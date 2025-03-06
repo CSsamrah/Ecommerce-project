@@ -1,18 +1,25 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import pool from "./dbConnect.js";
+import cartRoutes from "./src/routes/cartRoutes.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+pool.connect()
+  .then(() => console.log('Connected to supabase!'))
+  .catch(err => {
+    console.error('Database connection error:', err.message);
+
+});
+
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.send("Backend is running!");
-});
+app.use("/", cartRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -17,12 +17,12 @@ const pool = new Pool({
     },
 });
 
-pool.connect()
-  .then(() => console.log('Connected to supabase!'))
-  .catch(err => {
-    console.error('Database connection error:', err.message);
+// pool.connect()
+//   .then(() => console.log('Connected to supabase!'))
+//   .catch(err => {
+//     console.error('Database connection error:', err.message);
 
-});
+// });
 
 
 export default pool;
