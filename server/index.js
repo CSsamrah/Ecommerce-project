@@ -19,7 +19,7 @@ pool.connect()
 app.use(cors());
 app.use(express.json());
 
-app.use("/", cartRoutes);
+app.use("/cart", cartRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
