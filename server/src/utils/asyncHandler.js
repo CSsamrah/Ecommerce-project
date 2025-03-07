@@ -1,16 +1,19 @@
-export const asyncHandler=(requestHandler)=>async(req,res,next)=>{
-    try{
-        await requestHandler(req,res,next)
+export const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch((error) => {
+      console.error("Database error:", error);
+  
+      // Always return a valid HTTP status code
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: error.message,  // Send the error message, not the error code
+      });
+    });
+  };
+  
+  
 
-    }
-    catch(error){
-        res.status(error.code || 500).json({
-            success:false,
-            message:error.message
-        })
-    }
 
-}
 
 
 
