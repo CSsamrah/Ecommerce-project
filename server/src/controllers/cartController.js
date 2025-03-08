@@ -199,11 +199,12 @@ export const getCartItems = asyncHandler(async (req, res) => {
         quantity: item.quantity,
         price: item.price,
         status: item.status,
+        total: item.price * item.quantity,
         itemDetails: itemDetails,
       };
     })
   );
 
-  return res.status(200).json({ cartItems: cartWithDetails });
+  return res.status(200).json({ cartItems: cartWithDetails, CartTotal: cartWithDetails.reduce((acc, item) => acc + item.total, 0) });
 });
 
