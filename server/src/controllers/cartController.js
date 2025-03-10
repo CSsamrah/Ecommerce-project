@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { v4 as uuidv4 } from 'uuid';
 
 export const addToCart = asyncHandler(async (req, res) => {
-  const { user_id, item_type, product_id, rental_id, secondhand_id, quantity, status, rental_period } = req.body;
+  const { user_id, item_type, product_id, rental_id, secondhand_id, quantity, status } = req.body;
 
   if (!user_id || !item_type || !quantity || quantity <= 0) {
     return res.status(400).json({ message: 'Missing required fields or invalid quantity.' });
@@ -63,8 +63,8 @@ export const addToCart = asyncHandler(async (req, res) => {
     cartItem = updateResult.rows[0];
   } else {
     const cart_id = uuidv4();
-    query = `INSERT INTO cart (cart_id, user_id, item_type, product_id, rental_id, secondhand_id, quantity, price, status, rental_period)
-               VALUES ($1, $2, $3, CAST($4 AS INT), CAST($5 AS INT), CAST($6 AS INT), $7, $8, $9, CAST($10 AS INT)) RETURNING *`;
+    query = `INSERT INTO cart (cart_id, user_id, item_type, product_id, rental_id, secondhand_id, quantity, price, status)
+               VALUES ($1, $2, $3, CAST($4 AS INT), CAST($5 AS INT), CAST($6 AS INT), $7, $8, $9) RETURNING *`;
     values = [
       cart_id,
       user_id,
@@ -75,7 +75,6 @@ export const addToCart = asyncHandler(async (req, res) => {
       quantity,
       price,
       status || 'active',
-      rental_period || null
     ];
     const insertResult = await pool.query(query, values);
     cartItem = insertResult.rows[0];
