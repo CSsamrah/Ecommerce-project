@@ -24,5 +24,4 @@ pool.connect()
 
 });
 
-
 export default pool;

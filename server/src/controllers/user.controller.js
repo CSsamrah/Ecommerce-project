@@ -6,7 +6,6 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import jwt from "jsonwebtoken";
 import transporter from '../utils/nodemailSetUp.js';
 
-
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, confirmPassword, role, phoneNo, address } = req.body;
 
@@ -246,7 +245,107 @@ const resetPwd=asyncHandler(async(req,res)=>{
         throw new ApiError(500,'Error updating password');
     }
 
-    return res.status(200).json({success:true,message:"Password reset successfully"});
+    return res.status(200).json(new ApiResponse(200,'Password reset successfully'));
  })
 
-export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd};
+const changePassword=asyncHandler(async(req,res)=>{
+    const {oldPassword,newPassword,confirmPassword}=req.body;
+    
+    if(!oldPassword || !newPassword || !confirmPassword){
+        throw new ApiError(400,'Please fill all required fields');
+    }
+    if(newPassword.trim().length<6){
+        throw new ApiError(400,'Password must be at least 6 characters long');
+    }
+    if(newPassword!==confirmPassword){
+        throw new ApiError(400,'Passwords do not match');
+    }
+    const checkOldPassword=await bcrypt.compare(oldPassword,req.user.password);
+    if(!checkOldPassword){
+        throw new ApiError(400,'Incorrect old password');
+    }
+    const changedPassword=await bcrypt.hash(newPassword,10);
+
+    try{
+        await pool.query('UPDATE "Users" SET password=$1 WHERE user_id=$2 RETURNING user_id',[changedPassword,req.user.user_id]);
+
+    }catch(err){
+        console.log("Error updating password: ",err);
+        throw new ApiError(500, "Internal server error")
+    }
+    return res.status(200).json(new ApiResponse(200,'Password updated successfully'));
+   
+})
+
+const getAccountDetails=asyncHandler(async(req,res)=>{
+    const { user_id } = req.user;
+
+    const result = await pool.query(
+        'SELECT name, email, "phoneNo", role, address FROM "Users" WHERE user_id = $1 LIMIT 1',
+        [user_id]
+    );
+
+    if (result.rows.length === 0) {
+        throw new ApiError(404, 'No user found');
+    }
+
+    return res.status(200).json(new ApiResponse(200, result.rows[0],"User details fetched successfully"));
+})
+
+const updateAccount=asyncHandler(async(req,res)=>{
+    const {user_id}=req.user;
+    
+    const {name,email,phoneNo,address}=req.body;
+
+    if(!name && !email && !phoneNo && !address){
+        throw new ApiError(400,'Please provide atleast one field to update');
+    }
+    let updateFields = [];  // Stores field assignments (e.g., name=$1, email=$2)
+    let values = [];  // Stores actual values for parameterized query
+    let index = 1;  // Keeps track of the $ placeholders in SQL
+
+    if (name) {
+        updateFields.push(`name=$${index}`);
+        values.push(name);
+        index++;
+    }
+    if(email){
+        updateFields.push(`email=$${index}`);
+        values.push(email);
+        index++;
+    }
+    if(phoneNo){
+        updateFields.push(`"phoneNo"=$${index}`);
+        values.push(phoneNo);
+        index++;
+    }
+    if(address){
+        updateFields.push(`address=$${index}`);
+        values.push(address);
+        index++;
+    }
+    values.push(user_id);
+    const query = `UPDATE "Users" SET ${updateFields.join(', ')} WHERE user_id=$${index} RETURNING name, email, "phoneNo", role, address`;
+
+    const result = await pool.query(query, values);
+
+    return res.status(200).json(new ApiResponse(200, result.rows[0],"User details updated successfully"));
+
+})
+
+const deleteAccount=asyncHandler(async(req,res)=>{
+    const {user_id}=req.user;
+
+    const result=await pool.query(
+        'DELETE FROM "Users" WHERE user_id=$1 RETURNING user_id',
+        [user_id]
+    );
+    if(result.rows.length==0){
+        throw new ApiError(404,'No user found');
+    }
+    return res.status(200).json(new ApiResponse(200,{},'User deleted successfully'));
+
+})  
+
+
+export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount };
