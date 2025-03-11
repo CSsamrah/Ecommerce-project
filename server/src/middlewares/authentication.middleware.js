@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import pool from "../../dbConnect.js";
 
-const isLoggedIn=asyncHandler(async(req,res,next)=>{
+const isLoggedIn=asyncHandler(async(req,_,next)=>{
     const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", "");
     console.log("TOKEN: ",token);
 
@@ -21,6 +21,7 @@ const isLoggedIn=asyncHandler(async(req,res,next)=>{
         throw new ApiError(401,'Invalid Access Token');
     }
     req.user = findUser.rows[0];
+    
     next(); 
 })
 
