@@ -56,4 +56,11 @@ const isAdmin = asyncHandler(async (req, res, next) => {
     next();
 });
 
-export { isLoggedIn ,isAdmin}
+export const authorizeSeller = (req, res, next) => {
+    if (req.user.role !== "seller") {
+        return res.status(403).json({ success: false, message: "Access denied. Only sellers can perform this action." });
+    }
+    next();
+};
+
+export { isLoggedIn ,isAdmin,authorizeSeller}
