@@ -13,7 +13,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
     }
 
     const user_id = user.user_id; // Access user_id from the user object
-    const { payment_status } = req.body;
+    const { status } = req.body;
   
     // Fetch cart items for the user
     const cartQuery = 'SELECT * FROM cart WHERE user_id = $1';
@@ -36,11 +36,11 @@ export const placeOrder = asyncHandler(async (req, res) => {
   
       // Create a new order in the orders table
       const orderQuery = `
-        INSERT INTO orders (user_id, total_price, payment_status)
+        INSERT INTO orders (user_id, total_price, status)
         VALUES ($1, $2, $3)
         RETURNING order_id
       `;
-      const orderValues = [user_id, total_price, payment_status || 'pending'];
+      const orderValues = [user_id, total_price, status];
       const orderResult = await client.query(orderQuery, orderValues);
       const order_id = orderResult.rows[0].order_id;
   
@@ -137,20 +137,20 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     }
 
     // Check current order status
-    const checkQuery = `SELECT payment_status FROM orders WHERE order_id = $1`;
+    const checkQuery = `SELECT status FROM orders WHERE order_id = $1`;
     const checkResult = await pool.query(checkQuery, [order_id]);
 
     if (!checkResult.rows.length) {
         throw new ApiError(404, "Order not found.");
     }
 
-    const orderStatus = checkResult.rows[0].payment_status;
-    if (orderStatus !== "pending") {
+    const orderStatus = checkResult.rows[0].status;
+    if (orderStatus !== "processing") {
         throw new ApiError(400, "Order cannot be canceled after processing.");
     }
 
     // Cancel the order
-    const cancelQuery = `UPDATE orders SET Payment_status = 'cancelled' WHERE order_id = $1 RETURNING *`;
+    const cancelQuery = `UPDATE orders SET status = 'cancelled' WHERE order_id = $1 RETURNING *`;
     const cancelResult = await pool.query(cancelQuery, [order_id]);
 
     res.status(200).json({ success: true, message: "Order canceled successfully.", order: cancelResult.rows[0] });
@@ -164,7 +164,7 @@ export const getOrderStatus = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Order ID is required.");
     }
 
-    const query = `SELECT order_id, payment_status FROM orders WHERE order_id = $1`;
+    const query = `SELECT order_id, status FROM orders WHERE order_id = $1`;
     const result = await pool.query(query, [order_id]);
 
     if (!result.rows.length) {

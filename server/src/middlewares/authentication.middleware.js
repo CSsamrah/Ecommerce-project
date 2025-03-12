@@ -24,29 +24,36 @@ const isLoggedIn=asyncHandler(async(req,res,next)=>{
     next(); 
 })
 
-const isAdmin=asyncHandler(async(req,res,next)=>{
-    const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", "");
-    console.log("TOKEN: ",token);
+const isAdmin = asyncHandler(async (req, res, next) => {
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", "");
+    console.log("TOKEN: ", token);
 
-    if(!token){
-        throw new ApiError(401,'Unauthorized request: No token received');
+    if (!token) {
+        throw new ApiError(401, "Unauthorized request: No token received");
     }
-    const decodedToken=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
-    console.log("\nDecoded Token: ",decodedToken);
 
-    if(!decodedToken){
-        throw new ApiError(401,'Unauthorized request: Invalid token');
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    console.log("\nDecoded Token: ", decodedToken);
+
+    if (!decodedToken) {
+        throw new ApiError(401, "Unauthorized request: Invalid token");
     }
-    const findUser=await pool.query('SELECT * FROM "Users" WHERE user_id=$1',[decodedToken.id]);
-    if(!findUser.rows.length){
-        throw new ApiError(401,'Invalid Access Token');
+
+    const findUser = await pool.query('SELECT * FROM "Users" WHERE user_id=$1', [decodedToken.id]);
+
+    if (!findUser.rows.length) {
+        throw new ApiError(401, "Invalid Access Token");
     }
-    // Check if the user has an admin role
-    if (findUser.role !== 'admin') {
-        throw new ApiError(403, 'Forbidden: Admin access required');
+
+    // console.log("\nFetched User: ", findUser.rows[0]); 
+
+
+    if (findUser.rows[0].role !== "admin") {
+        throw new ApiError(403, "Forbidden: Admin access required");
     }
-    req.user = findUser
-    next(); 
-})
+
+    req.user = findUser.rows[0];
+    next();
+});
 
 export { isLoggedIn ,isAdmin}
