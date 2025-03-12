@@ -1,9 +1,17 @@
 import pool from "../../dbConnect.js";
+import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { v4 as uuidv4 } from 'uuid';
 
 export const addToCart = asyncHandler(async (req, res) => {
-  const { user_id, item_type, product_id, rental_id, secondhand_id, quantity, status } = req.body;
+  const user=req.user;
+  if(!user){
+    throw new ApiError(401, "Unauthorized: User not found in request. Ensure you are logged in.");
+  }
+
+  const user_id=user.user_id;
+
+  const {item_type, product_id, rental_id, secondhand_id, quantity, status } = req.body;
 
   if (!user_id || !item_type || !quantity || quantity <= 0) {
     return res.status(400).json({ message: 'Missing required fields or invalid quantity.' });
@@ -109,8 +117,13 @@ export const updateCartItem = asyncHandler(async (req, res) => {
 });
 
 export const getCartItems = asyncHandler(async (req, res) => {
-  const { user_id } = req.params;
+  const user=req.user;
+  if(!user){
+    throw new ApiError(401, "Unauthorized: User not found in request. Ensure you are logged in.");
+  }
 
+  const user_id=user.user_id;
+  
   // Query to fetch cart items with necessary fields
   const query = `
     SELECT 

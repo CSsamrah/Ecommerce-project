@@ -81,3 +81,129 @@ export const placeOrder = asyncHandler(async (req, res) => {
       client.release();
     }
   });
+
+ 
+//Get User Orders
+export const getUserOrders = asyncHandler(async (req, res) => {
+    const user=req.user;
+    if(!user){
+      throw new ApiError(401, "Unauthorized: User not found in request. Ensure you are logged in.");
+    }
+
+    const user_id=user.user_id;
+    if (!user_id) {
+        throw new ApiError(400, "User ID is required.");
+    }
+
+    const query = `SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC`;
+    const result = await pool.query(query, [user_id]);
+
+    if (!result.rows.length) {
+        throw new ApiError(404, "No orders found for this user.");
+    }
+
+    res.status(200).json({ success: true, orders: result.rows });
+});
+
+// Get Order Details
+export const getOrderDetails = asyncHandler(async (req, res) => {
+    const { order_id } = req.params;
+
+    if (!order_id) {
+        throw new ApiError(400, "Order ID is required.");
+    }
+
+    const query = `
+        SELECT oi.*, p.name AS product_name 
+        FROM order_item oi
+        JOIN product p ON oi.product_id = p.product_id
+        WHERE oi.order_id = $1
+    `;
+    const result = await pool.query(query, [order_id]);
+
+    if (!result.rows.length) {
+        throw new ApiError(404, "Order details not found.");
+    }
+
+    res.status(200).json({ success: true, orderItems: result.rows });
+});
+
+// Cancel Order (Only before shipping)
+export const cancelOrder = asyncHandler(async (req, res) => {
+    const { order_id } = req.params;
+
+    if (!order_id) {
+        throw new ApiError(400, "Order ID is required.");
+    }
+
+    // Check current order status
+    const checkQuery = `SELECT payment_status FROM orders WHERE order_id = $1`;
+    const checkResult = await pool.query(checkQuery, [order_id]);
+
+    if (!checkResult.rows.length) {
+        throw new ApiError(404, "Order not found.");
+    }
+
+    const orderStatus = checkResult.rows[0].payment_status;
+    if (orderStatus !== "pending") {
+        throw new ApiError(400, "Order cannot be canceled after processing.");
+    }
+
+    // Cancel the order
+    const cancelQuery = `UPDATE orders SET Payment_status = 'cancelled' WHERE order_id = $1 RETURNING *`;
+    const cancelResult = await pool.query(cancelQuery, [order_id]);
+
+    res.status(200).json({ success: true, message: "Order canceled successfully.", order: cancelResult.rows[0] });
+});
+
+//  Get Order Status
+export const getOrderStatus = asyncHandler(async (req, res) => {
+    const { order_id } = req.params;
+
+    if (!order_id) {
+        throw new ApiError(400, "Order ID is required.");
+    }
+
+    const query = `SELECT order_id, payment_status FROM orders WHERE order_id = $1`;
+    const result = await pool.query(query, [order_id]);
+
+    if (!result.rows.length) {
+        throw new ApiError(404, "Order not found.");
+    }
+
+    res.status(200).json({ success: true, orderStatus: result.rows[0] });
+});
+
+//  Update Order Status (Admin Only)
+export const updateOrderStatus = asyncHandler(async (req, res) => {
+    const { order_id } = req.params;
+// Example: "processing", "shipped", "delivered"
+    const { status } = req.body; 
+
+    if (!order_id) {
+        throw new ApiError(400, "Order ID is required.");
+    }
+
+    if (!status) {
+        throw new ApiError(400, "Status is required.");
+    }
+
+    const validStatuses = ["processing", "shipped", "delivered"];
+    if (!validStatuses.includes(status)) {
+        throw new ApiError(400, "Invalid status value.");
+    }
+
+    // Ensure only admins can update order status
+    if (req.user.role !== "admin") {
+        throw new ApiError(403, "Only admins can update order status.");
+    }
+
+    const updateQuery = `UPDATE orders SET status = $1 WHERE order_id = $2 RETURNING *`;
+    const result = await pool.query(updateQuery, [status, order_id]);
+
+    if (!result.rows.length) {
+        throw new ApiError(404, "Order not found or status unchanged.");
+    }
+
+    res.status(200).json({ success: true, message: "Order status updated successfully.", order: result.rows[0] });
+});
