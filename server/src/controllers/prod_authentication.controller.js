@@ -5,7 +5,6 @@ import pool from "../../dbConnect.js";
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
-import generateKeyPair from "../utils/generateKeys.js";
 
 const keysDir = path.resolve("src/keys")
 const publicKeyPath = path.join(keysDir, "public_key.pem");

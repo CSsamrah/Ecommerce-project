@@ -4,6 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./src/routes/userRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
+import productRoutes from "./src/routes/productRoutes.js";
+import validationRoutes from "./src/routes/verifyProdutcRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.get("/", (req, res) => {
 });
 app.use("/api/users",userRoutes);
 app.use("/api/categories",categoryRoutes);
+app.use("/api/products",productRoutes)
+app.use("/api/validate",validationRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
