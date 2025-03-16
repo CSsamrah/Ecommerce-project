@@ -87,22 +87,23 @@ const addProduct = asyncHandler(async (req, res) => {
 
     let digital_signature = ""
     try {
-        const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
+        const privateKey = fs.readFileSync(privateKeyPath, "utf-8");  // Read the private key from the specified file path
         const sign = crypto.createSign("sha256");
 
+        //preparing data to be signed
         const signingData = JSON.stringify({
             name: name.trim(),
             description: description.trim(),
-            price: parseFloat(price).toFixed(2),  
+            price: parseFloat(price).toFixed(2),
             condition,
-            stock_quantity: Number(stock_quantity),  
-            rental_available: rental_available === "true" || rental_available === true, 
+            stock_quantity: Number(stock_quantity),
+            rental_available: rental_available === "true" || rental_available === true,
             product_features: Array.isArray(product_features) ? product_features : JSON.parse(product_features)
         });
 
-        sign.update(signingData);
+        sign.update(signingData);  // Add data to be signed
         sign.end()
-        digital_signature = sign.sign(privateKey, "base64");
+        digital_signature = sign.sign(privateKey, "base64");  // Signing the data using the private key and encode in base64
     }
     catch (err) {
         console.error("Error signing product data:", err);
@@ -143,4 +144,30 @@ const addProduct = asyncHandler(async (req, res) => {
 
 })
 
-export { addProduct }
+const getOneProduct = asyncHandler(async (req, res) => {
+    const { id: product_id } = req.params;
+
+    if (!product_id) {
+        throw new ApiError(400, "Product ID should be provided to search for a product");
+    }
+    const findProduct = await pool.query(
+        `SELECT 
+        p.product_id, p.name, p.description, p.price, p.condition, 
+        p.stock_quantity, p.product_features, p.product_image, 
+        p.user_id, U.name AS product_added_by, U.role, 
+        p.category_id, c.category_name 
+     FROM product p
+     JOIN "Users" U ON p.user_id = U.user_id
+     JOIN category c ON p.category_id = c.category_id
+     WHERE p.product_id = $1`,
+        [product_id]
+
+    )
+
+    if (findProduct.rows.length == 0) {
+        throw new ApiError(404, "Product not found")
+    }
+    return res.status(200).json(new ApiResponse(200, findProduct.rows[0], "Product retrieved successfully"))
+})
+
+export { addProduct, getOneProduct }

@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 // Get `__dirname` in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);           // Extracts the directory path from __filename.
-console.log("Directory name",__dirname,"\nFileName ",__filename)  
 
 //  Store keys inside `src/keys`
 

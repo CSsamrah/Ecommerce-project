@@ -1,5 +1,5 @@
 import express from "express"
-import { addProduct } from "../controllers/product.controller.js"
+import { addProduct, getOneProduct } from "../controllers/product.controller.js"
 import { isLoggedIn } from "../middlewares/authentication.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -14,5 +14,7 @@ productRoutes.post("/addProduct",
 ]),
 isLoggedIn,
 addProduct);
+
+productRoutes.get("/getProduct/:id",isLoggedIn,getOneProduct)
 
 export default productRoutes
