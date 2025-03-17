@@ -7,6 +7,17 @@ export const listSecondhandProduct = asyncHandler(async (req, res) => {
     const { product_id, condition, rental_status, price } = req.body;
     const seller_id = req.user.user_id;  
     
+    // Check if the product is already listed
+    const existing = await pool.query(
+        `SELECT * FROM secondhand WHERE product_id = $1 AND seller_id = $2 AND status = 'available'`,
+        [product_id, seller_id]
+    );
+
+    if (existing.rows.length) {
+        throw new ApiError(400, "You have already listed this product for sale");
+    }
+
+    //inserting new product
     const result = await pool.query(
         `INSERT INTO secondhand (product_id, seller_id, condition, rental_status, status, price)
          VALUES ($1, $2, $3, $4, 'available', $5) RETURNING *`,
@@ -25,7 +36,7 @@ export const getSecondhandProduct = asyncHandler(async (req, res) => {
         [secondhand_id]
     );
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
         throw new ApiError(404, "Second-hand product not found");
     }
 
@@ -48,7 +59,12 @@ export const getUserSecondhandProducts = asyncHandler(async (req, res) => {
 export const updateSecondhandStatus = asyncHandler(async (req, res) => {
     const { secondhand_id } = req.params;
     const { status } = req.body;
-    const seller_id = req.user.user_id;  
+    const seller_id = req.user.user_id; 
+    
+    const validStatuses = ["available", "sold"];
+    if (!validStatuses.includes(status)) {
+        throw new ApiError(400, "Invalid status value");
+    } 
 
     const existing = await pool.query(
         `SELECT * FROM secondhand WHERE secondhand_id = $1 AND seller_id = $2`,
@@ -58,7 +74,6 @@ export const updateSecondhandStatus = asyncHandler(async (req, res) => {
     if (!existing.rows.length) {
         throw new ApiError(403, "Unauthorized to update this product");
     }
-
     const result = await pool.query(
         `UPDATE secondhand SET status = $1 WHERE secondhand_id = $2 RETURNING *`,
         [status, secondhand_id]
@@ -80,8 +95,9 @@ export const deleteSecondhandProduct = asyncHandler(async (req, res) => {
     if (!existing.rows.length) {
         throw new ApiError(403, "Unauthorized to delete this product");
     }
-
+    // Delete and return deleted product details
+    const deletedProduct = existing.rows[0];
     await pool.query(`DELETE FROM secondhand WHERE secondhand_id = $1`, [secondhand_id]);
 
-    res.status(200).json({ success: true, message: "Product listing deleted" });
+    res.status(200).json({ success: true, message: "Product listing deleted", deletedProduct });
 });

@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import pool from "./dbConnect.js";
 import cartRoutes from "./src/routes/cartRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
+import secondRoutes from "./src/routes/secondHandRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -31,6 +32,8 @@ app.use("/api/users",userRoutes);
 app.use("/api/categories",categoryRoutes);
 app.use("/cart", cartRoutes);
 app.use("/order", orderRoutes);
+app.use("/second", secondRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
