@@ -1,0 +1,47 @@
+.seller-dashboard-body {
+    position: relative;
+    font-family: Arial, sans-serif;
+}
+
+.hamburger {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: fixed; 
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+}
+
+
+.sideBar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #1C2E4A;
+    color: #D1CFC9;
+    transition: 0.3s;
+    padding-top: 50px;
+}
+
+.sideBar.open {
+    left: 0;
+}
+
+.sideBar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sideBar ul li {
+    padding: 15px;
+    border-bottom: 1px solid ivory;
+    cursor: pointer;
+}
+
+.sideBar ul li:hover {
+    background-color: #040e1d;
+}

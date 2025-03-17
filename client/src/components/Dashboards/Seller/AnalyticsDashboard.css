@@ -1,0 +1,45 @@
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #BDC4D4 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.analytics-container {
+    padding: 20px;
+    width: 90%;
+    max-width: 1200px;
+    background-color: transparent;
+}
+.title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.chart-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+.chart-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.transparent-bg {
+    background: transparent !important;
+    box-shadow: none;
+}
+
