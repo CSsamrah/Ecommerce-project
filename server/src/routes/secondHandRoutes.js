@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post("/listSecondHand", isLoggedIn, authorizeSeller, listSecondhandProduct);
 
-router.get("getSecondHand/:secondhand_id", getSecondhandProduct);
+router.get("/getSecondHand/:secondhand_id", getSecondhandProduct);
 
 router.get("/userSecondHand/:seller_id", getUserSecondhandProducts); //for admin 
 
