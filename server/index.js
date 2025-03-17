@@ -2,6 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import userRoutes from "./src/routes/userRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
+import productRoutes from "./src/routes/productRoutes.js";
+import validationRoutes from "./src/routes/verifyProdutcRoutes.js";
 
 import cors from "cors";
 import dotenv from "dotenv";
@@ -33,7 +35,8 @@ app.use("/api/categories",categoryRoutes);
 app.use("/cart", cartRoutes);
 app.use("/order", orderRoutes);
 app.use("/second", secondRoutes);
-
+app.use("/api/products",productRoutes)
+app.use("/api/validate",validationRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

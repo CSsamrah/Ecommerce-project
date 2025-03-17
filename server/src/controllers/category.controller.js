@@ -49,11 +49,24 @@ const getSingleCategory = asyncHandler(async (req, res) => {
     const findProducts = await pool.query("SELECT * FROM product WHERE category_id=$1", [categoryId]);
 
     return res.status(200).json(new ApiResponse(200, {
-        category: findCategory.rows[0],
-        products: findProducts.rows
+        category: {
+            category_id: findCategory.rows[0].category_id,  
+            category_name: findCategory.rows[0].category_name,
+            slug: findCategory.rows[0].slug
+        },
+        products: findProducts.rows.map(product => ({
+            product_id: product.product_id,
+            name: product.name.trim(),  // Remove unnecessary newlines
+            price: product.price,
+            condition: product.condition,
+            stock_quantity: product.stock_quantity,
+            product_image: product.product_image,
+            product_features: product.product_features, 
+            rental_available:product.rental_available
+        }))  
     }, "Category and products found successfully"));
-
 })
+
 const getAllCategories = asyncHandler(async (req, res) => {
     const allCategories = await pool.query("SELECT category_name, slug FROM category");
 
