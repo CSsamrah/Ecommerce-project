@@ -327,6 +327,34 @@ const updateProduct = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, result.rows[0], "Product updated successfully"));
 });
 
+const deleteProduct=asyncHandler(async(req,res)=>{
+
+    const userID=req.user?.user_id;
+    if(!userID){
+        throw new ApiError(400, "User ID is required for authentication");
+    }
+    const { id: product_id } = req.params;
+
+    const findProduct=await pool.query(`SELECT * FROM product WHERE product_id=$1`,[product_id]);
+
+    if(findProduct.rows.length==0){
+        throw new ApiError(404,"Product not found");
+    }
+    const existingProductAddedBy=findProduct.rows[0]?.user_id;
+
+    if(existingProductAddedBy!==userID){
+        throw new ApiError(403,"You are not authorized to delete this product")
+    }
+    try{
+        await pool.query(`DELETE FROM product WHERE product_id=$1`,[product_id]);
+    }catch(err){
+        console.log("error",err);
+        throw new ApiError(500,"Error deleting product")
+    }
+
+    return res.status(200).json(new ApiResponse(200,{},"Product deleted successfully"))
+
+})
 
 
-export { addProduct, getOneProduct, updateProduct }
+export { addProduct, getOneProduct, updateProduct,deleteProduct }

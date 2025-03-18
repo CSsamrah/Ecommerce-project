@@ -1,5 +1,5 @@
 import express from "express"
-import { addProduct, getOneProduct, updateProduct } from "../controllers/product.controller.js"
+import { addProduct, deleteProduct, getOneProduct, updateProduct } from "../controllers/product.controller.js"
 import { isLoggedIn } from "../middlewares/authentication.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -23,5 +23,7 @@ productRoutes.patch("/updateProduct/:id",upload.fields([
         maxCount:2
     }
 ]),isLoggedIn,updateProduct)
+
+productRoutes.delete("/deleteProduct/:id",isLoggedIn,deleteProduct)
 
 export default productRoutes
