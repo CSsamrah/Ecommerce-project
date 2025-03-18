@@ -78,8 +78,8 @@ function InventoryManagement() {
                     product_features: "", 
                     category_id: "", 
                     image: "",
-                    ...(selectedCategory !== "new" && { condition: "" }),  // Add condition field only for secondHand & rental
-                    ...(selectedCategory === "rental" && { rental_available: false }) // Add rental_available only for rental
+                    ...(selectedCategory !== "new" && { condition: "" }),  
+                    ...(selectedCategory === "rental" && { rental_available: false }) 
                 })
             }>
                 Add New Product
@@ -118,12 +118,40 @@ function InventoryManagement() {
                                     />
                                 </td>
                                 <td>
-                                    <button onClick={() => setEditingProduct(product)}>Edit</button>
+                                <button onClick={() => setEditingProduct({ ...product })}>Edit</button>
                                     <button onClick={() => deleteProduct(product.id)}>Delete</button></td>
                             </tr>
                         ))}
                 </tbody>
             </table>
+            {editingProduct && (
+    <div className="edit-form">
+        <h3>Edit Product</h3>
+        <input type="text" name="name" placeholder="Product Name" value={editingProduct.name} onChange={handleEditChange} />
+        <input type="text" name="description" placeholder="Description" value={editingProduct.description} onChange={handleEditChange} />
+        <input type="number" name="price" placeholder="Price" value={editingProduct.price} onChange={handleEditChange} />
+        
+        {selectedCategory !== "new" && (
+            <input type="text" name="condition" placeholder="Condition (New/Used)" value={editingProduct.condition} onChange={handleEditChange} />
+        )}
+
+        <input type="number" name="stock_quantity" placeholder="Stock Quantity" value={editingProduct.stock_quantity} onChange={handleEditChange} />
+        
+        {selectedCategory === "rental" && (
+            <label>
+                <input type="checkbox" name="rental_available" checked={editingProduct.rental_available} onChange={handleEditChange} />
+                Rental Available
+            </label>
+        )}
+
+        <input type="text" name="product_features" placeholder="Features (comma separated)" value={editingProduct.product_features} onChange={handleEditChange} />
+        <input type="text" name="image" placeholder="Image URL" value={editingProduct.image} onChange={handleEditChange} />
+        
+        <button onClick={saveEdit}>Save</button>
+        <button onClick={() => setEditingProduct(null)}>Cancel</button>
+    </div>
+)}
+
             {newProduct && (
                 <div className="edit-form">
                     <h3>Add New Product</h3>
