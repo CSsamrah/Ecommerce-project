@@ -7,7 +7,7 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #BDC4D4; /* Ivory color */
+    background-color: #BDC4D4; 
 }
 
 .inventory-container {
@@ -73,9 +73,9 @@ button:last-child {
 
 .edit-form {
     position: fixed;
-    top: 20%;
+    top: 10%;
     left: 50%;
-    transform: translate(-50%, -20%);
+    transform: translate(-50%, 0);
     background: white;
     padding: 20px;
     border-radius: 10px;
@@ -83,28 +83,70 @@ button:last-child {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 400px;
+    max-height: 80vh;  
+    overflow-y: auto;
 }
 
-.edit-form input {
-    width: 80%;
-    margin: 10px 0;
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    flex: 1;
+    text-align: left;
+    font-weight: bold;
+}
+
+.form-group input, 
+.form-group select {
+    flex: 2;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    width: 100%;
 }
 
-@media (max-width: 1000px) {
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 15px;
+}
 
-    table {
+.button-group button {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: navy;
+    color: white;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.button-group button:hover {
+    background-color: darkblue;
+}
+
+@media (max-width: 600px) {
+    .edit-form {
+        width: 90%;
+    }
+
+    .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-group input, 
+    .form-group select {
         width: 100%;
     }
-
-    .search-bar {
-        width: 80%;
-    }
-
-    .edit-form {
-        width: 80%;
-    }
 }
+
 

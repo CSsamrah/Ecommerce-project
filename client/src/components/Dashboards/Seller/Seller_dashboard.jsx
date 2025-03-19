@@ -19,7 +19,7 @@ function Seller_dashboard() {
                 <ul>
                     <li onClick={() => navigate("/inventory")}>Inventory Management</li>
                     <li onClick={() => navigate("/order")}>Order Management</li>
-                    <li>Rental Management</li>
+                    <li onClick={() => navigate("/rental")}>Rental Management</li>
                     <li onClick={() => navigate("/analytics")}>Analytics & Insights</li>
                 </ul>
             </div>
