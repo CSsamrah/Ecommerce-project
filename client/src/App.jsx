@@ -9,6 +9,8 @@ import InventoryManagement from './components/Dashboards/Seller/InventoryManagem
 import OrderManagement from './components/Dashboards/Seller/OrderManagement';
 import AnalyticsDashboard from './components/Dashboards/Seller/AnalyticsDashboard';
 import RentalManagement from './components/Dashboards/Seller/RentalManagement';
+import BuyerDashboard from './components/Dashboards/Buyer/BuyerDashboard';
+import OrderHistory from './components/Dashboards/Buyer/OrderHistory';
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
         <Route path="/order" element={<OrderManagement />} />
         <Route path="/rental" element={<RentalManagement />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
+      </Routes>
+      <Routes>
+      <Route path="/buyer" element={<BuyerDashboard />} />
+      <Route path='/orderHistory' element={<OrderHistory />}/>
       </Routes>
     </Router>
     // <div>
