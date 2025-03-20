@@ -11,6 +11,7 @@ import AnalyticsDashboard from './components/Dashboards/Seller/AnalyticsDashboar
 import RentalManagement from './components/Dashboards/Seller/RentalManagement';
 import BuyerDashboard from './components/Dashboards/Buyer/BuyerDashboard';
 import OrderHistory from './components/Dashboards/Buyer/OrderHistory';
+import RentalAgreement from './components/Dashboards/Buyer/RentalAgreement';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Routes>
       <Route path="/buyer" element={<BuyerDashboard />} />
       <Route path='/orderHistory' element={<OrderHistory />}/>
+      <Route path='/rentalAgreements' element={<RentalAgreement />}/>
       </Routes>
     </Router>
     // <div>

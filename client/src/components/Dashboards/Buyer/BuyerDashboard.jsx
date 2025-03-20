@@ -19,7 +19,7 @@ function BuyerDashboard() {
             <div className={`sideBar ${isOpen ? "open" : ""}`}>
                 <ul>
                     <li onClick={() => navigate("/orderHistory")}>Order History</li>
-                    <li>Rental Agreements</li>
+                    <li onClick={() => navigate("/rentalAgreements")}>Rental Agreements</li>
                 </ul>
             </div>
         </div>

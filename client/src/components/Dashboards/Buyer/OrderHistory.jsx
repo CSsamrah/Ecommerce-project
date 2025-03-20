@@ -1,31 +1,43 @@
 import { useState } from "react";
-//import "./OrderHistory.css";
 import BuyerDashboard from "./BuyerDashboard";
+import "./OrderHistory.css"; // Ensure to create this CSS file
 
 function OrderHistory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [orders, setOrders] = useState([
         {
-            id: "ORD12345",date: "2024-03-15", type: ["Second-hand", "Rental"],total: 120.50,status: "Delivered",items: ["Laptop", "Mouse"]
+            id: "ORD12345",
+            date: "2024-03-15",
+            type: ["Second-hand", "Rental"],
+            total: 120,
+            status: "Delivered",
+            items: [
+                { name: "Laptop", quantity: 1, price: 100 },
+                { name: "Mouse", quantity: 1, price: 20 }
+            ]
         },
         {
             id: "ORD67890",
-            date: "2024-03-12",type: ["Second-hand", "Rental"],
-            total: 45.99,
+            date: "2024-03-12",
+            type: ["Product", "Rental"],
+            total: 45,
             status: "Processing",
-            items: ["Bluetooth Headphones"]
+            items: [
+                { name: "Mouse", quantity: 1, price: 45 }
+            ]
         },
         {
-            id: "ORD54321",
-            date: "2024-02-20", type: ["Second-hand", "Rental"],
-            total: 75.00,
+            id: "ORD101112",
+            date: "2024-02-20",
+            type: ["Rental"],
+            total: 75,
             status: "Pending",
-            items: ["Smart Watch"]
+            items: [
+                { name: "Monitor", quantity: 1, price: 75 }
+            ]
         },
-        
     ]);
 
-    // Function to cancel an order
     const cancelOrder = (orderId) => {
         setOrders(orders.map(order =>
             order.id === orderId && order.status === "Pending"
@@ -36,9 +48,9 @@ function OrderHistory() {
 
     return (
         <div className="order-history-container">
-            <BuyerDashboard/>
-            <h2>Order History</h2>
-            
+            <BuyerDashboard />
+            <h2 className="order-history-title">Order History</h2>
+
             {/* Search Bar */}
             <input
                 type="text"
@@ -47,46 +59,46 @@ function OrderHistory() {
                 onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             />
 
-            {/* Order Table */}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Total Price</th>
-                        <th>Status</th>
-                        <th>Items</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders
-                        .filter(order => 
-                            order.id.toLowerCase().includes(searchTerm) || 
-                            order.items.some(item => item.toLowerCase().includes(searchTerm))
-                        )
-                        .map((order) => (
-                            <tr key={order.id}>
-                                <td>{order.id}</td>
-                                <td>{order.date}</td>
-                                <td>{order.type.join(", ")}</td>
-                                <td>${order.total.toFixed(2)}</td>
-                                <td className={`status ${order.status.toLowerCase()}`}>{order.status}</td>
-                                <td>{order.items.join(", ")}</td>
-                                <td>
-                                    {/* Show Cancel button only if order is Pending */}
-                                    {order.status === "Pending" && (
-                                        <button className="cancel-btn" onClick={() => cancelOrder(order.id)}>Cancel</button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                </tbody>
-            </table>
+            {/* Order Cards */}
+            <div className="order-list">
+                {orders
+                    .filter(order =>
+                        order.id.toLowerCase().includes(searchTerm) ||
+                        order.items.some(item => item.name.toLowerCase().includes(searchTerm))
+                    )
+                    .map((order) => (
+                        <div key={order.id} className="order-card">
+                            <div className="order-header">
+                                <span className="order-date">{order.date}</span>
+                                <span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span>
+                            </div>
+                            <h3 className="order-id">Order #{order.id}</h3>
+
+                            <table className="order-items-table">
+                                <tbody>
+                                    {order.items.map((item, index) => (
+                                        <tr key={index}>
+                                            <td>{item.name}</td>
+                                            <td>{item.quantity} pcs</td>
+                                            <td>${item.price.toFixed(2)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            <div className="order-footer">
+                                <span className="order-total">Total: ${order.total.toFixed(2)}</span>
+                                {order.status === "Pending" && (
+                                    <button className="cancel-btn" onClick={() => cancelOrder(order.id)}>Cancel Order</button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+            </div>
         </div>
     );
 }
 
 export default OrderHistory;
+
 
