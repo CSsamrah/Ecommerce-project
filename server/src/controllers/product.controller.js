@@ -131,15 +131,19 @@ const addProduct = asyncHandler(async (req, res) => {
     ]
 
     const insertProduct = await pool.query(query, values);
+    const productID = insertProduct.rows[0].product_id;
+
+    if (rental_available == true || rental_available == "true") {
+        await pool.query(`INSERT INTO rental (product_id,user_id) VALUES ($1,$2)`, [productID, userID]);
+    }
 
     const productWithCategory = await pool.query(
         `SELECT p.*, c.category_name, c.slug 
         FROM product p
         JOIN category c ON p.category_id = c.category_id
         WHERE p.product_id = $1`,
-        [insertProduct.rows[0].product_id]
-    )  //the join aims to gather data from both product and category tables
-
+        [productID]
+    ); //the join aims to gather data from both product and category tables
 
     return res.status(201).json(new ApiResponse(200, productWithCategory.rows[0], "Product added successfully"))
 
@@ -188,8 +192,8 @@ const updateProduct = asyncHandler(async (req, res) => {
     const findProduct = await pool.query("SELECT * FROM product WHERE product_id=$1", [product_id]);
     if (findProduct.rowCount === 0) throw new ApiError(404, "Product not found");
 
-    const existingProduct = findProduct.rows[0]; 
-    
+    const existingProduct = findProduct.rows[0];
+
     const { name, description, price, condition, stock_quantity, rental_available, product_features } = req.body;
 
     const priceNumber = price !== undefined ? parseFloat(price) : undefined;
@@ -226,6 +230,17 @@ const updateProduct = asyncHandler(async (req, res) => {
         }
     }
 
+    if (rental_available === false || rental_available === "false") {
+        const isProductRented = await pool.query(
+            `SELECT rental_status FROM rental WHERE product_id=$1 AND rental_status = 'Rented'`,
+            [product_id]
+        );
+    
+        if (isProductRented.rowCount > 0) {
+            throw new ApiError(403, "Cannot set rental_available to FALSE while the product is rented.");
+        }
+    }
+    
     let updatedProductImage = req.files?.product_image?.[0]?.path;
 
     let digital_signature = "";
@@ -246,7 +261,7 @@ const updateProduct = asyncHandler(async (req, res) => {
             rental_available: rentalAvailableBoolean ?? existingProduct.rental_available,
             product_features: Array.isArray(parsedFeatures)
                 ? parsedFeatures
-                : existingProduct.product_features 
+                : existingProduct.product_features
         });
 
         sign.update(signingData);
@@ -327,34 +342,34 @@ const updateProduct = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, result.rows[0], "Product updated successfully"));
 });
 
-const deleteProduct=asyncHandler(async(req,res)=>{
+const deleteProduct = asyncHandler(async (req, res) => {
 
-    const userID=req.user?.user_id;
-    if(!userID){
+    const userID = req.user?.user_id;
+    if (!userID) {
         throw new ApiError(400, "User ID is required for authentication");
     }
     const { id: product_id } = req.params;
 
-    const findProduct=await pool.query(`SELECT * FROM product WHERE product_id=$1`,[product_id]);
+    const findProduct = await pool.query(`SELECT * FROM product WHERE product_id=$1`, [product_id]);
 
-    if(findProduct.rows.length==0){
-        throw new ApiError(404,"Product not found");
+    if (findProduct.rows.length == 0) {
+        throw new ApiError(404, "Product not found");
     }
-    const existingProductAddedBy=findProduct.rows[0]?.user_id;
+    const existingProductAddedBy = findProduct.rows[0]?.user_id;
 
-    if(existingProductAddedBy!==userID){
-        throw new ApiError(403,"You are not authorized to delete this product")
+    if (existingProductAddedBy !== userID) {
+        throw new ApiError(403, "You are not authorized to delete this product")
     }
-    try{
-        await pool.query(`DELETE FROM product WHERE product_id=$1`,[product_id]);
-    }catch(err){
-        console.log("error",err);
-        throw new ApiError(500,"Error deleting product")
+    try {
+        await pool.query(`DELETE FROM product WHERE product_id=$1`, [product_id]);
+    } catch (err) {
+        console.log("error", err);
+        throw new ApiError(500, "Error deleting product")
     }
 
-    return res.status(200).json(new ApiResponse(200,{},"Product deleted successfully"))
+    return res.status(200).json(new ApiResponse(200, {}, "Product deleted successfully"))
 
 })
 
 
-export { addProduct, getOneProduct, updateProduct,deleteProduct }
+export { addProduct, getOneProduct, updateProduct, deleteProduct }
