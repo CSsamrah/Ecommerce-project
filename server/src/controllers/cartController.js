@@ -91,7 +91,7 @@ export const addToCart = asyncHandler(async (req, res) => {
   return res.status(201).json({ message: 'Item added to cart successfully.', cartItem: cartItem });
 });
 
-
+//delete cart item
 export const deleteCartItem = asyncHandler(async (req, res) => {
   const { cart_id } = req.params;
   const query = 'DELETE FROM cart WHERE cart_id = $1';
@@ -102,6 +102,7 @@ export const deleteCartItem = asyncHandler(async (req, res) => {
   return res.status(200).json({ message: 'Cart item deleted successfully.' });
 });
 
+//update cart item
 export const updateCartItem = asyncHandler(async (req, res) => {
   const { cart_id } = req.params;
   const { quantity } = req.body;
@@ -116,6 +117,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
   return res.status(200).json({ message: 'Cart item updated successfully.', cartItem: result.rows[0] });
 });
 
+// get cart items
 export const getCartItems = asyncHandler(async (req, res) => {
   const user=req.user;
   if(!user){

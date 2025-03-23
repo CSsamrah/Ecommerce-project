@@ -229,15 +229,17 @@ const updateProduct = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Product features must be a valid JSON array.");
         }
     }
-
-    if (rental_available === false || rental_available === "false") {
-        const isProductRented = await pool.query(
-            `SELECT rental_status FROM rental WHERE product_id=$1 AND rental_status = 'Rented'`,
+    
+    //nobody can set rental_available to true while the product is still rented
+    if (rental_available === true || rental_available === "true") {
+        const checkProduct = await pool.query(
+            `SELECT rental_status FROM rental WHERE product_id=$1`,
             [product_id]
         );
+        const isProductRented = checkProduct.rows[0]?.rental_status;
     
-        if (isProductRented.rowCount > 0) {
-            throw new ApiError(403, "Cannot set rental_available to FALSE while the product is rented.");
+        if (isProductRented === 'Rented') {
+            throw new ApiError(403, "Cannot set rental_available to TRUE while the product is still rented.");
         }
     }
     
@@ -370,6 +372,5 @@ const deleteProduct = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, "Product deleted successfully"))
 
 })
-
 
 export { addProduct, getOneProduct, updateProduct, deleteProduct }

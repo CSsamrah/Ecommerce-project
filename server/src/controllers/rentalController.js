@@ -13,7 +13,7 @@ const createRentalOrder = asyncHandler(async (req, res) => {
         `SELECT user_id,product_id,rental_available,price FROM product WHERE product_id = $1`,
         [product_id]
     );
-    
+
     if (findExistingProduct.rows.length == 0) {
         throw new ApiError(404, "Product not found");
     }
@@ -21,6 +21,7 @@ const createRentalOrder = asyncHandler(async (req, res) => {
     if (userID === findExistingProduct.rows[0]?.user_id) {
         throw new ApiError(403, "You cannot rent this product because you are its owner.")
     }
+
     const canBeRented = findExistingProduct?.rows[0]?.rental_available;
     if (canBeRented == "false" || canBeRented == false) {
         throw new ApiError(403, "Product can not be rented");
@@ -31,6 +32,7 @@ const createRentalOrder = asyncHandler(async (req, res) => {
     const returnDate = new Date(return_date);
 
     let rentalDuration = Math.ceil((returnDate - rentedAt) / (1000 * 60 * 60 * 24));
+
     console.log(rentalDuration);
 
     if (rentalDuration < 1) {
@@ -43,39 +45,258 @@ const createRentalOrder = asyncHandler(async (req, res) => {
     if (rentalDuration >= 1 && rentalDuration <= 10) {
         rental_price = basePrice * 0.2;
     } else if (rentalDuration >= 11 && rentalDuration <= 20) {
-        rental_price = basePrice * 0.3;
+        rental_price = basePrice * 0.25;
     } else if (rentalDuration >= 21 && rentalDuration <= 30) {
-        rental_price = basePrice * 0.4;
+        rental_price = basePrice * 0.3;
     } else {
         throw new ApiError(403, "Product cannot be rented for more than 30 days");
     }
     try {
-        await pool.query(`UPDATE rental SET rental_duration=$1,rental_status='Rented',return_date = $2, 
-        rental_price = $3, rented_by = $4, rented_at = $5 WHERE product_id=$6 RETURNING*`,
+        await pool.query(
+            `UPDATE rental 
+             SET rental_duration=$1, rental_status='Rented', return_date=$2, 
+                rental_price=$3, rented_by=$4, rented_at=$5
+             WHERE product_id=$6 RETURNING *`,
             [rentalDuration, returnDate, rental_price, userID, rentedAt, product_id]
-        )
+        );
+
+        await pool.query(`UPDATE product SET rental_available=FALSE WHERE product_id=$1`, [product_id]);
+
+        const userName = await pool.query(
+            `SELECT name FROM "Users" WHERE user_id = $1`,
+            [userID]
+        );
+        const rentedByName = userName.rows[0]?.name || "Unknown User";
+
+        return res.status(201).json(new ApiResponse(200, {
+            product_id,
+            rented_by: {
+                user_id: userID,
+                name: rentedByName
+            },
+            rented_at: rentedAt,
+            return_date: returnDate,
+            rental_duration: rentalDuration+" days",
+            rental_price
+        }, "Rental order created successfully"));
 
     } catch (err) {
         console.error("Error updating rental record:", err);
         throw new ApiError(500, "Database error while updating rental record");
     }
 
-    try {
-        await pool.query(`UPDATE product SET rental_available=FALSE WHERE product_id=$1`, [product_id])
+})
+
+const returnRentalOrder = asyncHandler(async (req, res) => {
+    const { id: rental_id } = req.params;
+    const userID = req.user?.user_id;
+
+    if (!rental_id) {
+        throw new ApiError(400, "Rental ID is required to proceed with this action")
     }
-    catch (err) {
-        throw new ApiError(403, "Error updating rent status in products table")
+    const rentalQuery = `
+      SELECT 
+        r.rental_id, 
+        r.product_id,
+        r.rental_duration, 
+        r.rental_status, 
+        r.rental_price,
+        r.return_date, 
+        r.rented_by, 
+        r.rented_at,
+        U.name  
+    FROM rental r
+    JOIN "Users" U ON r.rented_by = U.user_id
+    WHERE r.rental_id = $1;`
+
+    const findRentalOrder = await pool.query(rentalQuery, [rental_id]);
+
+    if (findRentalOrder.rows.length == 0) {
+        throw new ApiError(404, "Rental order not found")
     }
 
-    return res.status(201).json(new ApiResponse(200, {
-        product_id,
-        rented_by: userID,
-        rented_at: rentedAt,
-        return_date: returnDate,
-        rental_duration: rentalDuration,
-        rental_price
-    }, "Rental order created successfully"))
+    const rental=findRentalOrder.rows[0];
+    const rentalProductID=findRentalOrder.rows[0]?.product_id;
+
+    if(findRentalOrder.rows[0]?.rental_status=="Returned"){
+        throw new ApiError(403,"You have already returned this product")
+    }
+
+    // Ensuring the user returning the product is the one who rented it
+    if (userID != findRentalOrder.rows[0]?.rented_by) {
+        throw new ApiError(403, "You can not mark this product as returned")
+    }
+
+    try {
+        const updateQuery = `
+        UPDATE rental 
+        SET rental_status = 'Returned', 
+            returned_at = NOW()
+        WHERE rental_id = $1 
+        RETURNING rental_id, rental_status, returned_at, rented_by;
+    `;
+
+    const updatedRental = await pool.query(updateQuery, [rental_id]);
+
+    await pool.query(`UPDATE product SET rental_available=TRUE WHERE product_id=$1`,[rentalProductID])
+
+    return res.status(200).json(new ApiResponse(200, {
+            rental_id: updatedRental.rows[0].rental_id,
+            rental_status: updatedRental.rows[0].rental_status,
+            returned_at: updatedRental.rows[0].returned_at,
+            rented_by: rental.name,
+        }, "Product returned successfully"));
+
+    } catch (err) {
+        console.error("Error updating rental record:", err);
+        throw new ApiError(409, "Database error occured")
+    }
+})
+
+const getRentalDetails=asyncHandler(async(req,res)=>{
+    const {id:rental_id}=req.params;
+
+    const userID=req.user?.user_id;
+
+    if(!rental_id){
+        throw new ApiError(400, "Rental ID is required to proceed with this action")
+    }
+    const rentalQuery=` SELECT 
+            r.rental_id,
+            r.rental_status,
+            r.rented_by,
+            r.product_id,
+            r.rental_duration,
+            r.return_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' AS return_date_local,
+            p.product_id AS product_id_from_product,
+            p.name AS productName,
+            U.user_id AS user_id_from_users,
+            U.name AS userName
+        FROM rental r
+        JOIN product p ON r.product_id = p.product_id
+        JOIN "Users" U ON r.rented_by = U.user_id 
+        WHERE r.rental_id = $1;
+    `
+    const findRentalRecord=await pool.query(rentalQuery,[rental_id]);
+
+    if(findRentalRecord.rows.length==0){
+        throw new ApiError(404,"Rental record against provided rentalID does not exist");
+    }
+
+    const rentalRecord=findRentalRecord.rows[0]
+
+    if(userID!=rentalRecord?.rented_by){
+        throw new ApiError(403,"Access denied: You are not the owner of this rental record.")
+    }
+    const message = rentalRecord.rental_status === "Rented" 
+    ? "Rental record fetched successfully. This product is currently rented."
+    : `Rental record fetched successfully. Note: This product is no longer rented (Status: ${rentalRecord.rental_status}).`;
+
+    
+    return res.status(200).json(new ApiResponse(200,{rentalRecord},message))
 
 })
 
-export { createRentalOrder }
+const userRentals=asyncHandler(async(req,res)=>{
+    const userID=req.user?.user_id;
+
+    if(!userID){
+        throw new ApiError(403,"User ID is needed for authentication")
+    }
+    //Uses LEFT JOIN to ensure rentals are retrieved even if products are missing
+    const rentalQuery=`
+    SELECT
+        r.rental_id,
+        r.rental_status,
+        r.rental_duration, 
+        r.rental_price,
+        r.rented_by,
+        r.rented_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' AS rented_at,
+        r.returned_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' AS return_date,
+        r.product_id,
+        p.name AS productName,
+        U.name AS userName
+    FROM rental r
+    LEFT JOIN product p ON r.product_id = p.product_id
+    JOIN "Users" U ON r.rented_by = U.user_id 
+    WHERE r.rented_by = $1
+    `
+    const findRentalRecord=await pool.query(rentalQuery,[userID])
+
+    const rentalRecords=findRentalRecord.rows;
+
+    if(rentalRecords.length===0){
+        throw new ApiError(404,"You have not rented any prodcut uptill now")
+    }
+  
+    return res.status(200).json(new ApiResponse(200,
+        {rentalRecords},
+        `Rental history fetched successfully.`
+    ))
+})
+
+const getProductRentalHistory=asyncHandler(async(req,res)=>{
+    const {id:product_id}=req.params;
+
+    if(!product_id){
+        throw new ApiError(400,"Plz provide prodcut ID to fetch product's rental record")
+    }
+
+    const userID=req.user?.user_id;
+    
+    const userRole=req.user?.role;
+
+    if(userRole!="seller" && userRole!=="admin"){
+        throw new ApiError(403,"Access denied: Only sellers and admins can access this route")
+    }
+
+    const ownerQuery=`SELECT user_id FROM product WHERE product_id=$1`;
+    const ownerResult=await pool.query(ownerQuery,[product_id]);
+
+    if (ownerResult.rows.length === 0) {
+        throw new ApiError(404, "Product not found.");
+    }
+
+    const productOwner=ownerResult.rows[0]?.user_id
+
+    /*If the logged-in user is a seller but not the owner of the product, access is denied (403 Forbidden).
+    Admins are allowed to bypass this check.*/
+    
+    if (userRole == "seller" && productOwner != userID) {
+        throw new ApiError(403, `Access denied: Product ${product_id} is owned by another seller`);
+    }
+
+    const rentalQuery=`SELECT 
+        r.rental_id,
+        r.product_id,
+        r.user_id AS product_listed_by,  
+        U2.name AS product_listed_by, 
+        r.rental_duration,
+        r.rental_status,
+        r.rental_price,
+        r.return_date, 
+        U.name AS product_rented_by,  
+        p.name AS product_name,
+        p.condition AS product_condition,
+        c.category_id,
+        c.category_name
+    FROM rental r
+    JOIN product p ON r.product_id = p.product_id
+    JOIN category c ON p.category_id = c.category_id
+    JOIN "Users" U ON r.rented_by = U.user_id  -- Get Buyer's name
+    JOIN "Users" U2 ON r.user_id = U2.user_id  -- Get Seller's name
+    WHERE r.product_id = $1;`
+
+    const findProductRentalRecord=await pool.query(rentalQuery,[product_id]);
+
+    if(findProductRentalRecord.rows.length==0){
+        throw new ApiError(404, "No rental records found for this product.");
+    }
+
+    const productRentalHistory=findProductRentalRecord.rows;
+
+    return res.status(200).json(new ApiResponse(200,{productRentalHistory},"Product rental hstory fetched"))
+
+})
+
+export { createRentalOrder, returnRentalOrder ,getRentalDetails,userRentals,getProductRentalHistory}
