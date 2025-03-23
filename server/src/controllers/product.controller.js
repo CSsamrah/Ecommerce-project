@@ -127,7 +127,6 @@ const addProduct = asyncHandler(async (req, res) => {
         image.url,   //Storing Cloudinary URL
         userID,
         category_id,
-
     ]
 
     const insertProduct = await pool.query(query, values);
