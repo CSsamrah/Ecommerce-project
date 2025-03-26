@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Checkout.css"; // Importing the CSS file
+import "./Checkout.css"; 
 
 function Checkout() {
   const [formData, setFormData] = useState({
@@ -24,9 +24,7 @@ function Checkout() {
         <h2 className="checkout-title">Checkout</h2>
         
         <div className="checkout-grid">
-          {/* Left: Billing & Shipping Information */}
           <div className="checkout-form">
-            {/* Billing Information */}
             <div className="section">
               <h3>Billing Information</h3>
               <div className="input-group">
@@ -39,8 +37,6 @@ function Checkout() {
                 <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
               </div>
             </div>
-
-            {/* Shipping Information */}
             <div className="section">
               <h3>Shipping Information</h3>
               <div className="input-group">
@@ -53,16 +49,12 @@ function Checkout() {
                 <input type="email" name="email" placeholder="Email" />
               </div>
             </div>
-
-            {/* Payment Method */}
             <div className="section">
               <h3>Payment Method</h3>
               <label><input type="radio" name="paymentMethod" value="cod" /> Cash on Delivery</label>
               <label><input type="radio" name="paymentMethod" value="paypro" /> PayPro</label>
             </div>
           </div>
-
-          {/* Right: Order Summary */}
           <div className="order-summary">
             <h3>Order Summary</h3>
             <ul>
