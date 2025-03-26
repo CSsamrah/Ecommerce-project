@@ -5,9 +5,9 @@ import "./OrderManagement.css";
 const OrderManagement = () => {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const orders = [
-        { id: "001", customer: "Sara", product: "New Product", type: "New", quantity: 2, price: 200, status: "Pending" },
-        { id: "002", customer: "Saba", product: "Second-Hand Item", type: "Second-Hand", quantity: 1, price: 50, status: "Shipped" },
-        { id: "003", customer: "Sana", product: "Rental Item", type: "Rental", quantity: 1, price: 30, status: "Active Rental", rentalDates: { start: "2024-03-10", end: "2024-03-20" } },
+        { id: "001", customer: "Areesha", product: "New Product", type: "New", quantity: 2, price: 200, status: "Pending" },
+        { id: "002", customer: "Adeena", product: "Second-Hand Item", type: "Second-Hand", quantity: 1, price: 50, status: "Shipped" },
+        { id: "003", customer: "Suniya", product: "Rental Item", type: "Rental", quantity: 1, price: 30, status: "Active Rental", rentalDates: { start: "2024-03-10", end: "2024-03-20" } },
     ];
 
     const filteredOrders = selectedCategory === "all" ? orders : orders.filter(order => order.type === selectedCategory);

@@ -12,12 +12,15 @@ import RentalManagement from './components/Dashboards/Seller/RentalManagement';
 import BuyerDashboard from './components/Dashboards/Buyer/BuyerDashboard';
 import OrderHistory from './components/Dashboards/Buyer/OrderHistory';
 import RentalAgreement from './components/Dashboards/Buyer/RentalAgreement';
+import AdminDashboard from './components/Dashboards/Admin/AdminDashboard';
+import Buyers from './components/Dashboards/Admin/Buyers';
+import Sellers from './components/Dashboards/Admin/Sellers';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Seller_dashboard />} />
+        <Route path="/seller-dashboard" element={<Seller_dashboard />} />
         <Route path="/inventory" element={<InventoryManagement />} />
         <Route path="/" element={<Seller_dashboard />} />
         <Route path="/order" element={<OrderManagement />} />
@@ -28,6 +31,11 @@ function App() {
       <Route path="/buyer" element={<BuyerDashboard />} />
       <Route path='/orderHistory' element={<OrderHistory />}/>
       <Route path='/rentalAgreements' element={<RentalAgreement />}/>
+      </Routes>
+      <Routes>
+      <Route path="/admin" element={<AdminDashboard />} />
+       <Route path='/regBuyers' element={<Buyers />}/>
+       <Route path='/regSellers' element={<Sellers />}/>  
       </Routes>
     </Router>
     // <div>

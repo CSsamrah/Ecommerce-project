@@ -1,0 +1,83 @@
+
+.buyers-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.buyers-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.search-bar {
+    padding: 10px 14px;
+    width: 50%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.search-bar:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.4);
+    transform: scale(1.02);
+}
+
+.buyers-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    transition: background 0.3s ease-in-out;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.buyers-table th, .buyers-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    transition: all 0.2s ease-in-out;
+}
+
+.buyers-table tr:hover {
+    background: rgba(0, 123, 255, 0.05);
+    transform: scale(1.01);
+}
+
+.buyers-table th {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+}
+
+/* 🛑 Status Badges */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+    .table-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .search-bar {
+        width: 70%;
+    }
+}
+
+
