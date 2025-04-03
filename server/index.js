@@ -12,6 +12,7 @@ import cartRoutes from "./src/routes/cartRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
 import secondHandRoutes from "./src/routes/secondHandRoutes.js";
 import rentalRoutes from "./src/routes/rentalRoutes.js";
+import adminRoutes from "./src/routes/adminDashboardRoutes.js";
 
 dotenv.config();
 
@@ -40,7 +41,8 @@ app.use("/order", orderRoutes);
 app.use("/api/secondHand", secondHandRoutes);
 app.use("/api/products",productRoutes)
 app.use("/api/validate",validationRoutes);
-app.use("/api/rental",rentalRoutes)
+app.use("/api/rental",rentalRoutes);
+app.use("/admin",adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
