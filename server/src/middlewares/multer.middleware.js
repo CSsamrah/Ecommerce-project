@@ -8,7 +8,7 @@ const allowedTypes = {
 // Configure storage settings
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./public/temp"); // Temporary storage location
+  cb(null, "./public/temp");        // Temporary storage location
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase(); // Get file extension
