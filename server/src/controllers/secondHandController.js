@@ -1,103 +1,100 @@
 import pool from "../../dbConnect.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
-// List a used product for sale
+// List all second-hand products for sale
 export const listSecondhandProduct = asyncHandler(async (req, res) => {
-    const { product_id, condition, rental_status, price } = req.body;
-    const seller_id = req.user.user_id;  
     
-    // Check if the product is already listed
-    const existing = await pool.query(
-        `SELECT * FROM secondhand WHERE product_id = $1 AND seller_id = $2 AND status = 'available'`,
-        [product_id, seller_id]
-    );
+    const condition='second-hand';
+    const allSecondHandQuery=`SELECT 
+        p.name,
+        p.description,
+        p.price,
+        p.stock_quantity,
+        p.rental_available,
+        p.product_features,
+        p.product_image,
+        c.category_id,
+        c.category_name
+    FROM product p
+    LEFT JOIN category c ON c.category_id = p.category_id
+    WHERE p.condition = $1;
+    `;
+    const secondHandResult=await pool.query(allSecondHandQuery,[condition]);
 
-    if (existing.rows.length) {
-        throw new ApiError(400, "You have already listed this product for sale");
+    if(secondHandResult.rows.length==0){
+        throw new ApiError(404,"No second hand product found")
     }
-
-    //inserting new product
-    const result = await pool.query(
-        `INSERT INTO secondhand (product_id, seller_id, condition, rental_status, status, price)
-         VALUES ($1, $2, $3, $4, 'available', $5) RETURNING *`,
-        [product_id, seller_id, condition, rental_status, price]
-    );
-
-    res.status(201).json({ success: true, data: result.rows[0] });
+    const response=secondHandResult.rows;
+    return res.status(200).json(new ApiResponse(200,{response},"Second hand products fetched successfully"))
 });
 
-//  Retrieve details of a specific second-hand sale
+//  Retrieve details of a specific second-hand product
 export const getSecondhandProduct = asyncHandler(async (req, res) => {
-    const { secondhand_id } = req.params;
-    
-    const result = await pool.query(
-        `SELECT * FROM secondhand WHERE secondhand_id = $1`,
-        [secondhand_id]
+    const { id:product_id } = req.params;
+    const condition='second-hand'
+
+    const isSecondHand=await pool.query(`SELECT condition from product WHERE product_id=$1`,[product_id]);
+
+    if(isSecondHand.rowCount==0){
+        throw new ApiError(404,"Product does not exist")
+    }
+    if(isSecondHand.rows[0]?.condition!=='second-hand'){
+        throw new ApiError(403,"The product you are querying isn't a second-hand product")
+    }
+     
+    const secondHandProduct = await pool.query(
+        `SELECT 
+            p.name,
+            p.description,
+            p.price,
+            p.stock_quantity,
+            p.rental_available,
+            p.product_features,
+            p.product_image,
+            c.category_id,
+            c.category_name
+            FROM product p
+        LEFT JOIN category c on c.category_id=p.category_id
+        WHERE p.product_id=$1 AND p.condition=$2 `,
+        [product_id,condition]
     );
 
-    if (!result.rowCount) {
+    if (!secondHandProduct.rowCount) {
         throw new ApiError(404, "Second-hand product not found");
     }
 
-    res.status(200).json({ success: true, data: result.rows[0] });
+    const response=secondHandProduct.rows;
+
+    res.status(200).json(new ApiResponse(200,{response},"Product fetched successfully"))
 });
 
 // Retrieve all second-hand products listed by a user
 export const getUserSecondhandProducts = asyncHandler(async (req, res) => {
-    const { seller_id } = req.params;
+    const { id:user_id } = req.params;
     
-    const result = await pool.query(
-        `SELECT * FROM secondhand WHERE seller_id = $1`,
-        [seller_id]
+    const secondHandByUser = await pool.query(
+        `SELECT  
+            p.user_id AS product_owner_id,  -- user_id from product table
+            p.name,
+            p.description,
+            p.price,
+            p.stock_quantity,
+            p.rental_available,
+            p.product_features,
+            p.product_image,
+            U.user_id AS user_id_from_users, -- user_id from Users table
+            U.name AS product_listed_by
+        FROM product p
+        LEFT JOIN "Users" U ON p.user_id = U.user_id
+        WHERE p.user_id = $1`,
+        [user_id]
     );
 
-    res.status(200).json({ success: true, data: result.rows });
+    const response=secondHandByUser.rows;
+
+    res.status(200).json(new ApiResponse(200,{response},"Products fetched successfully"));
 });
 
-// Update the sale status of a second-hand product
-export const updateSecondhandStatus = asyncHandler(async (req, res) => {
-    const { secondhand_id } = req.params;
-    const { status } = req.body;
-    const seller_id = req.user.user_id; 
-    
-    const validStatuses = ["available", "sold"];
-    if (!validStatuses.includes(status)) {
-        throw new ApiError(400, "Invalid status value");
-    } 
 
-    const existing = await pool.query(
-        `SELECT * FROM secondhand WHERE secondhand_id = $1 AND seller_id = $2`,
-        [secondhand_id, seller_id]
-    );
-
-    if (!existing.rows.length) {
-        throw new ApiError(403, "Unauthorized to update this product");
-    }
-    const result = await pool.query(
-        `UPDATE secondhand SET status = $1 WHERE secondhand_id = $2 RETURNING *`,
-        [status, secondhand_id]
-    );
-
-    res.status(200).json({ success: true, data: result.rows[0] });
-});
-
-// Remove a second-hand listing
-export const deleteSecondhandProduct = asyncHandler(async (req, res) => {
-    const { secondhand_id } = req.params;
-    const seller_id = req.user.user_id;  // Ensure only the seller can delete
-
-    const existing = await pool.query(
-        `SELECT * FROM secondhand WHERE secondhand_id = $1 AND seller_id = $2`,
-        [secondhand_id, seller_id]
-    );
-
-    if (!existing.rows.length) {
-        throw new ApiError(403, "Unauthorized to delete this product");
-    }
-    // Delete and return deleted product details
-    const deletedProduct = existing.rows[0];
-    await pool.query(`DELETE FROM secondhand WHERE secondhand_id = $1`, [secondhand_id]);
-
-    res.status(200).json({ success: true, message: "Product listing deleted", deletedProduct });
-});
