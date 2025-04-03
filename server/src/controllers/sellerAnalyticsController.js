@@ -2,120 +2,244 @@ import pool from "../../dbConnect.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 
-//total products sold and rented
+//total products sold and rented that has been uploaded by the seller 
 export const getTotalProductsSoldRented = asyncHandler(async (req, res) => {
-    const seller_id = req.user.user_id;
+    try {
+        // Get seller ID from auth token
+        const seller_id = req.user.user_id;
 
-    const soldSecondhandProducts = await pool.query(
-        `SELECT COUNT(*) AS total_sold FROM secondhand_products
-        WHERE seller_id = $1 AND buyer_id IS NOT NULL AND purchase_date IS NOT NULL`,
-        [seller_id]
-    );
+       // Query to get the count of each type of product sold by a seller
+    const query = `
+    SELECT 
+      SUM(CASE WHEN p.condition = 'new' AND oi.item_type = 'product' THEN 1 ELSE 0 END) AS new_products,
+      SUM(CASE WHEN p.condition = 'secondhand' AND oi.item_type = 'secondhand' THEN 1 ELSE 0 END) AS secondhand_products,
+      SUM(CASE WHEN oi.item_type = 'rental' THEN 1 ELSE 0 END) AS rental_products
+    FROM product p
+    JOIN order_item oi ON p.product_id = oi.product_id
+    WHERE p.user_id = $1
+  `;
 
-    const rentedProductsQuery = `
-             SELECT 
-                COUNT(DISTINCT CASE 
-                    WHEN product_id IS NOT NULL THEN product_id 
-                    WHEN secondhand_id IS NOT NULL THEN secondhand_id
-                END) as totalRented
-            FROM rental r
-            WHERE (
-                (product_id IS NOT NULL AND EXISTS (
-                    SELECT 1 FROM product p WHERE p.product_id = r.product_id AND p.user_id = ?
-                )) OR
-                (secondhand_id IS NOT NULL AND EXISTS (
-                    SELECT 1 FROM secondhand s WHERE s.secondhand_id = r.secondhand_id AND s.seller_id = ?
-                ))
-            )
-            AND status = 'Rented'
-        `;
+  const result = await pool.query(query, [seller_id]);
 
-        const [rentedProducts] = await pool.query(rentedProductsQuery, [seller_id, seller_id]);
-
-    res.status(200).json({
-        success: true,
-        total_sold: soldSecondhandProducts.rows[0].total_sold,
-        total_rented: rentedProducts.rows[0].totalRented,
+  if (result.rows.length > 0) {
+    res.json({
+      new_products: result.rows[0].new_products || 0,
+      secondhand_products: result.rows[0].secondhand_products || 0,
+      rental_products: result.rows[0].rental_products || 0,
     });
+  } else {
+    res.json({ message: 'No products found' });
+  }
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: 'Internal Server Error' });
+}
 });
 
-        // Get product-wise breakdown
-export const productBreakdown= asyncHandler(async (req, res) => {
-            const seller_id = req.user.user_id;
-         const productBreakdownQuery = `
-            (
-                SELECT 
-                    p.id as product_id,
-                    p.name as product_name,
-                    0 as times_sold,
-                    COUNT(DISTINCT CASE WHEN r.status = 'rented' THEN r.id END) as times_rented,
-                    'new' as product_type
-                FROM products p
-                LEFT JOIN rentals r ON p.id = r.product_id
-                WHERE p.seller_id = ?
-                GROUP BY p.id, p.name
-            )
-            UNION ALL
-            (
-                SELECT 
-                    s.id as product_id,
-                    s.name as product_name,
-                    CASE WHEN s.status = 'sold' THEN 1 ELSE 0 END as times_sold,
-                    COUNT(DISTINCT CASE WHEN r.status = 'rented' THEN r.id END) as times_rented,
-                    'secondhand' as product_type
-                FROM secondhand s
-                LEFT JOIN rentals r ON s.id = r.secondhand_id
-                WHERE s.seller_id = ?
-                GROUP BY s.id, s.name
-            )
+
+//  Get product breakdown (new and secondhand product details) for the seller
+export const productBreakdown=asyncHandler(async(req,res)=>{
+    try {
+        const userId = req.user.user_id;
+
+        // Query to get the breakdown of products uploaded by the seller
+        const query = `
+            SELECT
+                p.product_id,
+                p.name,
+                p.description,
+                p.price,
+                p.condition,
+                p.stock_quantity,
+                p.rental_available,
+                p.product_image,
+                COUNT(oi.product_id) AS items_sold,
+                p.stock_quantity - COUNT(oi.product_id) AS items_left
+            FROM
+                product p
+            LEFT JOIN
+                order_item oi ON p.product_id = oi.product_id
+            WHERE
+                p.user_id = $1
+            GROUP BY
+                p.product_id, p.condition;
         `;
 
-        const [productBreakdown] = await pool.query(productBreakdownQuery, [seller_id, seller_id]);
+        const result = await pool.query(query, [userId]);
 
-        res.status(200).json({
-            success: true,
-            product_breakdown:productBreakdown.rows,
-        });
-    });
+        if (result.rows.length > 0) {
+            const newProducts = result.rows
+                .filter(row => row.condition === 'new')
+                .map(row => ({
+                    product_id: row.product_id,
+                    name: row.name,
+                    description: row.description,
+                    price: parseFloat(row.price),
+                    stock_quantity: parseInt(row.stock_quantity),
+                    rental_available: row.rental_available,
+                    product_image: row.product_image,
+                    items_sold: parseInt(row.items_sold || 0),
+                    items_left: parseInt(row.items_left)
+                }));
 
-        // Get monthly analytics
-        const monthlyAnalyticsQuery = `
-            SELECT 
-                DATE_FORMAT(month_date, '%Y-%m') as month,
-                SUM(products_sold) as products_sold,
-                SUM(products_rented) as products_rented
-            FROM (
-                SELECT 
-                    s.purchase_date as month_date,
-                    COUNT(DISTINCT s.secondhand_id) as products_sold,
-                    0 as products_rented
-                FROM secondhand s
-                WHERE s.seller_id = ? AND s.status = 'sold'
-                GROUP BY DATE_FORMAT(s.sold_date, '%Y-%m')
-                
-                UNION ALL
-                
-                SELECT 
-                    r.rental_date as month_date,
-                    0 as products_sold,
-                    COUNT(DISTINCT r.id) as products_rented
-                FROM rentals r
-                WHERE (
-                    (product_id IS NOT NULL AND EXISTS (
-                        SELECT 1 FROM products p WHERE p.id = r.product_id AND p.seller_id = ?
-                    )) OR
-                    (secondhand_id IS NOT NULL AND EXISTS (
-                        SELECT 1 FROM secondhand s WHERE s.id = r.secondhand_id AND s.seller_id = ?
-                    ))
-                )
-                AND r.status = 'rented'
-                GROUP BY DATE_FORMAT(r.rental_date, '%Y-%m')
-            ) combined
-            GROUP BY DATE_FORMAT(month_date, '%Y-%m')
-            ORDER BY month DESC
-            LIMIT 12
+            const secondhandProducts = result.rows
+                .filter(row => row.condition === 'second-hand')
+                .map(row => ({
+                    product_id: row.product_id,
+                    name: row.name,
+                    description: row.description,
+                    price: parseFloat(row.price),
+                    stock_quantity: parseInt(row.stock_quantity),
+                    rental_available: row.rental_available,
+                    product_image: row.product_image,
+                    items_sold: parseInt(row.items_sold || 0),
+                    items_left: parseInt(row.items_left)
+                }));
+
+            res.json({
+                newProducts: newProducts,
+                secondhandProducts: secondhandProducts
+            });
+        } else {
+            res.json({ message: 'No products found for this seller' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+//  Query to get monthly analytics of products sold and rental income for the seller
+
+export const monthlyAnalytics=asyncHandler( async (req, res) => {
+    try {
+        const userId = req.user.user_id;
+
+        const query = `
+            SELECT
+                DATE_TRUNC('month', o.created_at) AS month,
+                SUM(CASE WHEN oi.item_type = 'product' OR oi.item_type = 'secondhand' THEN oi.quantity * oi.price_per_unit ELSE 0 END) AS product_sales,
+                SUM(CASE WHEN oi.item_type = 'rental' THEN oi.quantity * oi.price_per_unit ELSE 0 END) AS rental_income
+            FROM
+                orders o
+            JOIN
+                order_item oi ON o.order_id = oi.order_id
+            JOIN
+                product p ON oi.product_id = p.product_id
+            WHERE
+                p.user_id = $1
+            GROUP BY
+                DATE_TRUNC('month', o.created_at)
+            ORDER BY
+                month;
         `;
 
-        const [monthlyAnalytics] = await db.query(monthlyAnalyticsQuery, [sellerId, sellerId, sellerId]);
+        const result = await pool.query(query, [userId]);
 
-        // ... existing code (response handling) ...
+        if (result.rows.length > 0) {
+            const monthlyAnalytics = result.rows.map(row => ({
+                month: row.month,
+                product_sales: parseFloat(row.product_sales || 0),
+                rental_income: parseFloat(row.rental_income || 0)
+            }));
+
+            res.json(monthlyAnalytics);
+        } else {
+            res.json({ message: 'No analytics data found for this seller' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+
+//  Update Order Status (seller Only)
+export const updateOrderStatus = asyncHandler(async (req, res) => {
+    const { order_id } = req.params;
+// Example: "processing", "shipped", "delivered"
+    const { status } = req.body; 
+
+    if (!order_id) {
+        throw new ApiError(400, "Order ID is required.");
+    }
+
+    if (!status) {
+        throw new ApiError(400, "Status is required.");
+    }
+
+    const validStatuses = ["processing", "shipped", "delivered"];
+    if (!validStatuses.includes(status)) {
+        throw new ApiError(400, "Invalid status value.");
+    }
+
+    // Ensure only admins can update order status
+    if (req.user.role !== "seller") {
+        throw new ApiError(403, "Only sellers can update order status.");
+    }
+
+    const updateQuery = `UPDATE orders SET status = $1 WHERE order_id = $2 RETURNING *`;
+    const result = await pool.query(updateQuery, [status, order_id]);
+
+    if (!result.rows.length) {
+        throw new ApiError(404, "Order not found or status unchanged.");
+    }
+
+    res.status(200).json({ success: true, message: "Order status updated successfully.", order: result.rows[0] });
+});
+
+export const getAllOrders=asyncHandler(async (req, res) => {
+    try {
+        const userId = req.user.user_id;
+
+        // Query to get all orders placed by buyers for a particular seller's products
+        const query = `
+            SELECT
+                o.order_id,
+                o.user_id AS buyer_id,
+                o.total_price,
+                o.status,
+                o.created_at,
+                oi.product_id,
+                oi.quantity,
+                oi.price_per_unit
+            FROM
+                orders o
+            JOIN
+                order_item oi ON o.order_id = oi.order_id
+            JOIN
+                product p ON oi.product_id = p.product_id
+            WHERE
+                p.user_id = $1
+            ORDER BY
+                o.order_id;
+        `;
+
+        const result = await pool.query(query, [userId]);
+
+        if (result.rows.length > 0) {
+            const orders = result.rows.map(row => ({
+                order_id: row.order_id,
+                buyer_id: row.buyer_id,
+                total_price: parseFloat(row.total_price),
+                status: row.status,
+                created_at: row.created_at,
+                product_id: row.product_id,
+                quantity: row.quantity,
+                price_per_unit: parseFloat(row.price_per_unit)
+            }));
+
+            res.json(orders);
+        } else {
+            res.json({ message: 'No orders found for this seller' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+
+//rental history of product of a particular seller is in rental controller
+
+
