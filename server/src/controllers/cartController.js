@@ -85,27 +85,34 @@ export const updateCartItem = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid quantity.' });
   }
 
-  // Get the existing cart item
-  const cartResult = await pool.query(`SELECT * FROM cart WHERE cart_id = $1`, [cart_id]);
-
-  if (cartResult.rowCount === 0) {
-    return res.status(404).json({ message: 'Cart item not found.' });
-  }
-
-  const cartItem = cartResult.rows[0];
-
-  if (cartItem.user_id !== user_id) {
-    return res.status(403).json({ message: 'You are not authorized to update this cart item.' });
-  }
-
   // Calculate new total price
   let updatedTotalPrice;
+
+   // Get the existing cart item
+   const cartResult = await pool.query(`SELECT * FROM cart WHERE cart_id = $1`, [cart_id]);
+
+   if (cartResult.rowCount === 0) {
+     return res.status(404).json({ message: 'Cart item not found.' });
+   }
+
+   const cartItem = cartResult.rows[0];
+
+   if (cartItem.user_id !== user_id) {
+     return res.status(403).json({ message: 'You are not authorized to update this cart item.' });
+   }
+
   if (cartItem.is_rental) {
     // Multiply rental price per unit by quantity
     updatedTotalPrice = parseFloat(cartItem.rental_price) * quantity;
   } else {
-    updatedTotalPrice = parseFloat(cartItem.total_price) * quantity
-     
+    const productResult = await pool.query(`SELECT price FROM product WHERE product_id = $1`, [cartItem.product_id]);
+    if (productResult.rowCount === 0) {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
+    const product = productResult.rows[0];
+    // Multiply product price per unit by quantity
+    updatedTotalPrice = parseFloat(product.price) * quantity
+
   }
 
   // Update cart item with new quantity and recalculated total price
@@ -128,17 +135,17 @@ export const updateCartItem = asyncHandler(async (req, res) => {
 
 // get cart items
 export const getCartItems = asyncHandler(async (req, res) => {
-    const user_id = req.user.user_id;
-    const cartItems = await pool.query(
-      `SELECT c.*, p.name, p.condition
+  const user_id = req.user.user_id;
+  const cartItems = await pool.query(
+    `SELECT c.*, p.name, p.condition
        FROM cart c
        JOIN product p ON c.product_id = p.product_id
        WHERE c.user_id = $1`,
-      [user_id]
-    );
-  
-    return res.status(200).json(new ApiResponse(200, cartItems.rows, "Cart items fetched"));
-  
+    [user_id]
+  );
+
+  return res.status(200).json(new ApiResponse(200, cartItems.rows, "Cart items fetched"));
+
 });
 
 //view full cart 
