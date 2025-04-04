@@ -1,224 +1,168 @@
 import pool from "../../dbConnect.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { v4 as uuidv4 } from 'uuid';
 
 export const addToCart = asyncHandler(async (req, res) => {
-  const user=req.user;
-  if(!user){
-    throw new ApiError(401, "Unauthorized: User not found in request. Ensure you are logged in.");
+  const { product_id, is_rental = false, rental_days = 0, quantity = 1 } = req.body;
+  const user_id = req.user.user_id;
+
+  const productRes = await pool.query(
+    `SELECT product_id, user_id, price, rental_available FROM product WHERE product_id = $1`,
+    [product_id]
+  );
+  if (productRes.rows.length === 0) {
+    throw new ApiError(404, "Product not found");
   }
 
-  const user_id=user.user_id;
-
-  const {item_type, product_id, rental_id, secondhand_id, quantity, status } = req.body;
-
-  if (!user_id || !item_type || !quantity || quantity <= 0) {
-    return res.status(400).json({ message: 'Missing required fields or invalid quantity.' });
+  const product = productRes.rows[0];
+  if (product.user_id === user_id) {
+    throw new ApiError(403, "You cannot add your own product to cart");
   }
 
-  if (!['product', 'rental', 'secondhand'].includes(item_type)) {
-    return res.status(400).json({ message: 'Invalid item_type.' });
-  }
+  let total_price;
+  let rental_price = null;
 
-  let query, values;
-  let price;
+  if (is_rental) {
+    if (!product.rental_available) {
+      throw new ApiError(403, "Rental not available for this product");
+    }
+    if (rental_days < 1 || rental_days > 30) {
+      throw new ApiError(400, "Rental days must be between 1 and 30");
+    }
 
-  switch (item_type) {
-    case 'product':
-      if (!product_id) return res.status(400).json({ message: 'Missing product_id.' });
-      query = 'SELECT product_id, price FROM product WHERE product_id = $1';
-      values = [product_id];
-      break;
-    case 'rental':
-      if (!rental_id) return res.status(400).json({ message: 'Missing rental_id.' });
-      query = 'SELECT rental_id, price FROM rental WHERE rental_id = $1';
-      values = [rental_id];
-      break;
-    case 'secondhand':
-      if (!secondhand_id) return res.status(400).json({ message: 'Missing secondhand_id.' });
-      query = 'SELECT secondhand_id, price FROM secondhand WHERE secondhand_id = $1';
-      values = [secondhand_id];
-      break;
-  }
+    if (rental_days <= 10) rental_price = product.price * 0.2;
+    else if (rental_days <= 20) rental_price = product.price * 0.25;
+    else rental_price = product.price * 0.3;
 
-  const itemResult = await pool.query(query, values);
-  if (itemResult.rows.length === 0) {
-    return res.status(404).json({ message: `${item_type} not found.` });
-  }
-
-  price = itemResult.rows[0].price;
-
-  query = `
-      SELECT * FROM cart
-      WHERE user_id = $1 AND item_type = $2
-      AND (product_id = $3 OR product_id IS NULL)
-      AND (rental_id = $4 OR rental_id IS NULL)
-      AND (secondhand_id = $5 OR secondhand_id IS NULL)
-    `;
-
-  values = [user_id, item_type, product_id || null, rental_id || null, secondhand_id || null];
-
-  const cartResult = await pool.query(query, values);
-  let cartItem;
-
-  if (cartResult.rows.length > 0) {
-    cartItem = cartResult.rows[0];
-    const newQuantity = cartItem.quantity + quantity;
-    query = 'UPDATE cart SET quantity = $1, price = $2 WHERE cart_id = $3 RETURNING *';
-    values = [newQuantity, price, cartItem.cart_id];
-    const updateResult = await pool.query(query, values);
-    cartItem = updateResult.rows[0];
+    total_price = rental_price * quantity;
   } else {
-    const cart_id = uuidv4();
-    query = `INSERT INTO cart (cart_id, user_id, item_type, product_id, rental_id, secondhand_id, quantity, price, status)
-               VALUES ($1, $2, $3, CAST($4 AS INT), CAST($5 AS INT), CAST($6 AS INT), $7, $8, $9) RETURNING *`;
-    values = [
-      cart_id,
-      user_id,
-      item_type,
-      product_id || null,
-      rental_id || null,
-      secondhand_id || null,
-      quantity,
-      price,
-      status || 'active',
-    ];
-    const insertResult = await pool.query(query, values);
-    cartItem = insertResult.rows[0];
+    total_price = product.price * quantity;
   }
 
-  return res.status(201).json({ message: 'Item added to cart successfully.', cartItem: cartItem });
+  await pool.query(
+    `INSERT INTO cart (user_id, product_id, quantity, is_rental, rental_days, rental_price, total_price)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [user_id, product_id, quantity, is_rental, rental_days || null, rental_price, total_price]
+  );
+
+  return res.status(201).json(new ApiResponse(201, {
+    product_id, is_rental, quantity, rental_days, rental_price, total_price
+  }, "Item added to cart"));
 });
+
 
 //delete cart item
 export const deleteCartItem = asyncHandler(async (req, res) => {
   const { cart_id } = req.params;
-  const query = 'DELETE FROM cart WHERE cart_id = $1';
-  const result = await pool.query(query, [cart_id]);
-  if (result.rowCount === 0) {
+  const user_id = req.user.user_id;
+
+  // First check if the cart item exists and belongs to the user
+  const cartCheck = await pool.query(`SELECT * FROM cart WHERE cart_id = $1`, [cart_id]);
+
+  if (cartCheck.rowCount === 0) {
     return res.status(404).json({ message: 'Cart item not found.' });
   }
+
+  if (cartCheck.rows[0].user_id !== user_id) {
+    return res.status(403).json({ message: 'Unauthorized to delete this cart item.' });
+  }
+
+  // Proceed with deletion
+  const query = `DELETE FROM cart WHERE cart_id = $1`;
+  await pool.query(query, [cart_id]);
+
   return res.status(200).json({ message: 'Cart item deleted successfully.' });
 });
 
-//update cart item
+
 export const updateCartItem = asyncHandler(async (req, res) => {
   const { cart_id } = req.params;
   const { quantity } = req.body;
+  const user_id = req.user?.user_id;
+
   if (!quantity || quantity <= 0) {
     return res.status(400).json({ message: 'Invalid quantity.' });
   }
-  const query = 'UPDATE cart SET quantity = $1 WHERE cart_id = $2 RETURNING *';
-  const result = await pool.query(query, [quantity, cart_id]);
-  if (result.rowCount === 0) {
+
+  // Get the existing cart item
+  const cartResult = await pool.query(`SELECT * FROM cart WHERE cart_id = $1`, [cart_id]);
+
+  if (cartResult.rowCount === 0) {
     return res.status(404).json({ message: 'Cart item not found.' });
   }
-  return res.status(200).json({ message: 'Cart item updated successfully.', cartItem: result.rows[0] });
+
+  const cartItem = cartResult.rows[0];
+
+  if (cartItem.user_id !== user_id) {
+    return res.status(403).json({ message: 'You are not authorized to update this cart item.' });
+  }
+
+  // Calculate new total price
+  let updatedTotalPrice;
+  if (cartItem.is_rental) {
+    // Multiply rental price per unit by quantity
+    updatedTotalPrice = parseFloat(cartItem.rental_price) * quantity;
+  } else {
+    updatedTotalPrice = parseFloat(cartItem.total_price) * quantity
+     
+  }
+
+  // Update cart item with new quantity and recalculated total price
+  const updateQuery = `
+    UPDATE cart
+    SET quantity = $1,
+        total_price = $2
+    WHERE cart_id = $3
+    RETURNING *;
+  `;
+  const updatedResult = await pool.query(updateQuery, [quantity, updatedTotalPrice, cart_id]);
+
+  return res.status(200).json({
+    message: 'Cart item updated successfully.',
+    cartItem: updatedResult.rows[0],
+  });
 });
+
+
 
 // get cart items
 export const getCartItems = asyncHandler(async (req, res) => {
-  const user=req.user;
-  if(!user){
-    throw new ApiError(401, "Unauthorized: User not found in request. Ensure you are logged in.");
-  }
-
-  const user_id=user.user_id;
+    const user_id = req.user.user_id;
+    const cartItems = await pool.query(
+      `SELECT c.*, p.name, p.condition
+       FROM cart c
+       JOIN product p ON c.product_id = p.product_id
+       WHERE c.user_id = $1`,
+      [user_id]
+    );
   
-  // Query to fetch cart items with necessary fields
-  const query = `
-    SELECT 
-      c.cart_id, 
-      c.user_id, 
-      c.item_type, 
-      c.product_id, 
-      c.rental_id, 
-      c.secondhand_id, 
-      c.quantity, 
-      c.price, 
-      c.status
-    FROM cart c
-    WHERE c.user_id = $1
-  `;
-
-  const result = await pool.query(query, [user_id]);
-  const cartItems = result.rows;
-
-  if (!cartItems || cartItems.length === 0) {
-    return res.status(404).json({ message: 'Cart is empty.' });
-  }
-
-  // Fetch related item details (product, rental, secondhand) for each cart item
-  const cartWithDetails = await Promise.all(
-    cartItems.map(async (item) => {
-      let itemDetails = null;
-      let detailQuery, detailValues;
-
-      switch (item.item_type) {
-        case 'product':
-          if (item.product_id) {
-            detailQuery = `
-              SELECT 
-                product_id, 
-                name,  
-                stock_quantity
-              FROM product 
-              WHERE product_id = $1
-            `;
-            detailValues = [item.product_id];
-          }
-          break;
-        case 'rental':
-          if (item.rental_id) {
-            detailQuery = `
-              SELECT 
-                rental_id, 
-                product_id, 
-                rental_period
-              FROM rental 
-              WHERE rental_id = $1
-            `;
-            detailValues = [item.rental_id];
-          }
-          break;
-        case 'secondhand':
-          if (item.secondhand_id) {
-            detailQuery = `
-              SELECT 
-                secondhand_id, 
-                product_id, 
-                condition, 
-                purchase_date
-              FROM secondhand 
-              WHERE secondhand_id = $1
-            `;
-            detailValues = [item.secondhand_id];
-          }
-          break;
-      }
-
-      if (detailQuery) {
-        const detailResult = await pool.query(detailQuery, detailValues);
-        itemDetails = detailResult.rows[0];
-      }
-
-      return {
-        cart_id: item.cart_id,
-        user_id: item.user_id,
-        item_type: item.item_type,
-        product_id: item.product_id,
-        rental_id: item.rental_id,
-        secondhand_id: item.secondhand_id,
-        quantity: item.quantity,
-        price: item.price,
-        status: item.status,
-        total: item.price * item.quantity,
-        itemDetails: itemDetails,
-      };
-    })
-  );
-
-  return res.status(200).json({ cartItems: cartWithDetails, CartTotal: cartWithDetails.reduce((acc, item) => acc + item.total, 0) });
+    return res.status(200).json(new ApiResponse(200, cartItems.rows, "Cart items fetched"));
+  
 });
 
+//view full cart 
+export const getUserCartItems = asyncHandler(async (req, res) => {
+  const user_id = req.user?.user_id;
+
+  if (!user_id) {
+    return res.status(401).json({ message: 'Unauthorized: User not logged in.' });
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM cart WHERE user_id = $1 ORDER BY added_at DESC`,
+      [user_id]
+    );
+
+    return res.status(200).json({
+      message: 'Cart items fetched successfully.',
+      cartItems: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching cart items:', error);
+    return res.status(500).json({ message: 'Server error while fetching cart items.' });
+  }
+});
+
+//completed and tested 

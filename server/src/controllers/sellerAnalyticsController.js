@@ -242,4 +242,7 @@ export const getAllOrders=asyncHandler(async (req, res) => {
 
 //rental history of product of a particular seller is in rental controller
 
+//second hand products listed by a particular seller is in secondhand controller
+
+
 

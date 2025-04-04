@@ -1,5 +1,5 @@
 import express from "express"
-import { createRentalOrder,
+import {
     returnRentalOrder,
     getRentalDetails, 
     userRentals, 
@@ -9,7 +9,7 @@ import { isLoggedIn } from "../middlewares/authentication.middleware.js"
 
 const rentalRoutes=express.Router();
 
-rentalRoutes.post("/rentProduct/:id",isLoggedIn,createRentalOrder)
+// rentalRoutes.post("/rentProduct/:id",isLoggedIn,createRentalOrder)
 rentalRoutes.post("/returnRental/:id",isLoggedIn,returnRentalOrder)
 rentalRoutes.get("/getRental/:id",isLoggedIn,getRentalDetails);
 rentalRoutes.get("/getUserRentals",isLoggedIn,userRentals)
