@@ -71,30 +71,5 @@ export const getSecondhandProduct = asyncHandler(async (req, res) => {
 });
 
 // Retrieve all second-hand products listed by a user
-export const getUserSecondhandProducts = asyncHandler(async (req, res) => {
-    const { id:user_id } = req.params;
-    
-    const secondHandByUser = await pool.query(
-        `SELECT  
-            p.user_id AS product_owner_id,  -- user_id from product table
-            p.name,
-            p.description,
-            p.price,
-            p.stock_quantity,
-            p.rental_available,
-            p.product_features,
-            p.product_image,
-            U.user_id AS user_id_from_users, -- user_id from Users table
-            U.name AS product_listed_by
-        FROM product p
-        LEFT JOIN "Users" U ON p.user_id = U.user_id
-        WHERE p.user_id = $1`,
-        [user_id]
-    );
-
-    const response=secondHandByUser.rows;
-
-    res.status(200).json(new ApiResponse(200,{response},"Products fetched successfully"));
-});
 
 

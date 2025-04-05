@@ -235,68 +235,6 @@ const userRentals=asyncHandler(async(req,res)=>{
     ))
 })
 
-const getProductRentalHistory=asyncHandler(async(req,res)=>{
-    const {id:product_id}=req.params;
 
-    if(!product_id){
-        throw new ApiError(400,"Plz provide prodcut ID to fetch product's rental record")
-    }
-
-    const userID=req.user?.user_id;
-    
-    const userRole=req.user?.role;
-
-    if(userRole!="seller" && userRole!=="admin"){
-        throw new ApiError(403,"Access denied: Only sellers and admins can access this route")
-    }
-
-    const ownerQuery=`SELECT user_id FROM product WHERE product_id=$1`;
-    const ownerResult=await pool.query(ownerQuery,[product_id]);
-
-    if (ownerResult.rows.length === 0) {
-        throw new ApiError(404, "Product not found.");
-    }
-
-    const productOwner=ownerResult.rows[0]?.user_id
-
-    /*If the logged-in user is a seller but not the owner of the product, access is denied (403 Forbidden).
-    Admins are allowed to bypass this check.*/
-    
-    if (userRole == "seller" && productOwner != userID) {
-        throw new ApiError(403, `Access denied: Product ${product_id} is owned by another seller`);
-    }
-
-    const rentalQuery=`SELECT 
-        r.rental_id,
-        r.product_id,
-        r.user_id AS product_listed_by,  
-        U2.name AS product_listed_by, 
-        r.rental_duration,
-        r.rental_status,
-        r.rental_price,
-        r.return_date, 
-        U.name AS product_rented_by,  
-        p.name AS product_name,
-        p.condition AS product_condition,
-        c.category_id,
-        c.category_name
-    FROM rental r
-    JOIN product p ON r.product_id = p.product_id
-    JOIN category c ON p.category_id = c.category_id
-    JOIN "Users" U ON r.rented_by = U.user_id  -- Get Buyer's name
-    JOIN "Users" U2 ON r.user_id = U2.user_id  -- Get Seller's name
-    WHERE r.product_id = $1;`
-
-    const findProductRentalRecord=await pool.query(rentalQuery,[product_id]);
-
-    if(findProductRentalRecord.rows.length==0){
-        throw new ApiError(404, "No rental records found for this product.");
-    }
-
-    const productRentalHistory=findProductRentalRecord.rows;
-
-    return res.status(200).json(new ApiResponse(200,{productRentalHistory},"Product rental hstory fetched"))
-
-})
 
 export { returnRentalOrder ,getRentalDetails,userRentals,getProductRentalHistory}
