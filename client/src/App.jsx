@@ -1,6 +1,4 @@
 import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
 import './App.css'
 import Checkout from './components/Pages/Checkout';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -15,36 +13,42 @@ import RentalAgreement from './components/Dashboards/Buyer/RentalAgreement';
 import AdminDashboard from './components/Dashboards/Admin/AdminDashboard';
 import Buyers from './components/Dashboards/Admin/Buyers';
 import Sellers from './components/Dashboards/Admin/Sellers';
+import AdminAnalytics from './components/Dashboards/Admin/AdminAnalytics';
+import PaymentPage from './components/Pages/PaymentGateway';
+
+import OrderConfirmation from './components/Pages/OrderConfirmation';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Seller Routes */}
+        <Route path="/" element={<Seller_dashboard />} />
         <Route path="/seller-dashboard" element={<Seller_dashboard />} />
         <Route path="/inventory" element={<InventoryManagement />} />
-        <Route path="/" element={<Seller_dashboard />} />
         <Route path="/order" element={<OrderManagement />} />
         <Route path="/rental" element={<RentalManagement />} />
         <Route path="/analytics" element={<AnalyticsDashboard />} />
-      </Routes>
-      <Routes>
-      <Route path="/buyer" element={<BuyerDashboard />} />
-      <Route path='/orderHistory' element={<OrderHistory />}/>
-      <Route path='/rentalAgreements' element={<RentalAgreement />}/>
-      </Routes>
-      <Routes>
-      <Route path="/admin" element={<AdminDashboard />} />
-       <Route path='/regBuyers' element={<Buyers />}/>
-       <Route path='/regSellers' element={<Sellers />}/>  
+
+        {/* Buyer Routes */}
+        <Route path="/buyer" element={<BuyerDashboard />} />
+        <Route path="/orderHistory" element={<OrderHistory />} />
+        <Route path="/rentalAgreements" element={<RentalAgreement />} />
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/regBuyers" element={<Buyers />} />
+        <Route path="/regSellers" element={<Sellers />} />
+        <Route path="/adminAnalytics" element={<AdminAnalytics />} />
+
+        {/* Checkout & Payment */}
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/order-confirmation" element={<OrderConfirmation />} />
       </Routes>
     </Router>
-    // <div>
-    //   <Seller_dashboard />
-    // </div>
-    // <div>
-    //   <Checkout />
-    // </div>
-  )
+  );
 }
 
 export default App;
+

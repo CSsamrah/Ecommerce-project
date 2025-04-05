@@ -1,0 +1,87 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #BDC4D4 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.admin-analytics-container {
+    padding: 40px;
+    width: 90%;
+    max-width: 1200px;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.admin-analytics-container h2 {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+.chart-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+.chart-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.transparent-bg {
+    background: transparent !important;
+    box-shadow: none;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    height: 300px !important;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .admin-analytics-container h2 {
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+
+    .chart-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .chart-card {
+        width: 90%;
+        max-width: none;
+    }
+}
+
+body {
+    padding-top: 30px;
+}

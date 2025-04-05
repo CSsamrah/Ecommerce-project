@@ -20,6 +20,7 @@ function AdminDashboard() {
                 <ul>
                     <li onClick={() => navigate("/regBuyers")}>Registered Buyers</li>
                     <li onClick={() => navigate("/regSellers")}>Registered Sellers</li>
+                    <li onClick={() => navigate("/adminAnalytics")}>Analytics and Insights</li>
                 </ul>
             </div>
         </div>
