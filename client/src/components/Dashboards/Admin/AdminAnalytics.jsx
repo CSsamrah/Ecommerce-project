@@ -17,29 +17,25 @@ ChartJS.register(
   BarElement,
   CategoryScale,
   LinearScale,
-  Tooltip,
-  Legend
+  Tooltip, Legend
 );
 
 const AdminAnalytics = () => {
   const [userData, setUserData] = useState(null);
-
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
-    // Simulating API call response with mock data
-    const mockUserData = {
+    const UserData = {
       totalUsers: 1500,
       buyerCount: 1200,
       sellerCount: 300,
     };
 
-    setUserData(mockUserData);
+    setUserData(UserData);
   };
 
-  // Pie Chart data for Total Users (Buyers vs Sellers)
   const pieChartData = {
     labels: ["Buyers", "Sellers"],
     datasets: [
@@ -52,7 +48,6 @@ const AdminAnalytics = () => {
     ],
   };
 
-  // Bar Chart data for Buyers vs Sellers count
   const barChartData = {
     labels: ["Buyers", "Sellers"],
     datasets: [

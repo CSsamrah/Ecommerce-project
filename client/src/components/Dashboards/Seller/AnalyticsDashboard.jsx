@@ -7,8 +7,7 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  Tooltip,
-  Legend,
+  Tooltip, Legend,
 } from "chart.js";
 import { Pie, Bar, Line } from "react-chartjs-2";
 import "./AnalyticsDashboard.css"
@@ -21,8 +20,7 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
-  Tooltip,
-  Legend
+  Tooltip, Legend
 );
 
 const AnalyticsDashboard = () => {
@@ -36,14 +34,13 @@ const AnalyticsDashboard = () => {
   }, []);
 
   const fetchAnalyticsData = async () => {
-    // Sample mock data to simulate API responses
-    const mockSoldData = {
+    const SoldData = {
       new_products: 120,
       secondhand_products: 85,
       rental_products: 60,
     };
 
-    const mockBreakdownData = {
+    const BreakdownData = {
       newProducts: [
         { name: "Laptop", items_sold: 40, items_left: 10 },
         { name: "Headphones", items_sold: 30, items_left: 5 },
@@ -54,26 +51,24 @@ const AnalyticsDashboard = () => {
       ],
     };
 
-    const mockMonthlyData = [
+    const MonthlyData = [
       { month: "2024-01-01", product_sales: 5000, rental_income: 1500 },
       { month: "2024-02-01", product_sales: 4500, rental_income: 1800 },
       { month: "2024-03-01", product_sales: 6000, rental_income: 2000 },
     ];
 
-    const mockTopSellingProducts = [
+    const TopSellingProducts = [
       { name: "Laptop", items_sold: 40 },
       { name: "Headphones", items_sold: 30 },
       { name: "Monitor", items_sold: 50 },
       { name: "Used Phone", items_sold: 20 },
     ];
 
-    setSoldData(mockSoldData);
-    setBreakdownData(mockBreakdownData);
-    setMonthlyData(mockMonthlyData);
-    setTopSellingProducts(mockTopSellingProducts);
+    setSoldData(SoldData);
+    setBreakdownData(BreakdownData);
+    setMonthlyData(MonthlyData);
+    setTopSellingProducts(TopSellingProducts);
   };
-
-  // Chart for Total Revenue of Current Month (using Line Chart)
   const totalRevenueCurrentMonth = {
     labels: monthlyData.map((m) =>
       new Date(m.month).toLocaleDateString("en-US", {
@@ -101,7 +96,6 @@ const AnalyticsDashboard = () => {
     ],
   };
 
-  // Chart for Total Sales (Pie Chart)
   const pieChartData = {
     labels: ["New Products", "Second-Hand", "Rental"],
     datasets: [
@@ -118,7 +112,6 @@ const AnalyticsDashboard = () => {
     ],
   };
 
-  // Chart for Top Selling Products (Bar Chart)
   const topSellingData = {
     labels: topSellingProducts.map((product) => product.name),
     datasets: [
@@ -130,7 +123,6 @@ const AnalyticsDashboard = () => {
     ],
   };
 
-  // Loader if data is not available
   if (!soldData || !breakdownData || monthlyData.length === 0 || topSellingProducts.length === 0) {
     return <div>Loading seller analytics...</div>;
   }
@@ -141,19 +133,14 @@ const AnalyticsDashboard = () => {
       <h2>Seller Analytics Dashboard</h2>
 
       <div className="chart-section">
-        {/* Total Revenue of Current Month (Line Chart) */}
         <div className="chart-card">
           <h3>Total Revenue of Current Month</h3>
           <Line data={totalRevenueCurrentMonth} />
         </div>
-
-        {/* Total Sales (Pie Chart) */}
         <div className="chart-card">
           <h3>Total Sales Breakdown</h3>
           <Pie data={pieChartData} />
         </div>
-
-        {/* Top Selling Products (Bar Chart) */}
         <div className="chart-card">
           <h3>Top Selling Products</h3>
           <Bar data={topSellingData} />

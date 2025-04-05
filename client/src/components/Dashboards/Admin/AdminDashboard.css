@@ -14,7 +14,6 @@
     z-index: 1000;
 }
 
-
 .sideBar {
     position: fixed;
     top: 0;
@@ -41,7 +40,6 @@
     border-bottom: 1px solid ivory;
     cursor: pointer;
 }
-
 .sideBar ul li:hover {
     background-color: #040e1d;
 }
