@@ -4,7 +4,7 @@ import userRoutes from "./src/routes/userRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
 import productRoutes from "./src/routes/productRoutes.js";
 import validationRoutes from "./src/routes/verifyProdutcRoutes.js";
-
+import reviewRoutes from "./src/routes/reviewRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import pool from "./dbConnect.js";
@@ -47,6 +47,7 @@ app.use("/api/rental",rentalRoutes);
 app.use("/admin",adminRoutes);
 app.use("/seller",sellerRoutes);
 app.use("/buyer",buyerRoutes);
+app.use("/review", reviewRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
