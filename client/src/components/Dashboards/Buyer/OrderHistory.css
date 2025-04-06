@@ -1,4 +1,3 @@
-
 .order-history-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -61,17 +60,17 @@
 }
 
 .delivered {
-    background-color: #4CAF50;
+    background-color: green;
     color: white;
 }
 
 .processing {
-    background-color: #FF9800;
+    background-color: yellow;
     color: white;
 }
 
-.pending {
-    background-color: #FF5722;
+.shipped {
+    background-color: orange;
     color: white;
 }
 

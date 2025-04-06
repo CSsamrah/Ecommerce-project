@@ -1,6 +1,6 @@
 import { useState } from "react";
 import BuyerDashboard from "./BuyerDashboard";
-import "./OrderHistory.css"; // Ensure to create this CSS file
+import "./OrderHistory.css"; 
 
 function OrderHistory() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -31,7 +31,7 @@ function OrderHistory() {
             date: "2024-02-20",
             type: ["Rental"],
             total: 75,
-            status: "Pending",
+            status: "Shipped",
             items: [
                 { name: "Monitor", quantity: 1, price: 75 }
             ]
@@ -40,7 +40,7 @@ function OrderHistory() {
 
     const cancelOrder = (orderId) => {
         setOrders(orders.map(order =>
-            order.id === orderId && order.status === "Pending"
+            order.id === orderId && order.status === "Processing"
                 ? { ...order, status: "Cancelled" }
                 : order
         ));
@@ -50,16 +50,7 @@ function OrderHistory() {
         <div className="order-history-container">
             <BuyerDashboard />
             <h2 className="order-history-title">Order History</h2>
-
-            {/* Search Bar */}
-            <input
-                type="text"
-                className="search-bar"
-                placeholder="Search orders..."
-                onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
-            />
-
-            {/* Order Cards */}
+            <input type="text" className="search-bar"  placeholder="Search orders..." onChange={(e) => setSearchTerm(e.target.value.toLowerCase())} />
             <div className="order-list">
                 {orders
                     .filter(order =>
@@ -85,10 +76,9 @@ function OrderHistory() {
                                     ))}
                                 </tbody>
                             </table>
-
                             <div className="order-footer">
                                 <span className="order-total">Total: ${order.total.toFixed(2)}</span>
-                                {order.status === "Pending" && (
+                                {order.status === "Processing" && (
                                     <button className="cancel-btn" onClick={() => cancelOrder(order.id)}>Cancel Order</button>
                                 )}
                             </div>
