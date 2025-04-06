@@ -10,7 +10,7 @@ import {
 } from "chart.js";
 import { Pie, Bar } from "react-chartjs-2";
 import "./AdminAnalytics.css"
-import Seller_dashboard from "../Seller/Seller_dashboard";
+import AdminDashboard from "./AdminDashboard";
 
 ChartJS.register(
   ArcElement,
@@ -42,7 +42,7 @@ const AdminAnalytics = () => {
       {
         label: "Total Users",
         data: [userData?.buyerCount || 0, userData?.sellerCount || 0],
-        backgroundColor: ["#4CAF50", "#FFC107"],
+        backgroundColor: ["#BDC4D4", "#D1CFC9"],
         borderWidth: 1,
       },
     ],
@@ -54,7 +54,7 @@ const AdminAnalytics = () => {
       {
         label: "User Count",
         data: [userData?.buyerCount || 0, userData?.sellerCount || 0],
-        backgroundColor: ["#03a9f4", "#8bc34a"],
+        backgroundColor: ["#1C2E4A", "#52677D"],
       },
     ],
   };
@@ -65,7 +65,7 @@ const AdminAnalytics = () => {
 
   return (
     <div className="admin-analytics-container">
-        <Seller_dashboard />
+        <AdminDashboard />
       <h2>Admin Analytics Dashboard</h2>
 
       <div className="chart-container">

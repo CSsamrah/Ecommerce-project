@@ -3,7 +3,7 @@
     max-width: 1100px;
     margin: 40px auto;
     padding: 20px;
-    background: #fff;
+    background: white;
     border-radius: 10px;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -11,7 +11,7 @@
 .buyers-title {
     font-size: 26px;
     font-weight: 700;
-    color: #222;
+    color: #1C2E4A;
     text-align: center;
     margin-bottom: 20px;
     letter-spacing: 1px;
@@ -27,7 +27,7 @@
 }
 
 .search-bar:focus {
-    border-color: #007bff;
+    border-color: #1C2E4A;
     box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.4);
     transform: scale(1.02);
 }
@@ -35,7 +35,7 @@
 .buyers-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #ffffff;
+    background-color: white;
     transition: background 0.3s ease-in-out;
     border-radius: 10px;
     overflow: hidden;
@@ -54,13 +54,12 @@
 }
 
 .buyers-table th {
-    background: linear-gradient(135deg, #007bff, #0056b3);
+    background: linear-gradient(135deg, #1C2E4A, #0F1A2B);
     font-weight: bold;
     color: white;
     text-transform: uppercase;
 }
 
-/* 🛑 Status Badges */
 .status-badge {
     padding: 6px 14px;
     border-radius: 20px;
