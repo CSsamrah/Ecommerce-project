@@ -80,7 +80,7 @@ const AnalyticsDashboard = () => {
       {
         label: "Product Sales",
         data: monthlyData.map((m) => m.product_sales),
-        borderColor: "#673ab7",
+        borderColor: "#1C2E4A",
         backgroundColor: "rgba(103, 58, 183, 0.2)",
         fill: true,
         tension: 0.3,
@@ -88,8 +88,8 @@ const AnalyticsDashboard = () => {
       {
         label: "Rental Income",
         data: monthlyData.map((m) => m.rental_income),
-        borderColor: "#ff5722",
-        backgroundColor: "rgba(255, 87, 34, 0.2)",
+        borderColor: "GREEN",
+        backgroundColor: "rgba(34, 255, 100, 0.2)",
         fill: true,
         tension: 0.3,
       },
@@ -106,7 +106,7 @@ const AnalyticsDashboard = () => {
           soldData?.secondhand_products || 0,
           soldData?.rental_products || 0,
         ],
-        backgroundColor: ["#4CAF50", "#FFC107", "#2196F3"],
+        backgroundColor: ["#BDC4D4", "#D1CFC9", "#52677D"],
         borderWidth: 1,
       },
     ],
@@ -118,7 +118,7 @@ const AnalyticsDashboard = () => {
       {
         label: "Items Sold",
         data: topSellingProducts.map((product) => product.items_sold),
-        backgroundColor: "#03a9f4",
+        backgroundColor: "#0F1A2B",
       },
     ],
   };
