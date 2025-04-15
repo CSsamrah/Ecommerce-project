@@ -3,39 +3,30 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 
 //total products sold and rented that has been uploaded by the seller 
-export const getTotalProductsSoldRented = asyncHandler(async (req, res) => {
+export const getTotalProductsSold = asyncHandler(async (req, res) => {
+    const user_id  = req.user.user_id;
+    
     try {
-        // Get seller ID from auth token
-        const seller_id = req.user.user_id;
-
-       // Query to get the count of each type of product sold by a seller
-    const query = `
-    SELECT 
-      SUM(CASE WHEN p.condition = 'new' AND oi.item_type = 'product' THEN 1 ELSE 0 END) AS new_products,
-      SUM(CASE WHEN p.condition = 'second-hand' AND oi.item_type = 'second-hand' THEN 1 ELSE 0 END) AS secondhand_products,
-      SUM(CASE WHEN oi.item_type = 'rental' THEN 1 ELSE 0 END) AS rental_products
-    FROM product p
-    JOIN order_item oi ON p.product_id = oi.product_id
-    WHERE p.user_id = $1
-  `;
-
-  const result = await pool.query(query, [seller_id]);
-
-  if (result.rows.length > 0) {
-    res.json({
-      new_products: result.rows[0].new_products || 0,
-      secondhand_products: result.rows[0].secondhand_products || 0,
-      rental_products: result.rows[0].rental_products || 0,
-    });
-  } else {
-    res.json({ message: 'No products found' });
-  }
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ message: 'Internal Server Error' });
-}
-});
-
+      const query = `
+        SELECT 
+          COUNT(DISTINCT oi.product_id) AS total_products_sold,
+          SUM(CASE WHEN p.condition = 'new' THEN 1 ELSE 0 END) AS new_products_sold,
+          SUM(CASE WHEN p.condition = 'second-hand' THEN 1 ELSE 0 END) AS secondhand_products_sold
+        FROM order_item oi
+        JOIN product p ON oi.product_id = p.product_id
+        JOIN orders o ON oi.order_id = o.order_id
+        WHERE p.user_id = $1
+        AND o.status = 'delivered';
+      `;
+      
+      const result = await pool.query(query, [user_id ]);
+      res.json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+      
+//rental product count needs to be implemented but first i have to correct the orrderitem api to add rental orders in rental table.
 
 //  Get product breakdown (new and secondhand product details) for the seller
 export const productBreakdown=asyncHandler(async(req,res)=>{

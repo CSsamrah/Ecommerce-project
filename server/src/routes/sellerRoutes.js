@@ -1,10 +1,10 @@
 import express from "express";
-import {getTotalProductsSoldRented,productBreakdown,monthlyAnalytics,updateOrderStatus,getAllOrders,getProductRentalHistory,getUserSecondhandProducts} from "../controllers/sellerAnalyticsController.js";
+import {getTotalProductsSold,productBreakdown,monthlyAnalytics,updateOrderStatus,getAllOrders,getProductRentalHistory,getUserSecondhandProducts} from "../controllers/sellerAnalyticsController.js";
 import { isLoggedIn ,isAdmin} from "../middlewares/authentication.middleware.js";
 
 const router=express.Router();
 
-router.get('/totalSold',isLoggedIn,getTotalProductsSoldRented);
+router.get('/totalSold',isLoggedIn,getTotalProductsSold);
 router.get('/productBreakdown',isLoggedIn,productBreakdown);
 router.get('/monthlyAnalytics',isLoggedIn,monthlyAnalytics);
 router.put('/updateStatus/:order_id',isLoggedIn,updateOrderStatus);

@@ -237,4 +237,4 @@ const userRentals=asyncHandler(async(req,res)=>{
 
 
 
-export { returnRentalOrder ,getRentalDetails,userRentals,getProductRentalHistory}
+export { returnRentalOrder ,getRentalDetails,userRentals}
