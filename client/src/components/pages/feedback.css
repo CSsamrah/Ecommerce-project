@@ -1,0 +1,83 @@
+.feedback-container {
+    min-height: 100vh; /* Ensure it wraps all content */
+    width: 100%;
+    padding: 20px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #52667E;
+}
+.feedback-heading {
+    font-size: 2rem;
+    text-align: center;
+}
+.cards-container {
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 100vh; */
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    width: 100%;
+    min-height: 400px; /* Ensure space for cards */
+    margin-top: 20px;
+  } 
+  .card {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background-color: #D9D9D9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 70px 20px 20px 20px;
+    /* text-align: center; */
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .card h3 {
+    all: unset;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .card h4 {
+    all: unset;
+    font-size: 12px;
+    margin-top: 50px;
+  }
+  .card-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Positioning each card with stacking order */
+  .card:nth-child(1) { z-index: 1; transform: translateX(-150px); }
+  .card:nth-child(2) { z-index: 2; transform: translateX(0px); }
+  .card:nth-child(3) { z-index: 3; transform: translateX(150px); }
+  .card:nth-child(4) { z-index: 4; transform: translateX(300px); }
+  
+  /* When a card is active, bring it to the front */
+  .card.active {
+    z-index: 10;
+    transform: scale(1.2) translateX(0px);
+    background-color: #f8f9fa;
+  }
+  
+  /* Blur effect for background cards */
+  .card.blurred {
+    filter: blur(5px);
+    pointer-events: none;
+  }
+  
+  /* Close button (X) */
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
