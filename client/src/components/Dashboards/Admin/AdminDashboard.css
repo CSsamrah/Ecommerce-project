@@ -1,6 +1,13 @@
+/* .admin-body{
+
+    padding-top: 60px; 
+
+      
+} */
 .admin-dashboard-body {
     position: relative;
     font-family: Arial, sans-serif;
+      
 }
 
 .hamburger {
@@ -13,7 +20,6 @@
     left: 10px;
     z-index: 1000;
 }
-
 
 .sideBar {
     position: fixed;
@@ -41,7 +47,6 @@
     border-bottom: 1px solid ivory;
     cursor: pointer;
 }
-
 .sideBar ul li:hover {
     background-color: #040e1d;
 }

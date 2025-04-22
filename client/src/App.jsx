@@ -1,29 +1,86 @@
-import { useState } from 'react'
-import './App.css'
-import Checkout from './components/Pages/Checkout';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Seller_dashboard from './components/Dashboards/Seller/Seller_dashboard';
-import InventoryManagement from './components/Dashboards/Seller/InventoryManagement';
-import OrderManagement from './components/Dashboards/Seller/OrderManagement';
-import AnalyticsDashboard from './components/Dashboards/Seller/AnalyticsDashboard';
-import RentalManagement from './components/Dashboards/Seller/RentalManagement';
+import React from 'react'
+import { Box } from '@mui/material';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import HomeStart from "./components/pages/imageSlider"
+import "./components/pages/imageSlider.css"
+import Slider from "./components/pages/slider"
+import "./components/pages/slider.css"
+import TopPicks from "./components/pages/topPicks"
+import "./components/pages/topPicks.css"
+import Cards from "./components/pages/feedback"
+import "./components/pages/feedback.css"
+import SignIn from "./components/pages/signUp"
+import "./components/pages/signUp.css";
+import Catalog from "./components/pages/catalog"
+import { CartProvider } from './components/pages/cartContext';
+import "./components/pages/catalog.css";
+import ProductDetail from "./components/pages/productDescription";
+import "./components/pages/productDescription.css"
+// import ProductAuthentication from "./components/pages/productAuthentication";
+// import "./components/pages/productAuthentication.css"
+import Rating from "./components/pages/rating"
+import "./components/pages/rating.css";
+import Cart from "./components/pages/cart"
+import "./components/pages/cart.css";
+// import Footer from "./components/Footer/footer";
+// import "./components/pages/footer.css"
+import Navbar from "./components/Navbar/navbar1";
+// import "./components/Navbar/navbar1.css"
 import BuyerDashboard from './components/Dashboards/Buyer/BuyerDashboard';
 import OrderHistory from './components/Dashboards/Buyer/OrderHistory';
 import RentalAgreement from './components/Dashboards/Buyer/RentalAgreement';
 import AdminDashboard from './components/Dashboards/Admin/AdminDashboard';
+import AdminAnalytics from './components/Dashboards/Admin/AdminAnalytics';
 import Buyers from './components/Dashboards/Admin/Buyers';
 import Sellers from './components/Dashboards/Admin/Sellers';
-import AdminAnalytics from './components/Dashboards/Admin/AdminAnalytics';
-import PaymentPage from './components/Pages/PaymentGateway';
+import Seller_dashboard from './components/Dashboards/Seller/Seller_dashboard';
+import AnalyticsDashboard from './components/Dashboards/Seller/AnalyticsDashboard';
+import OrderManagement from './components/Dashboards/Seller/OrderManagement';
+import InventoryManagement from './components/Dashboards/Seller/InventoryManagement';
+import RentalManagement from './components/Dashboards/Seller/RentalManagement';
+import ForgotPassword from './components/pages/forgotPassword';
 
-import OrderConfirmation from './components/Pages/OrderConfirmation';
+
+const HomePage = () => (
+  <>
+    <Box>
+      <Navbar />
+    </Box>
+    <Box>
+      <HomeStart />
+    </Box>
+    <Box>
+      <Slider />
+    </Box>
+    <Box>
+      <TopPicks />
+    </Box>
+    <Box>
+      <Cards />
+    </Box>
+  </>
+);
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Seller Routes */}
-        <Route path="/" element={<Seller_dashboard />} />
+    <CartProvider>
+    <Box>
+    <div className='content'>
+      <Router>
+          {/* <Navbar /> */}
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/navbar" element={<Navbar />} />
+            <Route path="/sign" element={<SignIn />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/rating" element={<Rating />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path='/forgot-password' element={<ForgotPassword />} />
+            {/* <Route path="/authentication" element={<ProductAuthentication />} /> */}
+
+            {/* Seller Routes */}
+        // <Route path="/" element={<Seller_dashboard />} />
         <Route path="/seller-dashboard" element={<Seller_dashboard />} />
         <Route path="/inventory" element={<InventoryManagement />} />
         <Route path="/order" element={<OrderManagement />} />
@@ -31,22 +88,21 @@ function App() {
         <Route path="/analytics" element={<AnalyticsDashboard />} />
 
         {/* Buyer Routes */}
-        <Route path="/buyer" element={<BuyerDashboard />} />
+        <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
         <Route path="/orderHistory" element={<OrderHistory />} />
         <Route path="/rentalAgreements" element={<RentalAgreement />} />
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/regBuyers" element={<Buyers />} />
         <Route path="/regSellers" element={<Sellers />} />
         <Route path="/adminAnalytics" element={<AdminAnalytics />} />
-
-        {/* Checkout & Payment */}
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/payment" element={<PaymentPage />} />
-        <Route path="/order-confirmation" element={<OrderConfirmation />} />
-      </Routes>
-    </Router>
+          </Routes>
+          {/* <Footer /> */}
+      </Router>    
+    </div>
+    </Box>
+    </CartProvider>
   );
 }
 

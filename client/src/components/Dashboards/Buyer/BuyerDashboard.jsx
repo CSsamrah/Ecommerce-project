@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BuyerDashboard.css"
+import Navbar from "../../Navbar/navbar1.jsx";
 
 
 function BuyerDashboard() {
@@ -12,7 +13,11 @@ function BuyerDashboard() {
     };
 
     return (
+        
         <div className="buyer-dashboard-body">
+
+            <Navbar />
+
             <button className="hamburger" onClick={toggleSidebar}>
                 &#9776;
             </button>
@@ -23,6 +28,7 @@ function BuyerDashboard() {
                 </ul>
             </div>
         </div>
+
     );
 }
 

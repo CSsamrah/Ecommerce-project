@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../../Navbar/navbar1.jsx";
+
 import "./AdminDashboard.css"
 
 
@@ -12,6 +14,8 @@ function AdminDashboard() {
     };
 
     return (
+        <div className="admin body">
+        <Navbar />
         <div className="admin-dashboard-body">
             <button className="hamburger" onClick={toggleSidebar}>
                 &#9776;
@@ -23,6 +27,7 @@ function AdminDashboard() {
                     <li onClick={() => navigate("/adminAnalytics")}>Analytics and Insights</li>
                 </ul>
             </div>
+        </div>
         </div>
     );
 }
