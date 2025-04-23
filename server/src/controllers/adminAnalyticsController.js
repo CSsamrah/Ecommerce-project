@@ -2,6 +2,23 @@ import pool from "../../dbConnect.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 
+export const getReqL = asyncHandler(async (req, res) => {
+    const { category_name, category_description, slug } = req.query;
+
+    try {
+        const result = await pool.query(
+            'INSERT INTO category (category_name, category_description, slug) VALUES ($1, $2, $3) RETURNING *',
+            [category_name, category_description, slug]
+        );
+
+        res.status(201).json(result.rows[0]); // Return the inserted row
+    } catch (error) {
+        console.error('Error inserting category:', error);
+        throw new ApiError('Failed to insert category', 500);
+    }
+});
+
+
 // Get total users by role(admin,seller,buyer)
 export const totalUsers = asyncHandler(async (req, res) => {
     try {
