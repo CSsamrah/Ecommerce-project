@@ -312,7 +312,7 @@ const SignIn = () => {
       // Redirect based on role
       switch(signInData.role.toLowerCase()) {
         case "admin":
-          navigate("/admin-dashboard");
+          navigate("/admin");
           break;
         case "seller":
           navigate("/seller-dashboard");

@@ -19,35 +19,46 @@ const ForgotPassword = () => {
         setError('');
         setSuccess('');
 
+        // Validate email format before sending
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setError('Please enter a valid email address');
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:5000/api/users/getResetPwdOtp', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ email })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                // If email fails but we get an OTP in development
+                const errorMsg = data.message || 'Failed to send OTP';
                 if (data.otp) {
                     setTerminalOtp(data.otp);
                     setStep(2);
                     setSuccess(`OTP generated but email failed. Check terminal for OTP: ${data.otp}`);
                     return;
                 }
-                throw new Error(data.message || 'Failed to send OTP');
+                
+                throw new Error(errorMsg);
             }
 
             setStep(2);
             setSuccess('OTP sent to your email!');
-            
-            // For development, if backend returns OTP in response
+
             if (data.otp) {
                 setTerminalOtp(data.otp);
             }
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'An unexpected error occurred');
+            console.error('Error in handleEmailSubmit:', err);
         } finally {
             setIsLoading(false);
         }
@@ -58,10 +69,10 @@ const ForgotPassword = () => {
             const newOtp = [...otp];
             newOtp[index] = value;
             setOtp(newOtp);
-            
-            // Auto-focus to next input
+
             if (value && index < 5) {
-                document.getElementById(`otp-input-${index + 1}`).focus();
+                const nextInput = document.getElementById(`otp-input-${index + 1}`);
+                if (nextInput) nextInput.focus();
             }
         }
     };
@@ -71,8 +82,13 @@ const ForgotPassword = () => {
         setIsLoading(true);
         setError('');
         setSuccess('');
+        const otpCode = otp.join('');
+        if (otpCode.length !== 6) {
+            setError('Please enter a complete 6-digit OTP');
+            setIsLoading(false);
+            return;
+        }
 
-        // Frontend validations
         if (newPassword !== confirmPassword) {
             setError('Passwords do not match');
             setIsLoading(false);
@@ -86,10 +102,12 @@ const ForgotPassword = () => {
         }
 
         try {
-            const otpCode = otp.join('');
             const response = await fetch('http://localhost:5000/api/users/resetPwd', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     email,
                     otp: otpCode,
@@ -105,9 +123,10 @@ const ForgotPassword = () => {
             }
 
             setSuccess('Password reset successfully! Redirecting to login...');
-            setTimeout(() => navigate('/login'), 2000);
+            setTimeout(() => navigate('/sign'), 2000);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'An error occurred during password reset');
+            console.error('Error in handlePasswordReset:', err);
         } finally {
             setIsLoading(false);
         }

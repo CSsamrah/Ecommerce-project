@@ -39,6 +39,10 @@ import OrderManagement from './components/Dashboards/Seller/OrderManagement';
 import InventoryManagement from './components/Dashboards/Seller/InventoryManagement';
 import RentalManagement from './components/Dashboards/Seller/RentalManagement';
 import ForgotPassword from './components/pages/forgotPassword';
+import Checkout from './components/pages/Checkout';
+
+import OrderConfirmation from './components/pages/OrderConfirmation';
+import AdminOverview from './components/Dashboards/Admin/AdminOverview'
 
 
 const HomePage = () => (
@@ -77,6 +81,9 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path='/forgot-password' element={<ForgotPassword />} />
+            <Route path='/checkout' element={<Checkout /> } />
+
+            <Route path='/order-confirmation' element={<OrderConfirmation /> } />
             {/* <Route path="/authentication" element={<ProductAuthentication />} /> */}
 
             {/* Seller Routes */}
@@ -94,6 +101,7 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path='/admin' element={<AdminOverview /> } />
         <Route path="/regBuyers" element={<Buyers />} />
         <Route path="/regSellers" element={<Sellers />} />
         <Route path="/adminAnalytics" element={<AdminAnalytics />} />

@@ -40,7 +40,8 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, 'User registration failed');
     }
     const emailOptions = {
-        from: "arsalanali873@gmail.com",
+        // from: "arsalanali873@gmail.com",
+        from: "arisharehan7@gmail.com",
         to: email,
         subject: "Welcome to ProTech Hardware!",
         text: `Welcome to Hardware Hub. Your account has been created with Email ID: ${email}`, 
