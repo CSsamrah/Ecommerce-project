@@ -215,7 +215,7 @@ function Buyers() {
                 setLoading(true);
                 setError(null);
                 
-                const response = await axios.get("http://localhost:5000/api/users/buyers", {
+                const response = await axios.get("http://localhost:3000/api/users/buyers", {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json',

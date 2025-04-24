@@ -43,6 +43,7 @@ import Checkout from './components/pages/Checkout';
 
 import OrderConfirmation from './components/pages/OrderConfirmation';
 import AdminOverview from './components/Dashboards/Admin/AdminOverview'
+import PayFast from './components/pages/PayFast.jsx'
 
 
 const HomePage = () => (
@@ -105,6 +106,7 @@ function App() {
         <Route path="/regBuyers" element={<Buyers />} />
         <Route path="/regSellers" element={<Sellers />} />
         <Route path="/adminAnalytics" element={<AdminAnalytics />} />
+        <Route path='/payment' element={<PayFast />}/>
           </Routes>
           {/* <Footer /> */}
       </Router>    

@@ -49,19 +49,19 @@ const AdminAnalytics = () => {
           ordersResponse,
           revenueResponse,
         ] = await Promise.all([
-          axios.get("http://localhost:5000/api/admin/total-users", {
+          axios.get("http://localhost:3000/api/admin/total-users", {
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
           }),
-          axios.get("http://localhost:5000/api/admin/total-orders", {
+          axios.get("http://localhost:3000/api/admin/total-orders", {
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
           }),
-          axios.get("http://localhost:5000/api/admin/total-revenue", {
+          axios.get("http://localhost:3000/api/admin/total-revenue", {
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
