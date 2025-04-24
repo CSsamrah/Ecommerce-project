@@ -15,6 +15,7 @@ import rentalRoutes from "./src/routes/rentalRoutes.js";
 import adminRoutes from "./src/routes/adminDashboardRoutes.js";
 import sellerRoutes from "./src/routes/sellerRoutes.js";
 import buyerRoutes from "./src/routes/buyerRoutes.js";
+import paymentRoutes from "./src/routes/paymentRoutes.js"
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use("/api/admin",adminRoutes);
 app.use("/seller",sellerRoutes);
 app.use("/buyer",buyerRoutes);
 app.use("/review", reviewRoutes);
+app.use("/api/payfast",paymentRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

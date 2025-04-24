@@ -44,6 +44,8 @@ import Checkout from './components/pages/Checkout';
 import OrderConfirmation from './components/pages/OrderConfirmation';
 import AdminOverview from './components/Dashboards/Admin/AdminOverview'
 import PayFast from './components/pages/PayFast.jsx'
+import Success from './components/pages/sucess.jsx'
+import Failure from "./components/pages/cancel.jsx"
 
 
 const HomePage = () => (
@@ -107,6 +109,8 @@ function App() {
         <Route path="/regSellers" element={<Sellers />} />
         <Route path="/adminAnalytics" element={<AdminAnalytics />} />
         <Route path='/payment' element={<PayFast />}/>
+        <Route path='payment/success' element={<Success />} />
+        <Route path='payment/failure' element={<Failure />} />
           </Routes>
           {/* <Footer /> */}
       </Router>    
