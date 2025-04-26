@@ -81,79 +81,168 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.status(201).json(new ApiResponse(201, 'User registered successfully', createNewUser.rows[0]));
 });
 
-const loginUser = asyncHandler(async (req, res) => {
+// Keep your existing registerUser, forgotPassword, resetPwd, etc. functions
+// Only modifying login and logout functions
 
+const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
-        throw new ApiError(400, 'Please provide both email and password fields');
+      throw new ApiError(400, 'Please provide both email and password fields');
     }
-
-    const checkIfUserIsRegistered = await pool.query('SELECT * FROM "Users" WHERE email=$1', [email]);
-    if (checkIfUserIsRegistered.rows.length == 0) {
-        throw new ApiError(400, 'User not registered');
+  
+    const userResult = await pool.query('SELECT * FROM "Users" WHERE email=$1', [email]);
+    if (userResult.rows.length == 0) {
+      throw new ApiError(400, 'User not registered');
     }
-
-    const checkPwd = await bcrypt.compare(password, checkIfUserIsRegistered.rows[0].password);
+  
+    const user = userResult.rows[0];
+    const checkPwd = await bcrypt.compare(password, user.password);
     if (!checkPwd) {
-        throw new ApiError(400, 'Incorrect password');
+      throw new ApiError(400, 'Incorrect password');
     }
-
+  
     const accessToken = jwt.sign(
-        { id: checkIfUserIsRegistered.rows[0].user_id },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
-    )
-
-    const refreshToken = jwt.sign(
-        { id: checkIfUserIsRegistered.rows[0].user_id },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-    )
-
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    }
-
-    res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
-    res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-    //storing refreshToken in DB
-    await pool.query(
-        'UPDATE "Users" SET refresh_token=$1 WHERE email=$2',
-        [refreshToken, email]
+      { id: user.user_id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '15m' }
     );
-
-    const loggedInUser = await pool.query('SELECT name,email,"phoneNo",role,address FROM "Users" WHERE email=$1', [email]);
-
-    return res.status(200).json(new ApiResponse(200, {
-        user: loggedInUser.rows[0],
-        accessToken,
-        refreshToken
-    }));
-
-
-});
-
-const logOut = asyncHandler(async (req, res) => {
-    const findUser = await pool.query('SELECT * FROM "Users" WHERE user_id=$1', [req.user?.user_id]);
-    if (!findUser.rows.length) {
-        throw new ApiError(401, 'No user found');
-    }
-    await pool.query('UPDATE "Users" SET refresh_token=$1 WHERE user_id=$2', [null, req.user?.user_id]);
-
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "production",
-        sameSite: process.env.NODE_ENV == "production" ? "none" : "strict",
-    }
-    res.clearCookie('accessToken', options);
-    res.clearCookie('refreshToken', options);
-
+  
+    const refreshToken = jwt.sign(
+      { id: user.user_id },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    );
+  
+    // Update refresh token in DB
+    await pool.query(
+      'UPDATE "Users" SET refresh_token=$1 WHERE email=$2',
+      [refreshToken, email]
+    );
+  
+    
+    // Set HttpOnly cookies
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+  
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+  
+    // Return user data without sensitive info
+    const userData = {
+      user_id: user.user_id,
+      name: user.name,
+      email: user.email,
+      phoneNo: user.phoneNo,
+      role: user.role,
+      address: user.address
+    };
+  
+    return res.status(200).json(new ApiResponse(200, userData, "User logged in successfully"));
+  });
+  
+  const logOut = asyncHandler(async (req, res) => {
+    await pool.query(
+      'UPDATE "Users" SET refresh_token=$1 WHERE user_id=$2',
+      [null, req.user?.user_id]
+    );
+  
+    // Clear cookies
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict"
+    });
+  
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict"
+    });
+  
     return res.status(200).json(new ApiResponse(200, {}, "User logged out successfully"));
+  });
 
-});
+// const loginUser = asyncHandler(async (req, res) => {
+
+//     const { email, password } = req.body;
+//     if (!email || !password) {
+//         throw new ApiError(400, 'Please provide both email and password fields');
+//     }
+
+//     const checkIfUserIsRegistered = await pool.query('SELECT * FROM "Users" WHERE email=$1', [email]);
+//     if (checkIfUserIsRegistered.rows.length == 0) {
+//         throw new ApiError(400, 'User not registered');
+//     }
+
+//     const checkPwd = await bcrypt.compare(password, checkIfUserIsRegistered.rows[0].password);
+//     if (!checkPwd) {
+//         throw new ApiError(400, 'Incorrect password');
+//     }
+
+//     const accessToken = jwt.sign(
+//         { id: checkIfUserIsRegistered.rows[0].user_id },
+//         process.env.ACCESS_TOKEN_SECRET,
+//         { expiresIn: '15m' }
+//     )
+
+//     const refreshToken = jwt.sign(
+//         { id: checkIfUserIsRegistered.rows[0].user_id },
+//         process.env.REFRESH_TOKEN_SECRET,
+//         { expiresIn: '7d' }
+//     )
+
+//     const cookieOptions = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === "production",
+//         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+//     }
+
+//     res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
+//     res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+//     //storing refreshToken in DB
+//     await pool.query(
+//         'UPDATE "Users" SET refresh_token=$1 WHERE email=$2',
+//         [refreshToken, email]
+//     );
+
+//     const loggedInUser = await pool.query('SELECT name,email,"phoneNo",role,address FROM "Users" WHERE email=$1', [email]);
+
+//     return res.status(200).json(new ApiResponse(200, {
+//         user: loggedInUser.rows[0],
+//         accessToken,
+//         refreshToken
+//     }));
+
+
+// });
+
+// const logOut = asyncHandler(async (req, res) => {
+//     const findUser = await pool.query('SELECT * FROM "Users" WHERE user_id=$1', [req.user?.user_id]);
+//     if (!findUser.rows.length) {
+//         throw new ApiError(401, 'No user found');
+//     }
+//     await pool.query('UPDATE "Users" SET refresh_token=$1 WHERE user_id=$2', [null, req.user?.user_id]);
+
+//     const options = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV == "production",
+//         sameSite: process.env.NODE_ENV == "production" ? "none" : "strict",
+//     }
+//     res.clearCookie('accessToken', options);
+//     res.clearCookie('refreshToken', options);
+
+//     return res.status(200).json(new ApiResponse(200, {}, "User logged out successfully"));
+
+// });
 
 const forgotPassowrd=asyncHandler(async(req,res)=>{
     const {email}=req.body;
@@ -362,6 +451,8 @@ const deleteAccount=asyncHandler(async(req,res)=>{
 //     );
 // });
 
+// Add this to user.controller.js
+
 const getAllBuyers = asyncHandler(async (req, res) => {
     try {
         const result = await pool.query(
@@ -397,4 +488,4 @@ const getAllSellers = asyncHandler(async (req, res) => {
 });
 
 
-export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount, getAllBuyers, getAllSellers };
+export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount, getAllBuyers, getAllSellers};

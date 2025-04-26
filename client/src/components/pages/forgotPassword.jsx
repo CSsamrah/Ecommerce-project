@@ -27,7 +27,7 @@ const ForgotPassword = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/users/getResetPwdOtp', {
+            const response = await fetch('http://localhost:3000/api/users/getResetPwdOtp', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ const ForgotPassword = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/users/resetPwd', {
+            const response = await fetch('http://localhost:3000/api/users/resetPwd', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

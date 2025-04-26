@@ -5,7 +5,9 @@ import "./AdminDashboard.css";
 import AdminDashboard from "./AdminDashboard.jsx";
 
 function AdminOverview() {
-    
+    const handleGoHome = () => {
+        navigate("/"); 
+    };
 
     return (
         <div className="admin-dashboard-root-container">
@@ -15,6 +17,8 @@ function AdminOverview() {
             <AdminDashboard />
 
             <h1>Welcome to Admin Dashboard!</h1>
+            <button 
+                onClick={handleGoHome} className="back-to-home-button" >Back to Home </button>
         </div>
     );
 }

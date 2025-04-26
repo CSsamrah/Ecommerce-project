@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Seller_dashboard.css";
+import Navbar from "../../Navbar/navbar1";
 
 function Seller_dashboard() {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ function Seller_dashboard() {
 
     return (
         <div className="seller-dashboard-body">
+            <Navbar />
             <button className="hamburger" onClick={toggleSidebar}>
                 &#9776;
             </button>

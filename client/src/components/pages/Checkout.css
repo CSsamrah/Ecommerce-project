@@ -352,3 +352,25 @@
     padding: 15px;
   }
 }
+.cart-item-image {
+  width: 180px;  
+  height: 120px; 
+  margin-right: 15px;
+  flex-shrink: 0; 
+  overflow: hidden; 
+  border-radius: 4px;
+}
+
+.cart-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+

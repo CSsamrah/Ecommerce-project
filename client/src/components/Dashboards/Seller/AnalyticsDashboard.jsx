@@ -128,6 +128,8 @@ const AnalyticsDashboard = () => {
   }
 
   return (
+    <div className="analytics-body">
+      <br></br>
     <div className="analytics-container">
       <Seller_dashboard />
       <h2>Seller Analytics Dashboard</h2>
@@ -146,6 +148,7 @@ const AnalyticsDashboard = () => {
           <Bar data={topSellingData} />
         </div>
       </div>
+    </div>
     </div>
   );
 };

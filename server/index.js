@@ -20,7 +20,7 @@ import paymentRoutes from "./src/routes/paymentRoutes.js"
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 pool.connect()
   .then(() => console.log('Connected to supabase!'))
@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/users",userRoutes);
 app.use("/api/categories",categoryRoutes);
-app.use("/cart", cartRoutes);
+app.use("api/cart", cartRoutes);
 app.use("/order", orderRoutes);
 app.use("/api/secondHand", secondHandRoutes);
 app.use("/api/products",productRoutes)

@@ -193,6 +193,9 @@ function OrderHistory() {
     );
 
     return (
+        <div className="order-body">
+            <br></br>
+            <br></br>
         <div className="order-history-container">
             <br></br>
             <BuyerDashboard />
@@ -264,6 +267,7 @@ function OrderHistory() {
                     ))}
                 </div>
             )}
+        </div>
         </div>
     );
 }
