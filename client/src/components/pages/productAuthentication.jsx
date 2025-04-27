@@ -1,3 +1,5 @@
+// 
+
 import { useState } from "react";
 import axios from "axios";
 
@@ -5,18 +7,21 @@ const ProductAuthentication = ({ productId }) => {
     const [authStatus, setAuthStatus] = useState(null);
     const [loading, setLoading] = useState(false);
 
-
-    // Function to authenticate the product
     const authenticateProduct = async () => {
         setLoading(true);
         try {
+            // Using your existing authentication endpoint
             const response = await axios.post(
-                `http://localhost:5000/api/product/authenticate/${productId}`, 
+                `http://localhost:3000/api/product/authenticate/${productId}`, 
                 {}, 
-                { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                { 
+                    headers: { 
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    } 
+                }
             );
 
-            setAuthStatus(response.data.message); //Set the verification message
+            setAuthStatus(response.data.message);
         } catch (error) {
             setAuthStatus(error.response?.data?.message || "Authentication failed");
         } finally {
@@ -25,17 +30,17 @@ const ProductAuthentication = ({ productId }) => {
     };
 
     return (
-        <div className="flex flex-col items-center space-y-4 p-4 border rounded-lg shadow-md">
+        <div className="product-authentication">
             <button
                 onClick={authenticateProduct}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                 disabled={loading}
+                className="auth-button"
             >
-                {loading ? "Authenticating..." : "Authenticate Product"}
+                {loading ? "Authenticating..." : "Verify Authenticity"}
             </button>
-
+            
             {authStatus && (
-                <p className={`text-lg font-semibold ${authStatus.includes("valid") ? "text-green-500" : "text-red-500"}`}>
+                <p className={`auth-status ${authStatus.includes("valid") ? "valid" : "invalid"}`}>
                     {authStatus}
                 </p>
             )}

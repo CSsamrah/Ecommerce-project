@@ -117,23 +117,317 @@
 // export default Cart;
 
 
+// import React from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { useCart } from './cartContext';
+// import './cart.css';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faTrash, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+// import Navbar from '../Navbar/navbar1';
+
+// const Cart = () => {
+//   const { cartItems, removeFromCart, updateQuantity } = useCart();
+//   const navigate = useNavigate();
+
+//   const removeCartItem = (title) => {
+//     removeFromCart(title);
+//   };
+
+//   const handleQuantityChange = (title, quantity) => {
+//     updateQuantity(title, quantity);
+//   };
+
+//   const handleCheckout = () => {
+//     navigate('/checkout');
+//   };
+
+//   const calculateSubtotal = () => {
+//     return cartItems.reduce((total, item) => {
+//       return total + parseFloat(item.price.replace('Rs.', '')) * item.quantity;
+//     }, 0);
+//   };
+
+//   // const discount = calculateSubtotal() * 0.1;
+//   const deliveryFee = 50;
+//   const total = calculateSubtotal() + deliveryFee;
+
+//   return (
+//     <div className="main_cart_page">
+//       <Navbar />
+//       <br></br>
+//       <br></br>
+//     <div className="cart_page">
+//       <br></br>
+//       <h1 className="shopping_cart_heading">Shopping Cart</h1>
+//       <div className="cart_container">
+//         {/* Left Side: Cart Items */}
+//         <div className="cart_items_section">
+//           <div className="cart_header">
+//             <div className="header_product">Product Code</div>
+//             <div className="header_quantity column_header">Quantity</div>
+//             <div className="header_total column_header">Total</div>
+//             <div className="header_action column_header">Action</div>
+//           </div>
+//           <div className="cart_info">
+//             {cartItems.map((item) => (
+//               <div className="product_box" key={item.title}>
+//                 {/* Product Details */}
+//                 <div className="product_details">
+//                   <img src={item.image} alt={item.title} className="cart_product_image" />
+//                   <div className="cart_product_info">
+//                     <div className="cart_product_title">{item.title}</div>
+//                     <div className="cart_product_price">Rs. {item.price}</div>
+//                   </div>
+//                 </div>
+
+//                 {/* Quantity Control */}
+//                 <div className="cart_item_quantity">
+//                   <button
+//                     className="quantity-btn"
+//                     onClick={() => handleQuantityChange(item.title, Math.max(1, item.quantity - 1))}
+//                   >
+//                     <FontAwesomeIcon icon={faMinus} />
+//                   </button>
+//                   <span className="quantity-value">{item.quantity}</span>
+//                   <button
+//                     className="quantity-btn"
+//                     onClick={() => handleQuantityChange(item.title, item.quantity + 1)}
+//                   >
+//                     <FontAwesomeIcon icon={faPlus} />
+//                   </button>
+//                 </div>
+
+//                 {/* Total Price */}
+//                 <div className="total_price">
+//                   ${parseFloat(item.price.replace('Rs.', '')) * item.quantity}
+//                 </div>
+
+//                 {/* Remove Button */}
+//                 <div className="remove_item">
+//                   <button className="cart_remove" onClick={() => removeCartItem(item.title)}>
+//                     <FontAwesomeIcon icon={faTrash} />
+//                   </button>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+
+//           {/* Update Cart Button */}
+//           <div className="update_cart_section">
+//             <button className="update_cart_button" onClick={() => navigate('/catalog')}>
+//               Update Cart
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Right Side: Order Summary */}
+//         <div className="order_summary">
+//           <h2>Order Summary</h2>
+//           {/* <input type="text" className="discount_input" placeholder="Discount voucher" />
+//           <button className="apply_button">Apply</button> */}
+
+//           <div className="summary_details">
+//             <div className="summary_row">
+//               <span>Sub Total:</span>
+//               <span>${calculateSubtotal().toFixed(2)}</span>
+//             </div>
+//             {/* <div className="summary_row">
+//               <span>Discount (10%):</span>
+//               <span>-${discount.toFixed(2)}</span>
+//             </div> */}
+//             <div className="summary_row">
+//               <span>Delivery Fee:</span>
+//               <span>${deliveryFee.toFixed(2)}</span>
+//             </div>
+//             <hr />
+//             <div className="summary_total">
+//               <span>Total:</span>
+//               <span>${total.toFixed(2)}</span>
+//             </div>
+//           </div>
+
+//           <button className="checkout_button" onClick={handleCheckout}>
+//             Checkout Now
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//     </div>
+//   );
+// };
+
+// export default Cart;
+
+
+// import React from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { useCart } from './cartContext';
+// import './cart.css';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faTrash, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+// import Navbar from '../Navbar/navbar1';
+
+// const Cart = () => {
+//   const { cartItems, removeFromCart, updateQuantity, loading } = useCart();
+//   const navigate = useNavigate();
+
+//   const handleQuantityChange = async (cart_id, newQuantity) => {
+//     if (newQuantity < 1) return;
+//     await updateQuantity(cart_id, newQuantity);
+//   };
+
+//   const handleCheckout = () => {
+//     navigate('/checkout');
+//   };
+
+//   const calculateSubtotal = () => {
+//     return cartItems.reduce((total, item) => {
+//       return total + (parseFloat(item.total_price) || 0);
+//     }, 0);
+//   };
+
+//   const deliveryFee = 50;
+//   const total = calculateSubtotal() + deliveryFee;
+
+//   if (loading) {
+//     return (
+//       <div className="main_cart_page">
+//         <Navbar />
+//         <div className="loading-spinner">Loading cart...</div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="main_cart_page">
+//       <Navbar />
+//       <br></br>
+//       <br></br>
+//       <div className="cart_page">
+//         <br></br>
+//         <h1 className="shopping_cart_heading">Shopping Cart</h1>
+//         <div className="cart_container">
+//           {/* Left Side: Cart Items */}
+//           <div className="cart_items_section">
+//             <div className="cart_header">
+//               <div className="header_product">Product</div>
+//               <div className="header_quantity column_header">Quantity</div>
+//               <div className="header_total column_header">Total</div>
+//               <div className="header_action column_header">Action</div>
+//             </div>
+//             <div className="cart_info">
+//               {cartItems.length === 0 ? (
+//                 <div className="empty-cart-message">Your cart is empty</div>
+//               ) : (
+//                 cartItems.map((item) => (
+//                   <div className="product_box" key={item.cart_id}>
+//                     {/* Product Details */}
+//                     <div className="product_details">
+//                       <img src={item.image} alt={item.name} className="cart_product_image" />
+//                       <div className="cart_product_info">
+//                         <div className="cart_product_title">{item.name}</div>
+//                         <div className="cart_product_price">
+//                           Rs. {item.is_rental ? item.rental_price : item.price}
+//                           {item.is_rental && ` (for ${item.rental_days} days)`}
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     {/* Quantity Control */}
+//                     <div className="cart_item_quantity">
+//                       <button
+//                         className="quantity-btn"
+//                         onClick={() => handleQuantityChange(item.cart_id, item.quantity - 1)}
+//                       >
+//                         <FontAwesomeIcon icon={faMinus} />
+//                       </button>
+//                       <span className="quantity-value">{item.quantity}</span>
+//                       <button
+//                         className="quantity-btn"
+//                         onClick={() => handleQuantityChange(item.cart_id, item.quantity + 1)}
+//                       >
+//                         <FontAwesomeIcon icon={faPlus} />
+//                       </button>
+//                     </div>
+
+//                     {/* Total Price */}
+//                     <div className="total_price">
+//                       Rs. {item.total_price}
+//                     </div>
+
+//                     {/* Remove Button */}
+//                     <div className="remove_item">
+//                       <button 
+//                         className="cart_remove" 
+//                         onClick={() => removeFromCart(item.cart_id)}
+//                       >
+//                         <FontAwesomeIcon icon={faTrash} />
+//                       </button>
+//                     </div>
+//                   </div>
+//                 ))
+//               )}
+//             </div>
+
+//             {/* Update Cart Button */}
+//             <div className="update_cart_section">
+//               <button className="update_cart_button" onClick={() => navigate('/catalog')}>
+//                 Continue Shopping
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* Right Side: Order Summary */}
+//           <div className="order_summary">
+//             <h2>Order Summary</h2>
+//             <div className="summary_details">
+//               <div className="summary_row">
+//                 <span>Sub Total:</span>
+//                 <span>Rs. {calculateSubtotal().toFixed(2)}</span>
+//               </div>
+//               <div className="summary_row">
+//                 <span>Delivery Fee:</span>
+//                 <span>Rs. {deliveryFee.toFixed(2)}</span>
+//               </div>
+//               <hr />
+//               <div className="summary_total">
+//                 <span>Total:</span>
+//                 <span>Rs. {total.toFixed(2)}</span>
+//               </div>
+//             </div>
+
+//             <button 
+//               className="checkout_button" 
+//               onClick={handleCheckout}
+//               disabled={cartItems.length === 0}
+//             >
+//               Checkout Now
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Cart;
+
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from './cartContext';
 import './cart.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import Navbar from '../Navbar/navbar1';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, loading } = useCart();
   const navigate = useNavigate();
 
-  const removeCartItem = (title) => {
-    removeFromCart(title);
-  };
-
-  const handleQuantityChange = (title, quantity) => {
-    updateQuantity(title, quantity);
+  const handleQuantityChange = (cart_id, newQuantity) => {
+    if (newQuantity < 1) return;
+    updateQuantity(cart_id, newQuantity);
   };
 
   const handleCheckout = () => {
@@ -142,23 +436,35 @@ const Cart = () => {
 
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
-      return total + parseFloat(item.price.replace('Rs.', '')) * item.quantity;
+      return total + (parseFloat(item.price) * item.quantity);
     }, 0);
   };
 
-  // const discount = calculateSubtotal() * 0.1;
   const deliveryFee = 50;
   const total = calculateSubtotal() + deliveryFee;
 
+  if (loading) {
+    return (
+      <div className="main_cart_page">
+        <Navbar />
+        <div className="loading-spinner">Loading cart...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="main_cart_page">
+
+      <Navbar />
+      <br></br>
+      <br></br>
       <div className="cart_page">
+        <br></br>
         <h1 className="shopping_cart_heading">Shopping Cart</h1>
         <div className="cart_container">
-          {/* Left Side: Cart Items */}
           <div className="cart_items_section">
             <div className="cart_header">
-              <div className="header_product">Product Code</div>
+              <div className="header_product">Product</div>
               <div className="header_quantity column_header">Quantity</div>
               <div className="header_total column_header">Total</div>
               <div className="header_action column_header">Action</div>
@@ -181,81 +487,85 @@ const Cart = () => {
                   <div className="product_box" key={item.title}>
                     {/* Product Details */}
                     <div className="product_details">
-                      <img src={item.image} alt={item.title} className="cart_product_image" />
+                      <img src={item.image} alt={item.cart_id} className="cart_product_image" />
                       <div className="cart_product_info">
                         <div className="cart_product_title">{item.title}</div>
-                        <div className="cart_product_price">Rs. {item.price}</div>
+
+                        <div className="cart_product_price">Rs.{parseFloat(item.price).toFixed(2)}</div>
                       </div>
                     </div>
 
-                    {/* Quantity Control */}
                     <div className="cart_item_quantity">
                       <button
                         className="quantity-btn"
-                        onClick={() => handleQuantityChange(item.title, Math.max(1, item.quantity - 1))}
+                        onClick={() => handleQuantityChange(item.cart_id, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
                       >
                         <FontAwesomeIcon icon={faMinus} />
                       </button>
                       <span className="quantity-value">{item.quantity}</span>
                       <button
                         className="quantity-btn"
-                        onClick={() => handleQuantityChange(item.title, item.quantity + 1)}
+
+                        onClick={() => handleQuantityChange(item.cart_id, item.quantity + 1)}
                       >
                         <FontAwesomeIcon icon={faPlus} />
                       </button>
                     </div>
 
-                    {/* Total Price */}
+
                     <div className="total_price">
-                      ${parseFloat(item.price.replace('Rs.', '')) * item.quantity}
+                      Rs.{(parseFloat(item.price) * item.quantity).toFixed(2)}
                     </div>
 
-                    {/* Remove Button */}
                     <div className="remove_item">
-                      <button className="cart_remove" onClick={() => removeCartItem(item.title)}>
+                      <button 
+                        className="cart_remove" 
+                        onClick={() => removeFromCart(item.cart_id)}
+                      >
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
                   </div>
+
                 ))}
-              </div>
-            )}
+            </div>
 
-            {/* Update Cart Button - only show if there are items */}
-            {cartItems.length > 0 && (
-              <div className="update_cart_section">
-                <button className="update_cart_button" onClick={() => navigate('/catalog')}>
-                  Update Cart
-                </button>
-              </div>
-            )}
-          </div>
+              )}
 
-          {/* Right Side: Order Summary - only show if there are items */}
-          {cartItems.length > 0 && (
-            <div className="order_summary">
-              <h2>Order Summary</h2>
-              <div className="summary_details">
-                <div className="summary_row">
-                  <span>Sub Total:</span>
-                  <span>${calculateSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="summary_row">
-                  <span>Delivery Fee:</span>
-                  <span>${deliveryFee.toFixed(2)}</span>
-                </div>
-                <hr />
-                <div className="summary_total">
-                  <span>Total:</span>
-                  <span>${total.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <button className="checkout_button" onClick={handleCheckout}>
-                Checkout Now
+            <div className="update_cart_section">
+              <button className="update_cart_button" onClick={() => navigate('/catalog')}>
+                Continue Shopping
               </button>
             </div>
-          )}
+          </div>
+
+          <div className="order_summary">
+            <h2>Order Summary</h2>
+            <div className="summary_details">
+              <div className="summary_row">
+                <span>Sub Total:</span>
+                <span>Rs.{calculateSubtotal().toFixed(2)}</span>
+              </div>
+              <div className="summary_row">
+                <span>Delivery Fee:</span>
+                <span>Rs.{deliveryFee.toFixed(2)}</span>
+              </div>
+              <hr />
+              <div className="summary_total">
+                <span>Total:</span>
+                <span>Rs.{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button 
+              className="checkout_button" 
+              onClick={handleCheckout}
+              disabled={cartItems.length === 0}
+            >
+              Checkout Now
+            </button>
+          </div>
         </div>
       </div>
     </div>

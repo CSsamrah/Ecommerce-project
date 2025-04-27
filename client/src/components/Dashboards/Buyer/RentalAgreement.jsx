@@ -13,6 +13,9 @@ const RentalAgreement = () => {
   ];
 
   return (
+    <div className="rent-body">
+      <br></br>
+      <br></br>
     <div className="rental-container">
       <br></br>
       <br></br>
@@ -55,6 +58,7 @@ const RentalAgreement = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
