@@ -997,7 +997,8 @@
 }
 
 /* Action Buttons */
-.action-buttons {
+.product_detail_buttons {
+  width: 100%;
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
@@ -1124,8 +1125,15 @@
   transform: translateY(-2px);
 }
 
-.reviewer-info {
+.review_box:hover {
+  transform: translateY(-15px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  background: rgb(13, 21, 36);
+}
+
+.box_top {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }

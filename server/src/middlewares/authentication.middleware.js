@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import pool from "../../dbConnect.js";
 
 const isLoggedIn=asyncHandler(async(req,_,next)=>{
-    const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+    const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", "");
     console.log("TOKEN: ",token);
 
     if(!token){
@@ -26,7 +26,7 @@ const isLoggedIn=asyncHandler(async(req,_,next)=>{
 })
 
 const isAdmin = asyncHandler(async (req, res, next) => {
-    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", "");
     console.log("TOKEN: ", token);
 
     if (!token) {
@@ -65,4 +65,3 @@ const authorizeSeller = (req, res, next) => {
 };
 
 export { isLoggedIn ,isAdmin,authorizeSeller}
-

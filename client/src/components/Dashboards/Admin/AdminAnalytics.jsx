@@ -6,7 +6,7 @@ import {
   CategoryScale,
   LinearScale,
   Tooltip,
-  Legend,
+  Legend
 } from "chart.js";
 import { Pie, Bar } from "react-chartjs-2";
 import "./AdminAnalytics.css";
@@ -92,6 +92,7 @@ const AdminAnalytics = () => {
     fetchAnalyticsData();
   }, [navigate]);
 
+
   const pieChartData = {
     labels: ["Buyers", "Sellers", "Admins"],
     datasets: [
@@ -113,6 +114,9 @@ const AdminAnalytics = () => {
     labels: ["Processing", "Shipped", "Delivered", "Cancelled"],
     datasets: [
       {
+        // label: "User Count",
+        // data: [userData?.buyerCount || 0, userData?.sellerCount || 0],
+        // backgroundColor: ["#1C2E4A", "#52677D"],
         label: "Order Status",
         data: [
           analyticsData.orderStats?.find(o => o.status === 'processing')?.count || 0,

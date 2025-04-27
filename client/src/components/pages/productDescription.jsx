@@ -65,6 +65,7 @@ const ProductDetail = () => {
         
       } catch (err) {
         setError(err.message || "Unable to load product details. Please try again later.");
+        setError(err.message || "Unable to load product details. Please try again later.");
       } finally {
         setLoading(false);
       }
