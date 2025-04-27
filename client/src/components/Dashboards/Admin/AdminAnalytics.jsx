@@ -1,92 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   Chart as ChartJS,
-//   ArcElement,
-//   BarElement,
-//   CategoryScale,
-//   LinearScale,
-//   Tooltip,
-//   Legend,
-// } from "chart.js";
-// import { Pie, Bar } from "react-chartjs-2";
-// import "./AdminAnalytics.css"
-// import AdminDashboard from "./AdminDashboard";
-
-// ChartJS.register(
-//   ArcElement,
-//   BarElement,
-//   CategoryScale,
-//   LinearScale,
-//   Tooltip, Legend
-// );
-
-// const AdminAnalytics = () => {
-//   const [userData, setUserData] = useState(null);
-//   useEffect(() => {
-//     fetchUserData();
-//   }, []);
-
-//   const fetchUserData = async () => {
-//     const UserData = {
-//       totalUsers: 1500,
-//       buyerCount: 1200,
-//       sellerCount: 300,
-//     };
-
-//     setUserData(UserData);
-//   };
-
-//   const pieChartData = {
-//     labels: ["Buyers", "Sellers"],
-//     datasets: [
-//       {
-//         label: "Total Users",
-//         data: [userData?.buyerCount || 0, userData?.sellerCount || 0],
-//         backgroundColor: ["#BDC4D4", "#D1CFC9"],
-//         borderWidth: 1,
-//       },
-//     ],
-//   };
-
-//   const barChartData = {
-//     labels: ["Buyers", "Sellers"],
-//     datasets: [
-//       {
-//         label: "User Count",
-//         data: [userData?.buyerCount || 0, userData?.sellerCount || 0],
-//         backgroundColor: ["#1C2E4A", "#52677D"],
-//       },
-//     ],
-//   };
-
-//   if (!userData) {
-//     return <div>Loading admin analytics...</div>;
-//   }
-
-//   return (
-//     <div className="admin-analytics-container">
-//         <AdminDashboard />
-//       <h2>Admin Analytics Dashboard</h2>
-
-//       <div className="chart-container">
-//         <div className="chart-card">
-//           <h3>Total Users (Buyers vs Sellers)</h3>
-//           <Pie data={pieChartData} />
-//         </div>
-
-//         <div className="chart-card">
-//           <h3>Buyers vs Sellers</h3>
-//           <Bar data={barChartData} />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AdminAnalytics;
-
-
-
 import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
@@ -102,6 +13,7 @@ import "./AdminAnalytics.css";
 import AdminDashboard from "./AdminDashboard";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Sparkles, TrendingUp, Users, Package, Award } from "lucide-react";
 
 ChartJS.register(
   ArcElement,
@@ -123,6 +35,8 @@ const AdminAnalytics = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeChart, setActiveChart] = useState("both");
+  const [showConfetti, setShowConfetti] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -130,62 +44,38 @@ const AdminAnalytics = () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Fetch all data in parallel
         const [
           usersResponse, 
           ordersResponse,
           revenueResponse,
-          transactionsResponse,
-          topProductsResponse,
-          topSellersResponse
         ] = await Promise.all([
-          axios.get("http://localhost:5000/api/admin/total-users", {
+          axios.get("http://localhost:3000/api/admin/total-users", {
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
           }),
-          axios.get("http://localhost:5000/api/admin/total-orders", {
+          axios.get("http://localhost:3000/api/admin/total-orders", {
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
           }),
-          axios.get("http://localhost:5000/api/admin/total-revenue", {
+          axios.get("http://localhost:3000/api/admin/total-revenue", {
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
           }),
-          // axios.get("http://localhost:5000/api/admin/total-transactions", {
-          //   withCredentials: true,
-          //   headers: {
-          //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          //   }
-          // }),
-          // axios.get("http://localhost:5000/api/admin/top-selling-products", {
-          //   withCredentials: true,
-          //   headers: {
-          //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          //   }
-          // }),
-          // axios.get("http://localhost:5000/api/admin/top-sellers", {
-          //   withCredentials: true,
-          //   headers: {
-          //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          //   }
-          // })
         ]);
 
         setAnalyticsData({
           userStats: usersResponse.data,
           orderStats: ordersResponse.data,
           revenueStats: revenueResponse.data,
-          // transactionStats: transactionsResponse.data,
-          // topProducts: topProductsResponse.data,
-          // topSellers: topSellersResponse.data.topSellers
         });
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
 
       } catch (err) {
         console.error("Error fetching analytics data:", err);
@@ -210,10 +100,11 @@ const AdminAnalytics = () => {
         data: [
           analyticsData.userStats?.find(u => u.role === 'buyer')?.count || 0,
           analyticsData.userStats?.find(u => u.role === 'seller')?.count || 0,
-          analyticsData.userStats?.find(u => u.role === 'admin')?.count || 0
+          analyticsData.userStats?.find(u => u.role === 'admin')?.count || 0 //Unsure
         ],
-        backgroundColor: ["#BDC4D4", "#D1CFC9", "#A3A8B8"],
+        backgroundColor: ["pink", "orange", "yellow"],
         borderWidth: 1,
+        hoverOffset: 20,
       },
     ],
   };
@@ -229,16 +120,73 @@ const AdminAnalytics = () => {
           analyticsData.orderStats?.find(o => o.status === 'delivered')?.count || 0,
           analyticsData.orderStats?.find(o => o.status === 'cancelled')?.count || 0
         ],
-        backgroundColor: ["#1C2E4A", "#52677D", "#7D8FA6", "#BDC4D4"],
+        backgroundColor: ["pink", "yellow", "orange", "green"],
+        borderRadius: 8,
+        borderWidth: 0,
       },
     ],
   };
+
+  const pieOptions = {
+    plugins: {
+      legend: {
+        position: 'bottom',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.raw || 0;
+            const total = context.dataset.data.reduce((acc, data) => acc + data, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
+    },
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+      duration: 2000,
+    }
+  };
+
+  const barOptions = {
+    plugins: {
+      legend: {
+        display: false
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          display: false,
+        }
+      },
+      x: {
+        grid: {
+          display: false,
+        }
+      }
+    },
+    animation: {
+      delay: (context) => context.dataIndex * 100,
+      duration: 1000,
+    }
+  };
+
+  const totalUsers = analyticsData.userStats?.reduce((sum, user) => sum + parseInt(user.count), 0) || 0;
+  const monthlyRevenue = analyticsData.revenueStats?.monthly || 0;
 
   if (loading) {
     return (
       <div className="admin-analytics-container">
         <AdminDashboard />
-        <div className="loading">Loading admin analytics...</div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Preparing your analytics...</p>
+        </div>
       </div>
     );
   }
@@ -248,74 +196,106 @@ const AdminAnalytics = () => {
       <div className="admin-analytics-container">
         <AdminDashboard />
         <div className="error-message">
-          Error: {error}
-          <button onClick={() => window.location.reload()}>Retry</button>
+          <div className="error-icon">⚠️</div>
+          <p>Oops! {error}</p>
+          <button className="retry-button" onClick={() => window.location.reload()}>
+            Let's try again!
+          </button>
         </div>
       </div>
     );
   }
 
+  const renderConfetti = () => {
+    if (!showConfetti) return null;
+    
+    const confettiElements = [];
+    for (let i = 0; i < 50; i++) {
+      const left = Math.random() * 100;
+      const animationDelay = Math.random() * 2;
+      confettiElements.push(
+        <div 
+          key={i}
+          className="confetti"
+          style={{left: `${left}%`, animationDelay: `${animationDelay}s`}}
+        />
+      );
+    }
+    
+    return confettiElements;
+  };
+
   return (
     <div className="admin-analytics-container">
-      
+      {renderConfetti()}
       <AdminDashboard />
-      <h2>Admin Analytics Dashboard</h2>
+      <br></br>
+      <div className="analytics-header">
+        <Sparkles className="header-icon" size={32} />
+        <h2>Analytics Dashboard</h2>
+      </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Users</h3>
-          <p>{analyticsData.userStats?.reduce((sum, user) => sum + parseInt(user.count), 0) || 0}</p>
+      <div className="stats-summary">
+        <div className="stat-card animated">
+          <Users size={24} />
+          <div className="stat-content">
+            <h3>Total Users</h3>
+            <p className="stat-value">{totalUsers}</p>
+          </div>
         </div>
         
-        <div className="stat-card">
-          <h3>Monthly Revenue</h3>
-          <p>${analyticsData.revenueStats?.monthly || 0}</p>
+        <div className="stat-card animated">
+          <TrendingUp size={24} />
+          <div className="stat-content">
+            <h3>Monthly Revenue</h3>
+            <p className="stat-value">${monthlyRevenue}</p>
+          </div>
         </div>
-        
-        {/* <div className="stat-card">
-          <h3>Total Rentals</h3>
-          <p>{analyticsData.transactionStats?.rentals || 0}</p>
-        </div>
-        
-        <div className="stat-card">
-          <h3>Secondhand Sales</h3>
-          <p>{analyticsData.transactionStats?.secondhandSales || 0}</p>
-        </div> */}
+      </div>
+
+      <div className="chart-controls">
+        <button 
+          className={`chart-toggle-btn ${activeChart === 'users' || activeChart === 'both' ? 'active' : ''}`} 
+          onClick={() => setActiveChart(activeChart === 'orders' ? 'both' : 'users')}
+        >
+          <Users size={16} /> User Stats
+        </button>
+        <button 
+          className={`chart-toggle-btn ${activeChart === 'orders' || activeChart === 'both' ? 'active' : ''}`} 
+          onClick={() => setActiveChart(activeChart === 'users' ? 'both' : 'orders')}
+        >
+          <Package size={16} /> Order Stats
+        </button>
       </div>
 
       <div className="chart-container">
-        <div className="chart-card">
-          <h3>User Distribution</h3>
-          <Pie data={pieChartData} />
-        </div>
+        {(activeChart === 'users' || activeChart === 'both') && (
+          <div className="chart-card animated">
+            <h3>User Distribution</h3>
+            <div className="chart-wrapper">
+              <Pie data={pieChartData} options={pieOptions} />
+            </div>
+          </div>
+        )}
 
-        <div className="chart-card">
-          <h3>Order Status</h3>
-          <Bar data={barChartData} />
-        </div>
+        {(activeChart === 'orders' || activeChart === 'both') && (
+          <div className="chart-card animated">
+            <h3>Order Status</h3>
+            <div className="chart-wrapper">
+              <Bar data={barChartData} options={barOptions} />
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="top-lists">
-        <div className="list-card">
-          <h3>Top Selling Products</h3>
-          <ul>
-            {analyticsData.topProducts?.map((product, index) => (
-              <li key={index}>
-                Product ID: {product.product_id} - Sold: {product.total_sold}
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        {/* <div className="list-card">
-          <h3>Top Sellers</h3>
-          <ul>
-            {analyticsData.topSellers?.map((sellerId, index) => (
-              <li key={index}>Seller ID: {sellerId}</li>
-            ))}
-          </ul>
-        </div> */}
-      </div>
+      {/* <div className="fun-fact-box">
+        <Award size={20} />
+        <p>
+          <span className="fun-fact-header">Fun Fact:</span> Did you know? 
+          {totalUsers > 0 ? ` You have ${totalUsers} users, which is enough to fill ${Math.floor(totalUsers/50)} school buses!` : 
+          ` The average e-commerce platform sees a 25% increase in user engagement with visual analytics!`}
+        </p>
+      </div> */}
     </div>
   );
 };

@@ -65,3 +65,4 @@ const authorizeSeller = (req, res, next) => {
 };
 
 export { isLoggedIn ,isAdmin,authorizeSeller}
+

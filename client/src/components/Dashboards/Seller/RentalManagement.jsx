@@ -26,8 +26,15 @@ function RentalManagement() {
     };
     
     return (
+        <div className="rental-body">
+            <br></br>
+            <br></br>
+            <br></br>
         <div className="rental-container">
+
             <Seller_dashboard />
+            <br></br>
+            <br></br>
             <h2>Rental Management</h2>
             
             <input
@@ -83,6 +90,7 @@ function RentalManagement() {
                     <button onClick={() => setNewAgreement(null)}>Cancel</button>
                 </div>
             )}
+        </div>
         </div>
     );
 }

@@ -69,6 +69,8 @@ let updatedProducts = {
         setNewProduct(null);
     };
     return (
+        <div className="inv-body">
+            <br></br>
         <div className="inventory-container">
             <Seller_dashboard />
             <h2>Inventory Management</h2>
@@ -162,6 +164,7 @@ let updatedProducts = {
                     <button onClick={() => (editingProduct ? setEditingProduct(null) : setNewProduct(null))}>Cancel</button>
                 </div>
             )}
+        </div>
         </div>
     );
 }
