@@ -531,6 +531,7 @@ const SignIn = () => {
         {
           email: signInData.email,
           password: signInData.password,
+
           role: signInData.role.toLowerCase()
         },
         { withCredentials: true }
