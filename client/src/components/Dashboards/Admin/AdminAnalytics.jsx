@@ -233,7 +233,7 @@ const AdminAnalytics = () => {
     <div className="admin-analytics-container">
       {renderConfetti()}
       <AdminDashboard />
-      <br></br>
+ 
       <div className="analytics-header">
         <Sparkles className="header-icon" size={32} />
         <h2>Analytics Dashboard</h2>

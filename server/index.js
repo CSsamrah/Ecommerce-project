@@ -24,6 +24,8 @@ import { setupSocketServer } from "./src/utils/socket.js";
 
 dotenv.config();
 
+
+
 const app = express();
 const server = http.createServer(app); // Change from app.listen to http.createServer
 const PORT = process.env.PORT || 5000;
@@ -33,24 +35,28 @@ pool.connect()
   .then(() => console.log('Connected to supabase!'))
   .catch(err => console.error('Database connection error:', err.message));
 
+// app.use(cors());
+
 app.use(cors({
-    origin: 'http://localhost:5173', 
-    credentials: true 
-  }));
+  origin: 'http://localhost:5173', // Your frontend origin
+  credentials: true // Allow credentials
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use("/api/users", userRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/cart", cartRoutes);
+app.get("/", (req, res) => {
+    res.send("Backend is running!");
+});
+app.use("/api/users",userRoutes);
+app.use("/api/categories",categoryRoutes);
+app.use("/api/cart", cartRoutes);
 app.use("/order", orderRoutes);
 app.use("/api/secondHand", secondHandRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/validate", validationRoutes);
 app.use("/api/rental", rentalRoutes);
-app.use("/admin", adminRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/seller", sellerRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/review", reviewRoutes);

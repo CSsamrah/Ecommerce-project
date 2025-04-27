@@ -1,5 +1,7 @@
 .admin-analytics-container {
     padding: 40px;
+    padding-top: 40px; 
+    /* padding-left: 140px;  */
     width: 90%;
     max-width: 1200px;
     background-color: transparent;
@@ -8,6 +10,9 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+    margin-left: auto; 
+    margin-right: auto;
+
 }
 
 .analytics-header {
@@ -40,12 +45,14 @@
 }
 
 .stats-summary {
+
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 30px;
     width: 100%;
     margin-bottom: 30px;
+    
 }
 
 .stat-card {
@@ -71,7 +78,7 @@
 }
 
 .stat-content {
-    text-align: left;
+    text-align: center;
 }
 
 .stat-card h3 {
@@ -92,6 +99,7 @@
     justify-content: center;
     margin-bottom: 20px;
     gap: 15px;
+    padding-left: 140px; 
 }
 
 .chart-toggle-btn {
@@ -122,12 +130,14 @@
 }
 
 .chart-container {
+    padding-left: 140px; 
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 40px;
     margin-top: 20px;
     width: 100%;
+    max-width: calc(100% - 20px); 
 }
 
 .chart-card {
@@ -205,7 +215,6 @@
     color: #FF006E;
 }
 
-/* Loading animation */
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -239,7 +248,6 @@
     50% { opacity: 0.7; }
 }
 
-/* Error message styling */
 .error-message {
     background: rgba(255, 255, 255, 0.9);
     padding: 30px;
@@ -271,7 +279,6 @@
     transform: scale(1.05);
 }
 
-/* Animation classes */
 .animated {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
@@ -292,7 +299,6 @@
     }
 }
 
-/* Confetti animation */
 .confetti {
     position: absolute;
     width: 10px;
@@ -332,7 +338,7 @@
     }
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
     .stats-summary {
         flex-direction: column;
