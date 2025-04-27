@@ -11,7 +11,7 @@ import Cards from "./components/pages/feedback"
 import "./components/pages/feedback.css"
 import SignIn from "./components/pages/signUp"
 import "./components/pages/signUp.css";
-import Catalog from "./components/pages/catalog"
+import Catalog from "./components/pages/catalog";
 import { CartProvider } from './components/pages/cartContext';
 import "./components/pages/catalog.css";
 import ProductDetail from "./components/pages/productDescription";
