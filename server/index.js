@@ -17,6 +17,7 @@ import adminRoutes from "./src/routes/adminDashboardRoutes.js";
 import sellerRoutes from "./src/routes/sellerRoutes.js";
 import buyerRoutes from "./src/routes/buyerRoutes.js";
 import pool from "./dbConnect.js";
+import paymentRoutes from "./src/routes/paymentRoutes.js";
 
 // ADD THIS: Import Socket Server Setup
 import { setupSocketServer } from "./src/utils/socket.js";
@@ -50,6 +51,7 @@ app.use("/admin", adminRoutes);
 app.use("/seller", sellerRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/review", reviewRoutes);
+app.use("/api/payfast",paymentRoutes)
 
 // SETUP SOCKET.IO SERVER
 const io = setupSocketServer(server);
