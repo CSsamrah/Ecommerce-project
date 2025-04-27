@@ -15,15 +15,13 @@ const pool = new Pool({
     ssl: {
         rejectUnauthorized: false,     
     },
-    // port: parseInt(process.env.PG_PORT, 10),   // convert to number
-    // database: process.env.PG_DATABASE,
 });
 
-pool.connect()
-  .then(() => console.log('Connected to supabase!'))
-  .catch(err => {
-    console.error('Database connection error:', err.message);
+// pool.connect()
+//   .then(() => console.log('Connected to supabase!'))
+//   .catch(err => {
+//     console.error('Database connection error:', err.message);
 
-});
+// });
 
 export default pool;
