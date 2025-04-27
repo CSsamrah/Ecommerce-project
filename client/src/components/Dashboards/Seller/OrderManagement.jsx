@@ -13,6 +13,8 @@ const OrderManagement = () => {
     const filteredOrders = selectedCategory === "all" ? orders : orders.filter(order => order.type === selectedCategory);
 
     return (
+        <div className="orderManagement-body">
+            <br></br>
         <div className="order-container">
             <Seller_dashboard />
             <h2>Order Management</h2>
@@ -61,6 +63,7 @@ const OrderManagement = () => {
                     ))}
                 </tbody>
             </table>
+        </div>
         </div>
     );
 };
