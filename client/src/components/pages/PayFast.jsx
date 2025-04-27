@@ -1,31 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 const PayFastForm = () => {
+  
+  const location = useLocation();
+
+  const { email, phone, cartId, transactionAmount, transactionDesc } = location.state || {};
+
   const [token, setToken] = useState('');
   const [signature, setSignature] = useState('');
-
   const [formData, setFormData] = useState({
     CURRENCY_CODE: 'PKR',
     MERCHANT_ID: '102',
     MERCHANT_NAME: 'PC Parts Picker',
-    BASKET_ID: 'ITEM-AZ13',
-    TXNAMT: '150',
+    BASKET_ID: '',
+    TXNAMT: '',
     ORDER_DATE: new Date().toISOString(),
     SUCCESS_URL: 'http://localhost:5173/payment/success',
     FAILURE_URL: 'http://localhost:5173/payment/failure',
     CHECKOUT_URL: 'https://merchant-site-example.com',
-    EMAIL_ADDRESS: 'some-email@example.com',
-    MOBILE_NO: '03212007013',
+    EMAIL_ADDRESS: '',
+    MOBILE_NO: '',
     VERSION: 'MERCHANT-CART-0.1',
-    TXNDESC: 'Item Purchased from Cart',
+    TXNDESC: '',
     PROCCODE: '00',
     TRAN_TYPE: 'ECOMM_PURCHASE',
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    console.log('Payment details received:', { email, phone, cartId, transactionAmount, transactionDesc });
+
+    if (!email || !phone || !cartId || !transactionAmount || !transactionDesc) {
+      setError('Error: Payment details are missing. Please try again.');
+      return;
+    }
+    setError('');
+    // Ensure that payment details from state are applied to the formData state
+    setFormData((prev) => ({
+      ...prev,
+      BASKET_ID: cartId,
+      TXNAMT: transactionAmount,
+      EMAIL_ADDRESS: email,
+      MOBILE_NO: phone,
+      TXNDESC: transactionDesc,
+    }));
+  }, [email, phone, cartId, transactionAmount, transactionDesc]);
 
   const getToken = async () => {
     const payload = {
@@ -35,7 +57,7 @@ const PayFastForm = () => {
       transAmount: formData.TXNAMT,
       currencyCode: formData.CURRENCY_CODE,
     };
-
+  
     try {
       const res = await axios.post('http://localhost:3000/api/payfast/get-token', payload);
       setToken(res.data.ACCESS_TOKEN);
@@ -43,12 +65,16 @@ const PayFastForm = () => {
       console.log('response from backend:', res.data);
     } catch (error) {
       console.error('Error:', error);
+      // Handle error state
+      setError('Error: Failed to generate token. Please try again later.');
     }
   };
 
   return (
     <div style={{ maxWidth: '700px', margin: '50px auto', padding: '30px', border: '1px solid #ddd', borderRadius: '10px', backgroundColor: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,0.1)' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Proceed to Payment</h2>
+
+      {error && <div style={{ color: 'red', textAlign: 'center', marginBottom: '20px' }}>{error}</div>}
 
       <div style={{ textAlign: 'center', marginBottom: '30px' }}>
         <button
@@ -63,27 +89,42 @@ const PayFastForm = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
           {Object.entries(formData).map(([key, value]) => (
             <div key={key} style={{ display: 'flex', flexDirection: 'column' }}>
-              <label htmlFor={key} style={{ marginBottom: '5px', fontWeight: 'bold' }}>{key.replace(/_/g, ' ')}</label>
+              <label htmlFor={key} style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                {key.replace(/_/g, ' ')}
+              </label>
               <input
                 type="text"
                 name={key}
                 id={key}
                 value={value}
-                onChange={handleChange}
                 readOnly
-                style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '5px' }}
+                style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f9f9f9' }}
               />
             </div>
           ))}
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label htmlFor="TOKEN" style={{ marginBottom: '5px', fontWeight: 'bold' }}>TOKEN</label>
-            <input type="text" name="TOKEN" id="TOKEN" value={token} readOnly style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f1f1f1' }} />
+            <input
+              type="text"
+              name="TOKEN"
+              id="TOKEN"
+              value={token}
+              readOnly
+              style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f1f1f1' }}
+            />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label htmlFor="SIGNATURE" style={{ marginBottom: '5px', fontWeight: 'bold' }}>SIGNATURE</label>
-            <input type="text" name="SIGNATURE" id="SIGNATURE" value={signature} readOnly style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f1f1f1' }} />
+            <input
+              type="text"
+              name="SIGNATURE"
+              id="SIGNATURE"
+              value={signature}
+              readOnly
+              style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f1f1f1' }}
+            />
           </div>
         </div>
 

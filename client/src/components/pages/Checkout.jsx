@@ -439,6 +439,7 @@ import Navbar from "../Navbar/navbar1";
 import { useCart } from "./cartContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { v4 as uuidv4 } from 'uuid';
 
 function Checkout() {
   const { cartItems, removeFromCart } = useCart();
@@ -478,6 +479,11 @@ function Checkout() {
 
   const deliveryFee = 50;
   const total = calculateSubtotal() + deliveryFee;
+
+  console.log("total price",total);
+  const transactionDesc = cartItems.map(item => item.title).join(', ');
+
+  console.log("Item in cart",transactionDesc)
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -541,7 +547,18 @@ function Checkout() {
     e.preventDefault();
     if (validateForm()) {
       if (paymentMethod === "payFast") {
-        navigate("/payment");
+        const cartId = uuidv4(); // simple way to generate a unique Order ID
+        
+        navigate("/payment", {
+          state: {
+            phone: formData.phone,
+            email: formData.email,
+            cartId: cartId,
+            transactionAmount: total.toFixed(2),
+            transactionDesc: transactionDesc,
+            paymentMethod: "payFast",
+          },
+        });
       } else if (paymentMethod === "cod") {
         navigate("/order-confirmation", {
           state: { paymentMethod: "cod" },
@@ -549,7 +566,7 @@ function Checkout() {
       }
     }
   };
-
+  
   const removeCartItem = (title) => {
     removeFromCart(title);
   };

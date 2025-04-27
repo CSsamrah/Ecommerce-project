@@ -374,7 +374,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-      console.log("getAllProducts function called");
+    
 
       const query = `
         SELECT 
@@ -389,10 +389,8 @@ const getAllProducts = async (req, res) => {
         LIMIT 50
       `;
       
-      console.log("Executing query:", query);
       const result = await pool.query(query);
-      console.log(`Query executed successfully. Retrieved ${result.rows.length} products`);
-
+      
       const products = result.rows.map(product => ({
         id: product.id,
         title: product.title,

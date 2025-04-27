@@ -12,12 +12,10 @@ const ProductAuthentication = ({ productId }) => {
         try {
             // Using your existing authentication endpoint
             const response = await axios.post(
-                `http://localhost:3000/api/product/authenticate/${productId}`, 
+                `http://localhost:3000/api/validate/validate-product/${productId}`, 
                 {}, 
                 { 
-                    headers: { 
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                    } 
+                    withCredentials: true 
                 }
             );
 

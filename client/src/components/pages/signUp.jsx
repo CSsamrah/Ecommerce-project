@@ -527,7 +527,7 @@ const SignIn = () => {
   
     try {
       // Login logic
-      await axios.post('http://localhost:3000/api/users/login', 
+      const response=await axios.post('http://localhost:3000/api/users/login', 
         {
           email: signInData.email,
           password: signInData.password,
@@ -535,6 +535,10 @@ const SignIn = () => {
         },
         { withCredentials: true }
       );
+      
+      localStorage.setItem("userdata",JSON.stringify(response.data.data));
+      console.log("Response 1",response.data);
+      console.log("response 2",response.data.data);
   
       // Decide where to redirect based on role
       let redirect = "/";

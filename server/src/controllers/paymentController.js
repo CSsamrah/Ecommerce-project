@@ -34,7 +34,7 @@ export const getAccessToken = async (req, res) => {
       CURRENCY_CODE: currencyCode,
     });
 
-    // ✅ Post request as x-www-form-urlencoded
+    //  Post request as x-www-form-urlencoded
     const response = await axios.post(
       'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/GetAccessToken',
       qs.stringify({
@@ -51,7 +51,6 @@ export const getAccessToken = async (req, res) => {
       }
     );
 
-    // ✅ Respond with token and signature
     res.json({
       ACCESS_TOKEN: response.data.ACCESS_TOKEN,
       SIGNATURE: signature,
