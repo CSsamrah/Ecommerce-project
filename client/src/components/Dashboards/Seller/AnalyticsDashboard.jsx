@@ -7,11 +7,20 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  Tooltip, Legend,
+  Tooltip,
+  Legend,
+  Title
 } from "chart.js";
 import { Pie, Bar, Line } from "react-chartjs-2";
-import "./AnalyticsDashboard.css"
+import axios from "axios";
+import { io } from "socket.io-client";
 import Seller_dashboard from "./Seller_dashboard";
+import "./AnalyticsDashboard.css";
+import OrdersTable from "./OrdersTable";
+import ProductRatingsTable from "./ProductRatingsTable";
+import StatCard from "./StatCard";
+
+axios.defaults.withCredentials = true;
 
 ChartJS.register(
   ArcElement,
@@ -20,140 +29,578 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
-  Tooltip, Legend
+  Tooltip,
+  Legend,
+  Title
 );
 
 const AnalyticsDashboard = () => {
-  const [soldData, setSoldData] = useState(null);
-  const [breakdownData, setBreakdownData] = useState(null);
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [topSellingProducts, setTopSellingProducts] = useState([]);
-
+  // Dashboard overview data
+  const [dashboardData, setDashboardData] = useState(null);
+  // Revenue report data
+  const [revenueData, setRevenueData] = useState([]);
+  // Top products data
+  const [topProducts, setTopProducts] = useState({
+    top_selling_products: [],
+    top_rented_products: []
+  });
+  // Ratings data
+  const [ratingsData, setRatingsData] = useState(null);
+  // Order status breakdown
+  const [orderStatusData, setOrderStatusData] = useState({
+    order_status_breakdown: {},
+    recent_orders: []
+  });
+  // Loading states
+  const [loading, setLoading] = useState({
+    dashboard: true,
+    revenue: true,
+    products: true,
+    ratings: true,
+    orders: true
+  });
+  // Time period for revenue report
+  const [period, setPeriod] = useState("month");
+  
+  // Connect to socket.io
   useEffect(() => {
-    fetchAnalyticsData();
+    const socket = io();
+    
+    // Join seller's room when user is authenticated
+    socket.on("connect", () => {
+      const sellerId = localStorage.getItem("user_id"); // Assume user_id is stored in localStorage
+      if (sellerId) {
+        socket.emit("join", `seller-${sellerId}`);
+      }
+    });
+    
+    // Listen for order status updates
+    socket.on("order-status-update", (data) => {
+      // When an order status updates, refresh the orders data
+      fetchOrderBreakdown();
+    });
+    
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
-  const fetchAnalyticsData = async () => {
-    const SoldData = {
-      new_products: 120,
-      secondhand_products: 85,
-      rental_products: 60,
-    };
+  // Fetch all initial data
+  useEffect(() => {
+    fetchDashboardData();
+    fetchRevenueReport();
+    fetchTopProducts();
+    fetchRatingSummary();
+    fetchOrderBreakdown();
+  }, []);
 
-    const BreakdownData = {
-      newProducts: [
-        { name: "Laptop", items_sold: 40, items_left: 10 },
-        { name: "Headphones", items_sold: 30, items_left: 5 },
-        { name: "Monitor", items_sold: 50, items_left: 15 },
-      ],
-      secondhandProducts: [
-        { name: "Used Phone", items_sold: 20, items_left: 3 },
-      ],
-    };
-
-    const MonthlyData = [
-      { month: "2024-01-01", product_sales: 5000, rental_income: 1500 },
-      { month: "2024-02-01", product_sales: 4500, rental_income: 1800 },
-      { month: "2024-03-01", product_sales: 6000, rental_income: 2000 },
-    ];
-
-    const TopSellingProducts = [
-      { name: "Laptop", items_sold: 40 },
-      { name: "Headphones", items_sold: 30 },
-      { name: "Monitor", items_sold: 50 },
-      { name: "Used Phone", items_sold: 20 },
-    ];
-
-    setSoldData(SoldData);
-    setBreakdownData(BreakdownData);
-    setMonthlyData(MonthlyData);
-    setTopSellingProducts(TopSellingProducts);
+  // Fetch dashboard overview data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(prev => ({ ...prev, dashboard: true }));
+      const response = await axios.get("http://localhost:3000/seller/dashboard-overview");
+      setDashboardData(response.data.data);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, dashboard: false }));
+    }
   };
-  const totalRevenueCurrentMonth = {
-    labels: monthlyData.map((m) =>
-      new Date(m.month).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
-    ),
+
+  // Fetch revenue report data
+  const fetchRevenueReport = async (startDate, endDate) => {
+    try {
+      setLoading(prev => ({ ...prev, revenue: true }));
+      
+      let url = "http://localhost:3000/seller/revenue-report";
+      
+      if (startDate && endDate) {
+        url += `?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+      } else {
+        // Default to last 30 days
+        const end = new Date();
+        const start = new Date();
+        
+        if (period === "week") {
+          start.setDate(end.getDate() - 7);
+        } else if (period === "month") {
+          start.setDate(end.getDate() - 30);
+        } else if (period === "year") {
+          start.setFullYear(end.getFullYear() - 1);
+        }
+        
+        url += `?startDate=${start.toISOString()}&endDate=${end.toISOString()}`;
+      }
+      
+      const response = await axios.get(url);
+      setRevenueData(response.data.data.revenue_report);
+    } catch (error) {
+      console.error("Error fetching revenue data:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, revenue: false }));
+    }
+  };
+
+  // Fetch top products data
+  const fetchTopProducts = async () => {
+    try {
+      setLoading(prev => ({ ...prev, products: true }));
+      const response = await axios.get("http://localhost:3000/seller/top-products");
+      setTopProducts(response.data.data);
+    } catch (error) {
+      console.error("Error fetching top products:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, products: false }));
+    }
+  };
+
+  // Fetch ratings summary
+  const fetchRatingSummary = async () => {
+    try {
+      setLoading(prev => ({ ...prev, ratings: true }));
+      const response = await axios.get("http://localhost:3000/seller/rating-summary");
+      setRatingsData(response.data.data);
+    } catch (error) {
+      console.error("Error fetching ratings summary:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, ratings: false }));
+    }
+  };
+
+  // Fetch order breakdown
+  const fetchOrderBreakdown = async () => {
+    try {
+      setLoading(prev => ({ ...prev, orders: true }));
+      const response = await axios.get("http://localhost:3000/seller/order-status");
+      setOrderStatusData(response.data.data);
+    } catch (error) {
+      console.error("Error fetching order breakdown:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, orders: false }));
+    }
+  };
+
+  // Handle period change
+  const handlePeriodChange = (newPeriod) => {
+    setPeriod(newPeriod);
+    
+    const end = new Date();
+    const start = new Date();
+    
+    if (newPeriod === "week") {
+      start.setDate(end.getDate() - 7);
+    } else if (newPeriod === "month") {
+      start.setDate(end.getDate() - 30);
+    } else if (newPeriod === "year") {
+      start.setFullYear(end.getFullYear() - 1);
+    }
+    
+    fetchRevenueReport(start, end);
+  };
+
+  // Prepare revenue chart data
+  const revenueChartData = {
+    labels: revenueData.map(item => new Date(item.date).toLocaleDateString()),
     datasets: [
       {
-        label: "Product Sales",
-        data: monthlyData.map((m) => m.product_sales),
+        label: "Sales Revenue",
+        data: revenueData.map(item => item.sales_revenue),
         borderColor: "#1C2E4A",
-        backgroundColor: "rgba(103, 58, 183, 0.2)",
+        backgroundColor: "rgba(24, 68, 140, 0.2)",
         fill: true,
-        tension: 0.3,
+        tension: 0.3
       },
       {
-        label: "Rental Income",
-        data: monthlyData.map((m) => m.rental_income),
-        borderColor: "GREEN",
-        backgroundColor: "rgba(34, 255, 100, 0.2)",
+        label: "Rental Revenue",
+        data: revenueData.map(item => item.rental_revenue),
+        borderColor: "#52B788",
+        backgroundColor: "rgba(82, 183, 136, 0.2)",
+        fill: true,
+        tension: 0.3
+      },
+      {
+        label: "Total Revenue",
+        data: revenueData.map(item => item.total_revenue),
+        borderColor: "#6C63FF",
+        backgroundColor: "rgba(136, 28, 146, 0.1)",
         fill: true,
         tension: 0.3,
-      },
-    ],
+        borderDash: [5, 5]
+      }
+    ]
   };
 
-  const pieChartData = {
+  // Prepare sales breakdown pie chart data
+  const salesBreakdownData = {
     labels: ["New Products", "Second-Hand", "Rental"],
     datasets: [
       {
-        label: "Products Sold",
-        data: [
-          soldData?.new_products || 0,
-          soldData?.secondhand_products || 0,
-          soldData?.rental_products || 0,
-        ],
-        backgroundColor: ["#BDC4D4", "#D1CFC9", "#52677D"],
-        borderWidth: 1,
-      },
-    ],
+        label: "Revenue Source",
+        data: dashboardData ? [
+          dashboardData.total_sales - (dashboardData.rental_metrics?.total_rental_revenue || 0),
+          0, // We don't have second-hand data in the API
+          dashboardData.rental_metrics?.total_rental_revenue || 0
+        ] : [0, 0, 0],
+        backgroundColor: ["#475569", "#94A3B8", "#64748B"],
+        borderWidth: 1
+      }
+    ]
   };
 
+  // Prepare top selling products chart data
   const topSellingData = {
-    labels: topSellingProducts.map((product) => product.name),
+    labels: topProducts.top_selling_products.slice(0, 5).map(p => p.name),
     datasets: [
       {
-        label: "Items Sold",
-        data: topSellingProducts.map((product) => product.items_sold),
-        backgroundColor: "#0F1A2B",
-      },
-    ],
+        label: "Total Revenue",
+        data: topProducts.top_selling_products.slice(0, 5).map(p => p.total_revenue),
+        backgroundColor: "#1E40AF"
+      }
+    ]
   };
 
-  if (!soldData || !breakdownData || monthlyData.length === 0 || topSellingProducts.length === 0) {
-    return <div>Loading seller analytics...</div>;
+  // Prepare top rented products chart data
+  const topRentedData = {
+    labels: topProducts.top_rented_products.slice(0, 5).map(p => p.name),
+    datasets: [
+      {
+        label: "Rental Revenue",
+        data: topProducts.top_rented_products.slice(0, 5).map(p => p.rental_revenue),
+        backgroundColor: "#047857"
+      }
+    ]
+  };
+
+  // Prepare order status chart data
+  const orderStatusChartData = {
+    labels: orderStatusData.order_status_breakdown ? Object.keys(orderStatusData.order_status_breakdown) : [],
+    datasets: [
+      {
+        label: "Order Count",
+        data: orderStatusData.order_status_breakdown ? Object.values(orderStatusData.order_status_breakdown) : [],
+        backgroundColor: ["#22C55E", "#FACC15", "#3B82F6", "#F97316", "#EF4444"]
+      }
+    ]
+  };
+
+  // Prepare rating distribution chart data
+  const ratingDistribution = ratingsData?.overall_rating?.rating_breakdown;
+  const ratingChartData = {
+    labels: ["5 Stars", "4 Stars", "3 Stars", "2 Stars", "1 Star"],
+    datasets: [
+      {
+        label: "Rating Distribution",
+        data: ratingDistribution ? [
+          ratingDistribution.five_star.count,
+          ratingDistribution.four_star.count,
+          ratingDistribution.three_star.count,
+          ratingDistribution.two_star.count,
+          ratingDistribution.one_star.count
+        ] : [0, 0, 0, 0, 0],
+        backgroundColor: ["#22C55E", "#86EFAC", "#FDE68A", "#FBBF24", "#F87171"]
+      }
+    ]
+  };
+
+  if (loading.dashboard || loading.revenue || loading.products || loading.ratings || loading.orders) {
+    return <div className="analytics-body">Loading seller analytics...</div>;
   }
 
   return (
     <div className="analytics-body">
-      <br></br>
-    <div className="analytics-container">
-      <Seller_dashboard />
-      <h2>Seller Analytics Dashboard</h2>
+      <div className="analytics-container">
+        <Seller_dashboard />
+        <h2 className="dashboard-title">Seller Analytics Dashboard</h2>
 
-      <div className="chart-section">
-        <div className="chart-card">
-          <h3>Total Revenue of Current Month</h3>
-          <Line data={totalRevenueCurrentMonth} />
+        {/* Stats Overview Section */}
+        <div className="stats-section">
+          <StatCard 
+            title="Total Orders" 
+            value={dashboardData.total_orders} 
+            icon="📦" 
+          />
+          <StatCard 
+            title="Total Sales" 
+            value={`$${dashboardData.total_sales.toFixed(2)}`} 
+            icon="💰" 
+          />
+          <StatCard 
+            title="Products Sold" 
+            value={dashboardData.total_products_sold} 
+            icon="🛒" 
+          />
+          <StatCard 
+            title="Total Rentals" 
+            value={dashboardData.rental_metrics.total_rentals} 
+            icon="🔄" 
+          />
         </div>
-        <div className="chart-card">
-          <h3>Total Sales Breakdown</h3>
-          <Pie data={pieChartData} />
+
+        
+
+        {/* Charts Grid - First Row */}
+        <div className="charts-grid">
+        <div className="chart-card full-width">
+          <div className="chart-header">
+            <h3>Revenue Overview</h3>
+            <div className="period-selector">
+              <button 
+                className={period === "week" ? "active" : ""} 
+                onClick={() => handlePeriodChange("week")}
+              >
+                Week
+              </button>
+              <button 
+                className={period === "month" ? "active" : ""} 
+                onClick={() => handlePeriodChange("month")}
+              >
+                Month
+              </button>
+              <button 
+                className={period === "year" ? "active" : ""} 
+                onClick={() => handlePeriodChange("year")}
+              >
+                Year
+              </button>
+            </div>
+          </div>
+          <Line 
+            data={revenueChartData} 
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                title: {
+                  display: true,
+                  text: 'Revenue Over Time'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.dataset.label || '';
+                      if (label) {
+                        label += ': ';
+                      }
+                      if (context.parsed.y !== null) {
+                        label += new Intl.NumberFormat('en-US', { 
+                          style: 'currency', 
+                          currency: 'USD' 
+                        }).format(context.parsed.y);
+                      }
+                      return label;
+                    }
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return '$' + value;
+                    }
+                  }
+                }
+              }
+            }}
+          />
         </div>
-        <div className="chart-card">
-          <h3>Top Selling Products</h3>
-          <Bar data={topSellingData} />
+          <div className="chart-card">
+            <h3>Revenue Sources</h3>
+            <Pie 
+              data={salesBreakdownData} 
+              options={{
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        let label = context.label || '';
+                        label += ': ';
+                        if (context.parsed !== null) {
+                          label += new Intl.NumberFormat('en-US', { 
+                            style: 'currency', 
+                            currency: 'USD' 
+                          }).format(context.parsed);
+                        }
+                        return label;
+                      }
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+          
+          <div className="chart-card">
+            <h3>Top Selling Products</h3>
+            <Bar 
+              data={topSellingData}
+              options={{
+                indexAxis: 'y',
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        let label = context.dataset.label || '';
+                        label += ': ';
+                        if (context.parsed.x !== null) {
+                          label += new Intl.NumberFormat('en-US', { 
+                            style: 'currency', 
+                            currency: 'USD' 
+                          }).format(context.parsed.x);
+                        }
+                        return label;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function(value) {
+                        return '$' + value;
+                      }
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+          
+          <div className="chart-card">
+            <h3>Top Rental Products</h3>
+            <Bar 
+              data={topRentedData}
+              options={{
+                indexAxis: 'y',
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        let label = context.dataset.label || '';
+                        label += ': ';
+                        if (context.parsed.x !== null) {
+                          label += new Intl.NumberFormat('en-US', { 
+                            style: 'currency', 
+                            currency: 'USD' 
+                          }).format(context.parsed.x);
+                        }
+                        return label;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function(value) {
+                        return '$' + value;
+                      }
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
         </div>
+
+        {/* Charts Grid - Second Row */}
+        <div className="charts-grid">
+          <div className="chart-card">
+            <h3>Order Status</h3>
+            <Pie 
+              data={orderStatusChartData}
+              options={{
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                  }
+                }
+              }}
+            />
+          </div>
+          
+          <div className="chart-card">
+            <h3>Rating Distribution</h3>
+            <Bar 
+              data={ratingChartData}
+              options={{
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }}
+            />
+          </div>
+          
+          <div className="chart-card rating-summary">
+            <h3>Rating Summary</h3>
+            <div className="rating-content">
+              <div className="rating-score">
+                <span className="rating-number">{ratingsData?.overall_rating?.average?.toFixed(1) || "0.0"}</span>
+                <div className="rating-stars">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <span key={star} className={`star ${star <= Math.round(ratingsData?.overall_rating?.average) ? "filled" : ""}`}>★</span>
+                  ))}
+                </div>
+                <div className="review-count">Based on {ratingsData?.overall_rating?.total_reviews || 0} reviews</div>
+              </div>
+              <div className="rating-bars">
+                {ratingDistribution && [5, 4, 3, 2, 1].map(star => (
+                  <div key={star} className="rating-bar-item">
+                    <span>{star} Stars</span>
+                    <div className="rating-bar-container">
+                      <div 
+                        className="rating-bar" 
+                        style={{ width: `${ratingDistribution[`${star === 5 ? 'five' : star === 4 ? 'four' : star === 3 ? 'three' : star === 2 ? 'two' : 'one'}_star`].percentage}%` }}
+                      ></div>
+                    </div>
+                    <span>{ratingDistribution[`${star === 5 ? 'five' : star === 4 ? 'four' : star === 3 ? 'three' : star === 2 ? 'two' : 'one'}_star`].percentage}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Recent Orders Table
+        <div className="table-section">
+          <h3>Recent Orders</h3>
+          <OrdersTable 
+            orders={orderStatusData.recent_orders} 
+            onStatusUpdate={fetchOrderBreakdown}
+          />
+        </div> */}
+        
+        {/* Product Ratings Table */}
+        {/* <div className="table-section">
+          <h3>Product Ratings</h3>
+          <ProductRatingsTable 
+            products={ratingsData?.product_ratings || []} 
+          />
+        </div> */}
       </div>
-    </div>
     </div>
   );
 };
 
 export default AnalyticsDashboard;
-
-
-
