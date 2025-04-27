@@ -1,215 +1,3 @@
-// import React, {useEffect, useState} from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import { IonIcon } from '@ionic/react';
-// import { heartOutline, heart, cartOutline, arrowBackOutline } from 'ionicons/icons';
-// import "./productDescription.css"; // Add styling if needed
-// import Rating from "./rating"; // Import the rating component
-// import ProductAuthentication from "./productAuthentication";  // Import the product authentication component
-
-// // Import images (same as Catalog.jsx)
-// import image1 from "../images/chip.png";
-// import image2 from "../images/gaming.png";
-// import image3 from "../images/intelcorei7.png";
-// import image4 from "../images/keyboard.png";
-
-// //Product Details
-// const products = [
-//   { id: "p1", title: "GlossyBox Skincare: Deep Cleansing Cream", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "1500", image: image1 },
-//   { id: "p2", title: "Glow Recipe: Blueberry Bounce Gentle Cleanser", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "2200", image: image2 },
-//   { id: "p3", title: "Anua: Heartleaf Pore Control Cleansing Oil", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "2800", image: image3 },
-//   { id: "p4", title: "COSRX: Oil-Free Ultra-Moisturizing Lotion (with Birch Sap)", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "1800", image: image4 },
-//   { id: "p5", title: "Summer Fridays: Cloud Dew Oil-Free Gel Cream", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "3000", image: image4 },
-//   { id: "p6", title: "Summer Fridays: Rich Cushion Cream, Ultra-Plumping", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "3500", image: image3 },
-//   { id: "p7", title: "Glow Recipe: Watermelon Glow Pink Juice Moisturizer", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "2800", image: image2 },
-//   { id: "p8", title: "Glow Recipe: Watermelon Glow Niacinamide Dew Drops", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation. Perfect for gamers, creators, and professionals, the XYZ-500 offers exceptional speed and efficiency.", price: "3500", image: image1 },
-// ];
-
-// //Review Details
-// // const reviews = [
-// //   { username: "John Doe", email: "john@example.com", rating: 5, content: "Amazing product!" },
-// //   { username: "Jane Smith", email: "jane@example.com", rating: 4, content: "Pretty good, but could be better." },
-// //   { username: "Mike Ross", email: "mike@example.com", rating: 3, content: "" },
-// // ];
-
-// const ProductDetail = () => {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-//   const product = products.find((item) => item.id === id);
-
-//   if (!product) {
-//     return <h2>Product not found</h2>;
-//   }
-
-
-//   const [isWishlisted, setIsWishlisted] = useState(false);
-//   const [isInCart, setIsInCart] = useState(false);
-
-//   const handleWishlist = () => {
-//     setIsWishlisted(!isWishlisted);
-//   };
-
-//   const handleAddToCart = () => {
-//     if (isInCart) {
-//       alert("Already in cart!");
-//     } else {
-//       setIsInCart(true);
-//       alert("Added to cart!");
-//     }
-//   };
-
-// // Helper function to generate star icons
-// const renderStars = (rating) => {
-//     return [...Array(5)].map((_, i) => (
-//         <span key={i} style={{ color: i < rating ? "#FFD700" : "#ccc", fontSize: "23px" }}>★</span>
-//     ));
-// };
-// //Rating
-//     const [reviews, setReviews] = useState([]);
-
-//     const addReview = (newReview) => {
-//         const isReviewed = reviews.some(review => review.email === newReview.email);
-//         if (isReviewed) {
-//             alert("Product already reviewed!");
-//             return;
-//         }
-//         setReviews([...reviews, newReview]);
-//     };
-
-//   // Add reviews to the database ---------------->
-//     // const addReview = async (newReview) => {
-//     //   try {
-//     //     // Send review to the backend to be stored in the database
-//     //     await axios.post(`/api/reviews/${id}`, newReview);
-        
-//     //     // After submitting, fetch the updated reviews
-//     //     const response = await axios.get(`/api/reviews/${id}`);
-//     //     const updatedReviews = response.data;
-        
-//     //     setReviews(updatedReviews);
-    
-//     //     // Recalculate the average rating
-//     //     const totalRating = updatedReviews.reduce((acc, review) => acc + review.rating, 0);
-//     //     const avgRating = totalRating / updatedReviews.length;
-//     //     setAverageRating(avgRating);
-    
-//     //     alert("Review added successfully!");
-//     //   } catch (error) {
-//     //     console.error("Error submitting review:", error);
-//     //   }
-//     // };
-    
-
-// //Average Rating
-//     const [averageRating, setAverageRating] = useState(0);
-
-//     // Recalculate the average rating whenever the reviews change
-//   useEffect(() => {
-//     if (reviews.length) {
-//       const avgRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
-//       setAverageRating(avgRating);
-//     }
-//   }, [reviews]);
-
-//   useEffect(() => {
-//     if (product) {
-//       localStorage.setItem(`rating_${product.id}`, JSON.stringify(averageRating)); // Store rating
-//     }
-//   }, [averageRating, product]);
-
-//   // Fetch reviews from the database on page load ----->
-//   // useEffect(() => {
-//   //   const fetchReviews = async () => {
-//   //     try {
-//   //       // Assuming the API returns a list of reviews for the specific product
-//   //       const response = await axios.get(`/api/reviews/${id}`);
-//   //       const fetchedReviews = response.data; // Reviews returned from the API
-
-//   //       setReviews(fetchedReviews);
-
-//   //       // Calculate the average rating based on fetched reviews
-//   //       if (fetchedReviews.length > 0) {
-//   //         const totalRating = fetchedReviews.reduce((acc, review) => acc + review.rating, 0);
-//   //         const avgRating = totalRating / fetchedReviews.length;
-//   //         setAverageRating(avgRating);
-//   //       }
-//   //     } catch (error) {
-//   //       console.error("Error fetching reviews:", error);
-//   //     }
-//   //   };
-
-//   //   fetchReviews();
-//   // }, [id]); // Fetch reviews when the product ID changes
-
-
-
-//   return (
-//     <div className="product_detail_page">
-//     <div className="product-detail">
-//       <div className="product-container">
-//         <div className="back-button" onClick={() => navigate("/catalog")}><IonIcon icon={arrowBackOutline} /></div>
-//         <img src={product.image} alt={product.title} className="product-image" />
-//         <div className="product-info">
-//           {/* <div className="wishlist-button" onClick={handleWishlist}><IonIcon icon={isWishlisted ? heart : heartOutline} /></div> */}
-//           <h2>{product.title}</h2>
-//           <p className="about-product">{product.description}</p>
-//           {/* Display Average Rating */}
-//           <div className="average-rating">
-//             <div>{renderStars(Math.round(averageRating))} ({averageRating.toFixed(1)})</div>
-//           </div>
-//           <h3 className="product-price">Rs. {product.price}</h3>
-//           <div className="product_detail_buttons">
-//             <button className="cart-button" onClick={handleAddToCart}>Add To Cart<IonIcon icon={cartOutline} /></button>
-//             <div className="authentication_button">
-//               <ProductAuthentication productId={product.id} />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//       </div>
-
-//       {/* Review Section */}
-//       <div className="review_container">
-//         <div className="review_heading">
-//           <span>Customer Reviews</span>
-//           <h1>Client Says</h1>
-//         </div>
-
-//         {/* Rating Form */}
-//         <Rating addReview={addReview} />
-
-//         <div className="review_box_container">
-//             {/* Display Individual Reviews */}
-//             {reviews.length ? (
-//             reviews.map((review, index) => (
-//               <div key={index} className="review_box">
-//                 <div className="box_top">
-//                   <div className="user_name">
-//                     <h4>{review.username}</h4>
-//                     <span>{review.email}</span>
-//                   </div>
-//                   <div className="reviewed_stars">{renderStars(review.rating)}</div>
-//                 </div>
-//                 <div className="box_body">
-//                   {review.content && <p>"{review.content}"</p>}
-//                 </div>
-//               </div>
-//                 ))
-//               ) : (
-//                   <p>No reviews yet.</p>
-//               )}     
-//         </div>
-
-        
-        
-//         </div>
-//     </div>
-//   );
-// };
-
-// export default ProductDetail;
-
-
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { IonIcon } from '@ionic/react';
@@ -218,11 +6,12 @@ import axios from 'axios';
 import "./productDescription.css";
 import Rating from "./Rating";
 import ProductAuthentication from "./ProductAuthentication";
-
+import { useCart } from "./cartContext";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -232,52 +21,72 @@ const ProductDetail = () => {
   const [isInCart, setIsInCart] = useState(false);
 
 
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProductData = async () => {
       try {
         setLoading(true);
         
-        try {
-          const allProductsRes = await axios.get('http://localhost:3000/api/products/getAllProducts');
-          const foundProduct = allProductsRes.data.data.find(p => p.id === parseInt(id) || p.id === id);
-          
-          if (foundProduct) {
-            setProduct(foundProduct);
-          } else {
+        // Try to get from getAllProducts first
+        const allProductsRes = await axios.get('http://localhost:3000/api/products/getAllProducts');
+        const foundProduct = allProductsRes.data.data.find(p => 
+          p.id === parseInt(id) || p.id === id || p.product_id === parseInt(id)
+        );
+        
+        if (foundProduct) {
+          setProduct(formatProductData(foundProduct));
+        } else {
+          // Fallback to getProduct if available
+          try {
             const token = localStorage.getItem('token');
-            if (token) {
-              const productRes = await axios.get(
-                `http://localhost:3000/api/products/getProduct/${id}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              setProduct(productRes.data.data);
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const response = await axios.get(`http://localhost:3000/api/products/getProduct/${id}`);
+              { headers }
+            );
+            setProduct(formatProductData(productRes.data.data));
+          } catch (apiErr) {
+            // Final fallback to localStorage cache
+            const cachedProducts = JSON.parse(localStorage.getItem('cachedProducts') || '[]');
+            const cachedProduct = cachedProducts.find(p => 
+              p.id === parseInt(id) || p.id === id || p.product_id === parseInt(id)
+            );
+            
+            if (cachedProduct) {
+              setProduct(formatProductData(cachedProduct));
             } else {
-              throw new Error("Product not found");
+              throw new Error("Product not found in any available source");
             }
-          }
-        } catch (apiErr) {
-          const cachedProducts = JSON.parse(localStorage.getItem('cachedProducts') || '[]');
-          const cachedProduct = cachedProducts.find(p => p.id === parseInt(id) || p.id === id);
-          
-          if (cachedProduct) {
-            setProduct(cachedProduct);
-          } else {
-            throw new Error("Failed to load product data");
           }
         }
         
+        // Load reviews from localStorage
         const storedReviews = JSON.parse(localStorage.getItem(`reviews_${id}`)) || [];
         setReviews(storedReviews);
         
       } catch (err) {
-        setError("Unable to load product details. Please try again later.");
+        setError(err.message || "Unable to load product details. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchProductData();
   }, [id]);
+
+  const formatProductData = (product) => {
+    return {
+      id: product.id || product.product_id || product._id,
+      name: product.name || product.title || product.productName,
+      description: product.description || product.desc || product.productDescription || "No description available",
+      price: product.price || product.productPrice || 0,
+      originalPrice: product.originalPrice || product.original_price || product.oldPrice || null,
+      stock_quantity: product.stock_quantity || product.stock || product.quantity || product.inventory || 0,
+      product_image: product.product_image || product.image || product.imgUrl || product.thumbnail || '/images/product-placeholder.jpg',
+      product_features: Array.isArray(product.product_features) 
+        ? product.product_features 
+        : (product.features ? JSON.parse(product.features) : [])
+    };
+  };
 
   useEffect(() => {
     if (reviews.length > 0) {
@@ -289,25 +98,35 @@ const ProductDetail = () => {
   const handleWishlist = () => {
     if (!localStorage.getItem('token')) {
       alert("Please log in to add items to your wishlist");
+      navigate('/login');
       return;
     }
     setIsWishlisted(!isWishlisted);
   };
 
   const handleAddToCart = () => {
+    if (!product) return;
+    
     if (!localStorage.getItem('token')) {
       alert("Please log in to add items to your cart");
+      navigate('/login');
       return;
     }
+
+    const cartItem = {
+      title: product.name,
+      price: product.price,
+      image: product.product_image || '/images/product-placeholder.jpg',
+      quantity: 1
+    };
+
+    const added = addToCart(cartItem);
+    setIsInCart(added !== false);
     
-    if (product) {
-      addToCart({
-        id: product.id,
-        title: product.name,
-        price: product.price,
-        image: product.product_image || '/images/product-placeholder.jpg',
-        quantity: 1
-      });
+    if (added === false) {
+      alert("This item is already in your cart!");
+    } else {
+      alert(`${product.name} added to cart!`);
     }
   };
 
@@ -369,17 +188,17 @@ const ProductDetail = () => {
       <div className="product-content">
         <div className="product-gallery">
           <div className="main-image">
-          <img 
-  src={product.image || product.product_image || '/images/product-placeholder.jpg'} 
-  alt={product.name}
-  onError={(e) => e.target.src = '/images/product-placeholder.jpg'}
-/>
+            <img 
+              src={product.product_image || '/images/product-placeholder.jpg'} 
+              alt={product.name}
+              onError={(e) => e.target.src = '/images/product-placeholder.jpg'}
+            />
           </div>
         </div>
 
         <div className="product-info">
           <div className="price-section">
-            <span className="current-price">Rs. {product.price.toLocaleString()}</span>
+            <span className="current-price">Rs. {product.price?.toLocaleString()}</span>
             {product.originalPrice && (
               <span className="original-price">Rs. {product.originalPrice.toLocaleString()}</span>
             )}
@@ -401,7 +220,7 @@ const ProductDetail = () => {
 
           <div className="product-description">
             <h3>Description</h3>
-            <p>{product.description}</p>
+            <p>{product.description || "No description available"}</p>
           </div>
 
           {product.product_features?.length > 0 && (
@@ -419,9 +238,10 @@ const ProductDetail = () => {
             <button 
               className={`btn-cart ${isInCart ? 'in-cart' : ''}`}
               onClick={handleAddToCart}
+              disabled={product.stock_quantity <= 0}
             >
               <IonIcon icon={cartOutline} />
-              {isInCart ? 'Added to Cart' : 'Add to Cart'}
+              {product.stock_quantity <= 0 ? 'Out of Stock' : isInCart ? 'Added to Cart' : 'Add to Cart'}
             </button>
             <button 
               className={`btn-wishlist ${isWishlisted ? 'active' : ''}`}
@@ -474,3 +294,353 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+
+
+// import React, { useEffect, useState, useContext } from "react";
+// import { useParams, useNavigate } from "react-router-dom";
+// import { IonIcon } from '@ionic/react';
+// import { heartOutline, heart, cartOutline, arrowBackOutline } from 'ionicons/icons';
+// import axios from 'axios';
+// import "./productDescription.css";
+// import Rating from "./Rating";
+// import ProductAuthentication from "./ProductAuthentication";
+// import CartContext from './cartContext'
+
+// const ProductDetail = () => {
+//   const { id } = useParams();
+//   const navigate = useNavigate();
+//   const { addToCart } = useContext(CartContext);
+//   const [product, setProduct] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [reviews, setReviews] = useState([]);
+//   const [averageRating, setAverageRating] = useState(0);
+//   const [isWishlisted, setIsWishlisted] = useState(false);
+//   const [isInCart, setIsInCart] = useState(false);
+//   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await axios.get(`http://localhost:3000/api/products/getProduct/${id}`);
+        
+//         if (response.data && response.data.data) {
+//           setProduct({
+//             ...response.data.data,
+//             id: response.data.data.product_id,
+//             name: response.data.data.title || response.data.data.name,
+//             price: response.data.data.price,
+//             description: response.data.data.description,
+//             stock_quantity: response.data.data.stock_quantity,
+//             condition: response.data.data.condition,
+//             product_image: response.data.data.image || response.data.data.product_image,
+//             product_features: Array.isArray(response.data.data.product_features) 
+//               ? response.data.data.product_features 
+//               : JSON.parse(response.data.data.product_features || '[]'),
+//             category_name: response.data.data.category_name,
+//             added_by: response.data.data.product_added_by
+//           });
+
+//           // Check if product is in cart
+//           if (localStorage.getItem('token')) {
+//             const cartResponse = await axios.get('http://localhost:3000/api/cart', {
+//               headers: {
+//                 Authorization: `Bearer ${localStorage.getItem('token')}`
+//               }
+//             });
+//             const inCart = cartResponse.data.data.some(item => item.product_id === response.data.data.product_id);
+//             setIsInCart(inCart);
+//           }
+//         } else {
+//           throw new Error("Product not found");
+//         }
+
+//         const storedReviews = JSON.parse(localStorage.getItem(`reviews_${id}`)) || [];
+//         setReviews(storedReviews);
+        
+//       } catch (err) {
+//         setError(err.response?.data?.message || "Unable to load product details. Please try again later.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchData();
+//   }, [id]);
+
+//   useEffect(() => {
+//     if (reviews.length > 0) {
+//       const avg = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+//       setAverageRating(avg);
+//     }
+//   }, [reviews]);
+
+//   const handleWishlist = async () => {
+//     if (!localStorage.getItem('token')) {
+//       alert("Please log in to add items to your wishlist");
+//       navigate('/login');
+//       return;
+//     }
+
+//     try {
+//       if (isWishlisted) {
+//         await axios.delete(`http://localhost:3000/api/wishlist/${product.id}`, {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem('token')}`
+//           }
+//         });
+//       } else {
+//         await axios.post('http://localhost:3000/api/wishlist', {
+//           product_id: product.id
+//         }, {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem('token')}`
+//           }
+//         });
+//       }
+//       setIsWishlisted(!isWishlisted);
+//     } catch (error) {
+//       console.error("Wishlist error:", error);
+//       alert(error.response?.data?.message || "Failed to update wishlist");
+//     }
+//   };
+
+//   const handleAddToCart = async () => {
+//     if (!localStorage.getItem('token')) {
+//       alert("Please log in to add items to your cart");
+//       navigate('/login');
+//       return;
+//     }
+    
+//     if (!product || isAddingToCart) return;
+
+//     setIsAddingToCart(true);
+//     try {
+//       await addToCart({
+//         id: product.id,
+//         title: product.name,
+//         price: product.price,
+//         image: product.product_image,
+//         quantity: 1
+//       });
+//       setIsInCart(true);
+//     } catch (error) {
+//       console.error("Add to cart error:", error);
+//       alert(error.response?.data?.message || "Failed to add to cart");
+//     } finally {
+//       setIsAddingToCart(false);
+//     }
+//   };
+
+//   const addReview = (newReview) => {
+//     if (!localStorage.getItem('token')) {
+//       alert("Please log in to leave a review");
+//       return;
+//     }
+//     const updatedReviews = [...reviews, newReview];
+//     setReviews(updatedReviews);
+//     localStorage.setItem(`reviews_${id}`, JSON.stringify(updatedReviews));
+//   };
+
+//   const renderStars = (rating) => {
+//     const numericRating = Math.round(parseFloat(rating));
+//     return [...Array(5)].map((_, i) => (
+//       <span key={i} className={`star ${i < numericRating ? 'filled' : ''}`}>
+//         {i < numericRating ? '★' : '☆'}
+//       </span>
+//     ));
+//   };
+
+//   if (loading) return (
+//     <div className="loading-state">
+//       <div className="spinner">
+//         <div className="spinner-inner"></div>
+//       </div>
+//       <p className="loading-text">Loading product details...</p>
+//     </div>
+//   );
+
+//   if (error) return (
+//     <div className="error-state">
+//       <div className="error-icon">⚠️</div>
+//       <h3 className="error-title">Oops!</h3>
+//       <p className="error-message">{error}</p>
+//       <button onClick={() => navigate(-1)} className="btn-primary back-button">
+//         <IonIcon icon={arrowBackOutline} className="button-icon" />
+//         Back to Products
+//       </button>
+//     </div>
+//   );
+
+//   if (!product) return (
+//     <div className="not-found">
+//       <div className="not-found-illustration">
+//         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+//           <path d="M12 2L3 7l9 5 9-5-9-5zM3 7l9 5 9-5M3 7v10l9 5 9-5V7" />
+//           <path d="M12 22l9-5-9-5-9 5 9 5z" />
+//         </svg>
+//       </div>
+//       <h2 className="not-found-title">Product Not Found</h2>
+//       <p className="not-found-message">We couldn't find the product you're looking for.</p>
+//       <button onClick={() => navigate('/')} className="btn-primary browse-button">
+//         Browse Products
+//       </button>
+//     </div>
+//   );
+
+//   return (
+//     <div className="product-detail-container">
+//       <div className="product-header">
+//         <button onClick={() => navigate(-1)} className="btn-back">
+//           <IonIcon icon={arrowBackOutline} className="back-icon" />
+//           <span className="back-text">Back</span>
+//         </button>
+//         <h1 className="product-title">{product.name}</h1>
+//         <div className="product-category">
+//           <span className="category-badge">{product.category_name}</span>
+//           {product.added_by && (
+//             <span className="seller-badge">Sold by {product.added_by}</span>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className="product-content">
+//         <div className="product-gallery">
+//           <div className="main-image-container">
+//             <img 
+//               src={product.product_image || '/images/product-placeholder.jpg'} 
+//               alt={product.name}
+//               className="main-image"
+//               onError={(e) => e.target.src = '/images/product-placeholder.jpg'}
+//             />
+//           </div>
+//         </div>
+
+//         <div className="product-info">
+//           <div className="price-section">
+//             <span className="current-price">Rs. {product.price.toLocaleString()}</span>
+//           </div>
+
+//           <div className={`stock-status ${product.stock_quantity > 0 ? 'in-stock' : 'out-of-stock'}`}>
+//             {product.stock_quantity > 0 ? (
+//               <>
+//                 <span className="status-indicator"></span>
+//                 <span>In Stock ({product.stock_quantity} available)</span>
+//               </>
+//             ) : (
+//               <>
+//                 <span className="status-indicator"></span>
+//                 <span>Out of Stock</span>
+//               </>
+//             )}
+//           </div>
+
+//           <div className="product-condition">
+//             <h4 className="condition-title">Condition</h4>
+//             <p className="condition-value">{product.condition}</p>
+//           </div>
+
+//           <div className="product-description">
+//             <h3 className="section-title">Description</h3>
+//             <p className="description-text">{product.description}</p>
+//           </div>
+
+//           {product.product_features?.length > 0 && (
+//             <div className="product-features">
+//               <h3 className="section-title">Features</h3>
+//               <ul className="features-list">
+//                 {product.product_features.map((feature, index) => (
+//                   <li key={index} className="feature-item">
+//                     <span className="feature-bullet">•</span>
+//                     {feature}
+//                   </li>
+//                 ))}
+//               </ul>
+//             </div>
+//           )}
+
+//           <div className="action-buttons">
+//             <button 
+//               className={`btn-cart ${isInCart ? 'in-cart' : ''}`}
+//               onClick={handleAddToCart}
+//               disabled={product.stock_quantity <= 0 || isInCart || isAddingToCart}
+//             >
+//               <IonIcon icon={cartOutline} className="button-icon" />
+//               <span className="button-text">
+//                 {product.stock_quantity <= 0 
+//                   ? 'Out of Stock' 
+//                   : isAddingToCart 
+//                     ? 'Adding...' 
+//                     : isInCart 
+//                       ? 'Added to Cart' 
+//                       : 'Add to Cart'
+//                 }
+//               </span>
+//             </button>
+//             <button 
+//               className={`btn-wishlist ${isWishlisted ? 'active' : ''}`}
+//               onClick={handleWishlist}
+//             >
+//               <IonIcon icon={isWishlisted ? heart : heartOutline} className="button-icon" />
+//               <span className="button-text">
+//                 {isWishlisted ? 'Saved' : 'Save for Later'}
+//               </span>
+//             </button>
+//           </div>
+
+//           <ProductAuthentication productId={id} />
+//         </div>
+//       </div>
+
+//       <section id="reviews" className="reviews-section">
+//         <div className="section-header">
+//           <h2 className="section-title">Customer Reviews</h2>
+//           <div className="overall-rating">
+//             {renderStars(averageRating)}
+//             <span className="average-rating">{averageRating.toFixed(1)} out of 5</span>
+//           </div>
+//         </div>
+
+//         <Rating addReview={addReview} />
+
+//         {reviews.length > 0 ? (
+//           <div className="reviews-list">
+//             {reviews.map((review, index) => (
+//               <div key={index} className="review-card">
+//                 <div className="reviewer-info">
+//                   <div className="avatar" style={{ backgroundColor: `hsl(${index * 137.5 % 360}, 70%, 75%)` }}>
+//                     {review.username.charAt(0).toUpperCase()}
+//                   </div>
+//                   <div className="reviewer-details">
+//                     <h4 className="reviewer-name">{review.username}</h4>
+//                     <time className="review-date">{new Date(review.date).toLocaleDateString()}</time>
+//                   </div>
+//                 </div>
+//                 <div className="review-rating">{renderStars(review.rating)}</div>
+//                 {review.content && (
+//                   <p className="review-content">
+//                     <span className="quote-icon">"</span>
+//                     {review.content}
+//                     <span className="quote-icon">"</span>
+//                   </p>
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         ) : (
+//           <div className="no-reviews">
+//             <div className="empty-reviews-illustration">
+//               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+//                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+//               </svg>
+//             </div>
+//             <p className="empty-reviews-text">No reviews yet. Be the first to review this product!</p>
+//           </div>
+//         )}
+//       </section>
+//     </div>
+//   );
+// };
+
+// export default ProductDetail;

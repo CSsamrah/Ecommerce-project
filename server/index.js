@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/users",userRoutes);
 app.use("/api/categories",categoryRoutes);
-app.use("api/cart", cartRoutes);
+app.use("/api/cart", cartRoutes);
 app.use("/order", orderRoutes);
 app.use("/api/secondHand", secondHandRoutes);
 app.use("/api/products",productRoutes)

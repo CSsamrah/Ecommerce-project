@@ -129,11 +129,11 @@ function Sellers() {
     );
 
     return (
-        
-        <div className="buyers-container">
-            <br></br>
-            <br></br>
+        <div className="buyer-body">
             <AdminDashboard />
+        <div className="buyers-container">
+          
+            
             <h2 className="buyers-title">Registered sellers</h2>
 
             <div className="table-controls">
@@ -179,6 +179,7 @@ function Sellers() {
                     </tbody>
                 </table>
             )}
+        </div>
         </div>
     );
 }

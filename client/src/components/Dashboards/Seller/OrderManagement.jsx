@@ -14,9 +14,9 @@ const OrderManagement = () => {
 
     return (
         <div className="orderManagement-body">
-            <br></br>
-        <div className="order-container">
             <Seller_dashboard />
+        <div className="order-container">
+            
             <h2>Order Management</h2>
             <div className="category-tabs">
                 <button onClick={() => setSelectedCategory("all")}>All</button>

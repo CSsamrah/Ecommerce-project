@@ -70,9 +70,9 @@ let updatedProducts = {
     };
     return (
         <div className="inv-body">
-            <br></br>
-        <div className="inventory-container">
             <Seller_dashboard />
+        <div className="inventory-container">
+            
             <h2>Inventory Management</h2>
             <div className="category-tabs">
                 <button onClick={() => setSelectedCategory("new")}>Products</button>

@@ -34,7 +34,7 @@ body {
     font-size: 1.6rem;
     background: var(--bg);
 } */
-.top-pick-container {
+/* .top-pick-container {
     width: 100%;
     padding: 20px auto;
     display: flex;
@@ -51,7 +51,7 @@ body {
     width: 100%;
     margin: 0 100px;
     height: 200px;
-    /* background-color: #2222; */
+    /* background-color: #2222; 
     display: flex;
     flex-direction: row;
     gap: 100px;
@@ -90,7 +90,7 @@ body {
     transform: translateX(50px);
 }
 
-/* When visible, the elements will animate */
+/* When visible, the elements will animate 
 .fade-in-left.visible {
     opacity: 1;
     transform: translateX(0);
@@ -99,4 +99,179 @@ body {
 .fade-in-right.visible {
     opacity: 1;
     transform: translateX(0);
-}
+} */
+
+/* Top Picks Section */
+.top-picks-section {
+    background: #021A30;
+    padding: 80px 20px;
+    color: white;
+    overflow: hidden; /* Prevent horizontal scroll during animations */
+  }
+  
+  .top-pick-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .top-pick-heading {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #FFFFFF;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+  
+  .top-pick-heading.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .subheading {
+    text-align: center;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 60px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease 0.3s;
+  }
+  
+  .subheading.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Rest of your existing CSS remains the same */
+  .products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 120px;
+  }
+  
+  .product-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+  }
+  
+  .product-info {
+    flex: 1;
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.8s ease;
+  }
+  
+  .product-info.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .product-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.8s ease;
+  }
+  
+  .product-image.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .product-name {
+    font-size: 1.8rem;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  
+  .product-description {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  
+  .product-price {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #4CAF50;
+    display: inline-block;
+    padding: 8px 20px;
+    background: rgba(76, 175, 80, 0.15);
+    border-radius: 4px;
+  }
+  
+  .product-image img {
+    max-height: 200px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-item:hover .product-image img {
+    transform: scale(1.2);
+  }
+  
+  /* Responsive styles remain the same */
+  @media (max-width: 992px) {
+    .products-list {
+      gap: 80px;
+    }
+    
+    .product-item {
+      gap: 40px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .product-item {
+      flex-direction: column;
+      gap: 30px;
+    }
+    
+    .product-info, .product-image {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .product-image img {
+      max-height: 160px;
+    }
+    
+    .top-pick-heading {
+      font-size: 2rem;
+    }
+    
+    .product-name {
+      font-size: 1.5rem;
+    }
+    
+    .product-price {
+      font-size: 1.3rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .top-picks-section {
+      padding: 60px 20px;
+    }
+    
+    .products-list {
+      gap: 60px;
+    }
+    
+    .product-name {
+      font-size: 1.3rem;
+    }
+    
+    .product-description {
+      font-size: 1rem;
+    }
+  }

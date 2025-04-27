@@ -454,6 +454,7 @@ const Cart = () => {
 
   return (
     <div className="main_cart_page">
+
       <Navbar />
       <br></br>
       <br></br>
@@ -468,16 +469,28 @@ const Cart = () => {
               <div className="header_total column_header">Total</div>
               <div className="header_action column_header">Action</div>
             </div>
-            <div className="cart_info">
-              {cartItems.length === 0 ? (
-                <div className="empty-cart-message">Your cart is empty</div>
-              ) : (
-                cartItems.map((item) => (
-                  <div className="product_box" key={item.cart_id}>
+            
+            {cartItems.length === 0 ? (
+              <div className="empty_cart_message">
+                {/* <ShoppingCart size={64} className="text-l text-gray-300 mb-4" /> */}
+                <p className="text-xl text-gray-600 mb-9">You haven't added any products yet</p>
+                <button 
+                  onClick={() => navigate('/catalog')} 
+                  className="start_shopping_button"
+                >
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
+              <div className="cart_info">
+                {cartItems.map((item) => (
+                  <div className="product_box" key={item.title}>
+                    {/* Product Details */}
                     <div className="product_details">
-                      <img src={item.image} alt={item.title} className="cart_product_image" />
+                      <img src={item.image} alt={item.cart_id} className="cart_product_image" />
                       <div className="cart_product_info">
                         <div className="cart_product_title">{item.title}</div>
+
                         <div className="cart_product_price">Rs.{parseFloat(item.price).toFixed(2)}</div>
                       </div>
                     </div>
@@ -493,11 +506,13 @@ const Cart = () => {
                       <span className="quantity-value">{item.quantity}</span>
                       <button
                         className="quantity-btn"
+
                         onClick={() => handleQuantityChange(item.cart_id, item.quantity + 1)}
                       >
                         <FontAwesomeIcon icon={faPlus} />
                       </button>
                     </div>
+
 
                     <div className="total_price">
                       Rs.{(parseFloat(item.price) * item.quantity).toFixed(2)}
@@ -512,9 +527,11 @@ const Cart = () => {
                       </button>
                     </div>
                   </div>
-                ))
-              )}
+
+                ))}
             </div>
+
+              )}
 
             <div className="update_cart_section">
               <button className="update_cart_button" onClick={() => navigate('/catalog')}>

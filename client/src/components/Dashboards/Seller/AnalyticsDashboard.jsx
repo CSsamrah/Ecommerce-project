@@ -130,8 +130,9 @@ const AnalyticsDashboard = () => {
   return (
     <div className="analytics-body">
       <br></br>
-    <div className="analytics-container">
       <Seller_dashboard />
+    <div className="analytics-container">
+ 
       <h2>Seller Analytics Dashboard</h2>
 
       <div className="chart-section">

@@ -1,11 +1,13 @@
 
 .admin-dashboard-body {
+    margin-top: 80px;
     position: relative;
     font-family: Arial, sans-serif;
       
 }
 
 .hamburger {
+    margin-top: 80px;
     font-size: 24px;
     background: none;
     border: none;
@@ -17,6 +19,7 @@
 }
 
 .sideBar {
+    margin-top: 80px;
     position: fixed;
     top: 0;
     left: -250px;
