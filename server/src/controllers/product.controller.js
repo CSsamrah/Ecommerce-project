@@ -198,7 +198,21 @@ const updateProduct = asyncHandler(async (req, res) => {
     const priceNumber = price !== undefined ? parseFloat(price) : undefined;
     const stockNumber = stock_quantity !== undefined ? parseInt(stock_quantity, 10) : undefined;
     const rentalAvailableBoolean = rental_available === "true" || rental_available === true;
-
+    
+    let updatedProductImage;
+    // Ensure product image exists before uploading
+    if (req.files?.product_image) {
+        try {
+            
+            updatedProductImage = await uploadOnCloudinary(req.files.product_image[0].path);  
+            console.log(`The image format is ${updatedProductImage.format}`); // or you can use image format
+    
+        } catch (err) {
+            console.log("Error uploading on Cloudinary", err);
+          
+        }
+    }
+ 
     if (
         name === undefined &&
         description === undefined &&
@@ -206,7 +220,9 @@ const updateProduct = asyncHandler(async (req, res) => {
         condition === undefined &&
         stock_quantity === undefined &&
         rental_available === undefined &&
-        product_features === undefined
+        product_features === undefined &&
+        updatedProductImage===undefined
+        
     ) {
         throw new ApiError(400, "Please provide at least one field to update");
     }
@@ -242,8 +258,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         }
     }
     
-    let updatedProductImage = req.files?.product_image?.[0]?.path;
-
+    
     let digital_signature = "";
     try {
         const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
@@ -314,7 +329,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
     if (updatedProductImage) {
         updateFields.push(`product_image=$${index}`);
-        values.push(updatedProductImage);
+        values.push(updatedProductImage.url);
         index++;
     }
 

@@ -684,15 +684,16 @@ const SignIn = () => {
       <div className="overlay-container">
         <div className="overlay">
           <div className="overlay-panel overlay-left">
-            <h1>Hello, Friend!</h1>
-            <h4>Enter your personal details and start your journey with us</h4>
+            <h1>Welcome to the Future of Computing!</h1>
+            <h4>Join us and unlock access to the best PC <br /> parts and components for all your building and upgrading needs.</h4>
             <p>Already have an account?</p>
+
             <button className="ghost" onClick={() => setRightPanelActive(false)}>Sign In</button>
           </div>
           <div className="overlay-panel overlay-right">
-            <h1>Welcome Back!</h1>
-            <h4>To keep connected with us, please login with your personal info</h4>
-            <p>New around here?</p>
+            <h1>Welcome Back to Your PC Parts Store!</h1>
+            <h4>Log in to access your account and continue shopping <br /> for the latest and greatest in PC components.</h4>
+            <p>New here? Start your journey with us.</p>
             <button className="ghost" onClick={() => setRightPanelActive(true)}>Sign Up</button>
           </div>
         </div>

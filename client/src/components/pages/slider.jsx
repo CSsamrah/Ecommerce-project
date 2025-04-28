@@ -12,6 +12,8 @@ import sliderImage1 from '../images/chip.png';
 import sliderImage2 from '../images/gaming.png';
 import sliderImage3 from '../images/intelcorei7.png';
 import sliderImage4 from '../images/keyboard.png';
+import sliderImage5 from "../images/modem.png"
+import sliderImage6 from "../images/power.png"
 
 import "./slider.css"; 
 // const categories = [
@@ -68,7 +70,7 @@ const Slider = () => {
       >
         <div className="swiper-slides">
         <SwiperSlide className="swiper-slide">
-          <img src={sliderImage1} alt="chip" />
+          <img src={sliderImage6} alt="chip" />
           <p>Power & Electrical</p>
         </SwiperSlide>
 
@@ -83,12 +85,12 @@ const Slider = () => {
         </SwiperSlide>
 
         <SwiperSlide className="swiper-slide">
-          <img src={sliderImage4} alt="keyboard" />
+          <img src={sliderImage5} alt="keyboard" />
           <p>Networking Components</p>
         </SwiperSlide>
 
         <SwiperSlide className="swiper-slide">
-          <img src={sliderImage4} alt="ssd" />
+          <img src={sliderImage1} alt="ssd" />
           <p>Storage & Backup</p>
         </SwiperSlide>
 

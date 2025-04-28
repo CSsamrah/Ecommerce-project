@@ -59,15 +59,20 @@ const PayFastForm = () => {
     };
   
     try {
-      const res = await axios.post('http://localhost:3000/api/payfast/get-token', payload);
+      const res = await axios.post(
+        'http://localhost:3000/api/payfast/get-token',
+        payload,
+        { withCredentials: true }  
+      );
       setToken(res.data.ACCESS_TOKEN);
       setSignature(res.data.SIGNATURE);
       console.log('response from backend:', res.data);
     } catch (error) {
       console.error('Error:', error);
-      // Handle error state
+      
       setError('Error: Failed to generate token. Please try again later.');
     }
+    
   };
 
   return (
