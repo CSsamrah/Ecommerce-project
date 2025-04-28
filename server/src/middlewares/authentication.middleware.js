@@ -3,30 +3,45 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import pool from "../../dbConnect.js";
 
-const isLoggedIn=asyncHandler(async(req,_,next)=>{
-    const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-    console.log("TOKEN: ",token);
-
-    if(!token){
-        throw new ApiError(401,'Unauthorized request: No token received');
+const isLoggedIn = asyncHandler(async (req, _, next) => {
+    // First, try getting token from cookies
+    let token = req.cookies?.accessToken;
+  
+    // If not in cookies, try getting from Authorization header
+    if (!token && req.header("Authorization")) {
+      token = req.header("Authorization").replace("Bearer ", "").trim();
     }
-    const decodedToken=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
-    console.log("\nDecoded Token: ",decodedToken);
-
-    if(!decodedToken){
-        throw new ApiError(401,'Unauthorized request: Invalid token');
+  
+    console.log("TOKEN:", token);
+  
+    if (!token) {
+      throw new ApiError(401, 'Unauthorized request: No token received');
     }
-    const findUser=await pool.query('SELECT * FROM "Users" WHERE user_id=$1',[decodedToken.id]);
-    if(!findUser.rows.length){
-        throw new ApiError(401,'Invalid Access Token');
+  
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch (error) {
+      console.error("JWT Verification Error:", error);
+      throw new ApiError(401, 'Unauthorized request: Invalid or expired token');
     }
-    req.user = findUser.rows[0];
+  
+    console.log("Decoded Token:", decodedToken);
+  
+    const findUser = await pool.query('SELECT * FROM "Users" WHERE user_id=$1', [decodedToken.id]);
     
-    next(); 
-})
+    if (!findUser.rows.length) {
+      throw new ApiError(401, 'Unauthorized request: User not found');
+    }
+  
+    req.user = findUser.rows[0];
+  
+    next();
+  });
+  
 
 const isAdmin = asyncHandler(async (req, res, next) => {
-    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", "");
     console.log("TOKEN: ", token);
 
     if (!token) {
@@ -65,4 +80,3 @@ const authorizeSeller = (req, res, next) => {
 };
 
 export { isLoggedIn ,isAdmin,authorizeSeller}
-

@@ -72,7 +72,7 @@
 // );
 
 // function App() {
- 
+
 
 
 //   return (
@@ -133,7 +133,7 @@
 
 import React from 'react'
 import { Box } from '@mui/material';
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomeStart from "./components/pages/imageSlider"
 import "./components/pages/imageSlider.css"
 import Slider from "./components/pages/slider"
@@ -171,6 +171,8 @@ import AdminOverview from './components/Dashboards/Admin/AdminOverview'
 import PayFast from './components/pages/PayFast.jsx'
 import Success from './components/pages/sucess.jsx'
 import Failure from "./components/pages/cancel.jsx"
+import { SocketProvider } from './components/Dashboards/Seller/SocketContext.jsx';
+
 
 const HomePage = () => (
   <>
@@ -214,8 +216,14 @@ function App() {
               <Route path="/inventory" element={<InventoryManagement />} />
               <Route path="/order" element={<OrderManagement />} />
               <Route path="/rental" element={<RentalManagement />} />
-              <Route path="/analytics" element={<AnalyticsDashboard />} />
-
+              <Route
+                path="/analytics"
+                element={
+                  <SocketProvider>
+                    <AnalyticsDashboard />
+                  </SocketProvider>
+                }
+              />
               {/* Buyer Routes */}
               <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
               <Route path="/orderHistory" element={<OrderHistory />} />
@@ -227,7 +235,7 @@ function App() {
               <Route path="/regBuyers" element={<Buyers />} />
               <Route path="/regSellers" element={<Sellers />} />
               <Route path="/adminAnalytics" element={<AdminAnalytics />} />
-              <Route path='/payment' element={<PayFast />}/>
+              <Route path='/payment' element={<PayFast />} />
               <Route path='payment/success' element={<Success />} />
               <Route path='payment/failure' element={<Failure />} />
             </Routes>

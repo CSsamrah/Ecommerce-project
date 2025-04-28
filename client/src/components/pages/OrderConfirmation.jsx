@@ -6,16 +6,51 @@ import Navbar from "../Navbar/navbar1";
 function OrderConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { formData = {}, paymentMethod = "N/A", paymentDetails = {} } = location.state || {};
+  
+  // Safely destructure with defaults
+  const { 
+    formData = {},
+    paymentMethod = "N/A"
+  } = location.state || {};
+
+  // Generate a random order number
+  const orderNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 
   const handleBackToHome = () => {
     navigate("/");
   };
 
+  // Function to get full billing address with null checks
+  const getBillingAddress = () => {
+    if (formData.sameAsShipping) {
+      return `${formData.address1 || ''}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city || ''}, ${formData.state || ''}, ${formData.zipCode || ''}`;
+    } else {
+      return `${formData.billingAddress1 || ''}${formData.billingAddress2 ? ', ' + formData.billingAddress2 : ''}, ${formData.billingCity || ''}, ${formData.billingState || ''}, ${formData.billingZipCode || ''}`;
+    }
+  };
+
+  // Function to get shipping address with null checks
+  const getShippingAddress = () => {
+    return `${formData.address1 || ''}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city || ''}, ${formData.state || ''}, ${formData.zipCode || ''}`;
+  };
+
+  // Get state name from code with null check
+  const getStateName = (stateCode) => {
+    if (!stateCode) return '';
+    const states = {
+      pj: "Punjab",
+      sir: "Sindh",
+      kpk: "KPK",
+      Bal: "Balochistan",
+      GB: "Gilgit Baltistan"
+    };
+    return states[stateCode.toLowerCase()] || stateCode;
+  };
+
   return (
     <div className="order-confirmation-container">
       <Navbar />
-      <br></br>
+      <br />
       <div className="order-confirmation-card">
         <div className="order-confirmation-header">
           <div className="order-confirmation-checkmark">
@@ -29,23 +64,55 @@ function OrderConfirmation() {
         </div>
 
         <div className="order-confirmation-section">
+          <h3>Shipping Information</h3>
+          <div className="order-confirmation-details">
+            <div className="order-confirmation-detail-row">
+              <span className="order-confirmation-label">Name:</span>
+              <span className="order-confirmation-value">
+                {formData.firstName || 'Not provided'} {formData.lastName || ''}
+              </span>
+            </div>
+            <div className="order-confirmation-detail-row">
+              <span className="order-confirmation-label">Address:</span>
+              <span className="order-confirmation-value">{getShippingAddress() || 'Not provided'}</span>
+            </div>
+            <div className="order-confirmation-detail-row">
+              <span className="order-confirmation-label">State:</span>
+              <span className="order-confirmation-value">{getStateName(formData.state) || 'Not provided'}</span>
+            </div>
+            <div className="order-confirmation-detail-row">
+              <span className="order-confirmation-label">Phone:</span>
+              <span className="order-confirmation-value">{formData.phone || 'Not provided'}</span>
+            </div>
+            <div className="order-confirmation-detail-row">
+              <span className="order-confirmation-label">Email:</span>
+              <span className="order-confirmation-value">{formData.email || 'Not provided'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="order-confirmation-section">
           <h3>Billing Information</h3>
           <div className="order-confirmation-details">
             <div className="order-confirmation-detail-row">
               <span className="order-confirmation-label">Name:</span>
-              <span className="order-confirmation-value">{formData.firstName} {formData.lastName}</span>
+              <span className="order-confirmation-value">
+                {formData.sameAsShipping 
+                  ? `${formData.firstName || ''} ${formData.lastName || ''}`
+                  : `${formData.billingFirstName || ''} ${formData.billingLastName || ''}`}
+              </span>
             </div>
             <div className="order-confirmation-detail-row">
               <span className="order-confirmation-label">Address:</span>
-              <span className="order-confirmation-value">{formData.address}</span>
+              <span className="order-confirmation-value">{getBillingAddress() || 'Not provided'}</span>
             </div>
             <div className="order-confirmation-detail-row">
-              <span className="order-confirmation-label">Phone:</span>
-              <span className="order-confirmation-value">{formData.phone}</span>
-            </div>
-            <div className="order-confirmation-detail-row">
-              <span className="order-confirmation-label">Email:</span>
-              <span className="order-confirmation-value">{formData.email}</span>
+              <span className="order-confirmation-label">State:</span>
+              <span className="order-confirmation-value">
+                {formData.sameAsShipping 
+                  ? getStateName(formData.state) || 'Not provided'
+                  : getStateName(formData.billingState) || 'Not provided'}
+              </span>
             </div>
           </div>
         </div>
@@ -53,33 +120,13 @@ function OrderConfirmation() {
         <div className="order-confirmation-section">
           <h3>Payment Method</h3>
           <div className="order-confirmation-payment-method">
-            {paymentMethod === "paypro" ? "PayPro" : "Cash on Delivery"}
+            {paymentMethod === "payFast" ? "PayFast" : "Cash on Delivery"}
           </div>
         </div>
 
-        {paymentMethod === "paypro" && (
-          <div className="order-confirmation-section">
-            <h3>Payment Details</h3>
-            <div className="order-confirmation-details">
-              <div className="order-confirmation-detail-row">
-                <span className="order-confirmation-label">Card:</span>
-                <span className="order-confirmation-value">**** **** **** {paymentDetails.cardNumber?.slice(-4)}</span>
-              </div>
-              <div className="order-confirmation-detail-row">
-                <span className="order-confirmation-label">Country:</span>
-                <span className="order-confirmation-value">{paymentDetails.country}</span>
-              </div>
-              <div className="order-confirmation-detail-row">
-                <span className="order-confirmation-label">Phone:</span>
-                <span className="order-confirmation-value">{paymentDetails.phone}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="order-confirmation-message">
           <p>Your order is being processed and will be shipped soon.</p>
-          <p className="order-confirmation-order-number">Order #: {Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}</p>
+          <p className="order-confirmation-order-number">Order #: {orderNumber}</p>
         </div>
 
         <button className="order-confirmation-home-button" onClick={handleBackToHome}>

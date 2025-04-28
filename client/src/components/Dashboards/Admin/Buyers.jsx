@@ -4,6 +4,7 @@ import AdminDashboard from "./AdminDashboard.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
 function Buyers() {
     const [searchTerm, setSearchTerm] = useState("");
     const [buyers, setBuyers] = useState([]);
@@ -53,13 +54,11 @@ function Buyers() {
 
     return (
         <div className="buyer-body">
-            <br></br>
+         
             <AdminDashboard />
         <div className="buyers-container">
             <br></br>
             
-            
-
             <h2 className="buyers-title">Registered Buyers</h2>
 
             <div className="table-controls">

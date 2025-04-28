@@ -4,10 +4,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  width:100vw;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative; /* For dropdown positioning */
+  padding: 0 1rem;
+  background-color: #52667E;
+  color: white;
+  /* z-index: 1000; */
 }
 
 .nav_logo {

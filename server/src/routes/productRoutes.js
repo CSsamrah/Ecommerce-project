@@ -14,7 +14,9 @@ productRoutes.post("/addProduct",
 isLoggedIn,
 addProduct);
 productRoutes.get("/getAllProducts", getAllProducts);
-productRoutes.get("/getProduct/:id",isLoggedIn,getOneProduct)
+// productRoutes.get("/getProduct/:id",isLoggedIn,getOneProduct)
+
+productRoutes.get("/getProduct/:id",getOneProduct)
 
 productRoutes.patch("/updateProduct/:id",upload.fields([
     {
@@ -25,4 +27,4 @@ productRoutes.patch("/updateProduct/:id",upload.fields([
 
 productRoutes.delete("/deleteProduct/:id",isLoggedIn,deleteProduct)
 
-export default productRoutes
+export default productRoutes;
