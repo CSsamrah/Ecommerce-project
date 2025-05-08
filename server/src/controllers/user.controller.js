@@ -486,6 +486,63 @@ const getAllSellers = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to fetch sellers");
     }
 });
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+  
+    if (!refreshToken) {
+      throw new ApiError(401, "Refresh token not found");
+    }
+  
+    try {
+      // Verify the refresh token
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      
+      // Find the user with this refresh token
+      const userResult = await pool.query(
+        'SELECT * FROM "Users" WHERE user_id = $1 AND refresh_token = $2',
+        [decoded.id, refreshToken]
+      );
+  
+      if (userResult.rows.length === 0) {
+        throw new ApiError(401, "Invalid refresh token");
+      }
+  
+      const user = userResult.rows[0];
+  
+      // Generate new access token
+      const accessToken = jwt.sign(
+        { id: user.user_id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '15m' }
+      );
+  
+      // Set the new access token in the cookie
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        maxAge: 15 * 60 * 1000 // 15 minutes
+      });
+  
+      // Return user data without sensitive info
+      const userData = {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        phoneNo: user.phoneNo,
+        role: user.role,
+        address: user.address
+      };
+  
+      return res.status(200).json(new ApiResponse(200, userData, "Access token refreshed successfully"));
+    } catch (error) {
+      // If the token is invalid or expired, clear cookies
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      throw new ApiError(401, "Invalid or expired refresh token");
+    }
+  });
+  
 
 
-export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount, getAllBuyers, getAllSellers};
+export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount, getAllBuyers, getAllSellers, refreshAccessToken};
