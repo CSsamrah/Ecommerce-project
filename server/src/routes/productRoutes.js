@@ -14,7 +14,7 @@ productRoutes.post("/addProduct",
 isLoggedIn,
 addProduct);
 productRoutes.get("/getAllProducts", getAllProducts);
-productRoutes.get("/getProduct/:id",isLoggedIn,getOneProduct)
+productRoutes.get("/getProduct/:id",isLoggedIn, getOneProduct)
 
 productRoutes.patch("/updateProduct/:id",upload.fields([
     {

@@ -403,7 +403,7 @@
 //     );
 // }
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
     AppBar,
@@ -418,6 +418,7 @@ import {
     Drawer,
     List,
     ListItem,
+    ListItemButton,
     ListItemText,
     Collapse,
     Tabs,
@@ -436,6 +437,7 @@ import { styled, alpha, createTheme, ThemeProvider } from '@mui/material/styles'
 import { Link } from 'react-router-dom';
 import { FaHome, FaBookOpen, FaThLarge, FaPhoneAlt } from "react-icons/fa";
 import { useCart } from '../pages/cartContext';
+import axios from 'axios';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -509,7 +511,8 @@ function NavTabs({shopOpen, setShopOpen}) {
             >
                 <LinkTab label="Home" to="/" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
                 <LinkTab label="Dashboard" to="/dashboard" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-                <LinkTab label="Shop" to="/catalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
+                <LinkTab label="Selling" to="/catalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
+                <LinkTab label="Rental" to="/rentalCatalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
 
                 {/* <Tab
                     label="Shop"
@@ -573,6 +576,103 @@ export default function PrimarySearchAppBar() {
     const [secondHandSellingOpen, setSecondHandSellingOpen] = useState(false);
     const [newRentalOpen, setNewRentalOpen] = useState(false);
     const [secondHandRentalOpen, setSecondHandRentalOpen] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch categories on component mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+          try {
+            console.log("Fetching categories...");
+            // Simplified request - no authentication headers
+            const response = await axios.get("http://localhost:3000/api/categories/getAllCategories");
+            
+            console.log("Response received:", response.data);
+            // console.log("1Current products state:", products)
+            
+            // Check if response has data property
+            if (response.data && (response.data.data || Array.isArray(response.data))) {
+              // Handle both possible response formats
+              const categoriesData = Array.isArray(response.data) ? response.data : 
+                                  (response.data.data ? response.data.data : []);
+              
+              setCategories(categoriesData);
+            //   console.log("2Current products state:", products)
+              // console.log("The products are:", products);
+            } else {
+              console.error("Unexpected response format:", response.data);
+              setError("Invalid data format received from server");
+            }
+            
+            setLoading(false);
+          } catch (err) {
+            console.error("Error fetching categories:", err);
+            setError(err.message || "Failed to fetch categories");
+            setLoading(false);
+          }
+        };
+    
+        fetchCategories();
+      }, []);
+    // useEffect(() => {
+    //     const fetchCategories = async () => {
+    //         try {
+    //             setLoading(true);
+    //             const response = await axios.get("http://localhost:3000/api/categories/getAllCategories");
+    //             console.log("Full API response:", response.data);
+    
+    //             // Directly access the categories array from response.data
+    //             const receivedCategories = response.data?.categories || [];
+    
+    //             if (receivedCategories.length > 0) {
+    //                 setCategories(receivedCategories);
+    //                 setError(null);
+    //                 console.log("Categories set:", receivedCategories);
+    //             } else {
+    //                 console.warn("Received empty categories array");
+    //                 setError("No categories found");
+    //                 setCategories([]); // Explicitly set empty array
+    //             }
+    //         } catch (error) {
+    //             console.error("API Error:", error);
+    //             setError(error.message || "Failed to fetch categories");
+    //             setCategories([]); // Clear on error
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchCategories();
+    // }, []);
+    useEffect(() => {
+        console.log("Current categories state:", categories);
+      }, [categories]);
+    // useEffect(() => {
+    //     const fetchCategories = async () => {
+    //         try {
+    //             setLoading(true);
+    //             const response = await axios.get('http://localhost:3000/api/categories/getAllCategories');
+    //             console.log("Categories response:", response.data);
+    //             if (response.data.categories) {
+    //                 setCategories(response.data.categories);
+    //                 setError(null);
+    //             } else {
+    //                 throw new Error("Unexpected response format");
+    //             }
+    //             // setCategories(response.data.categories);
+    //             // console.log("categories:", categories);
+    //             // console.log("set categories",setCategories);
+    //             // setError(null);
+    //         } catch (error) {
+    //             console.error("Error fetching categories:", error);
+    //             setError(err.message || "Failed to fetch categories");
+    //             // setLoading(false);
+    //         }finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchCategories();
+    // }, []);
 
 
     const isMenuOpen = Boolean(anchorEl);
@@ -704,151 +804,111 @@ export default function PrimarySearchAppBar() {
                 <ListItem button component={Link} to="/">
                     <ListItemText primary="Home" />
                 </ListItem>
-                <ListItem button component={Link} to="/">
-                    <ListItemText primary="Dashborad" />
+                <ListItem button component={Link} to="/dashboard">
+                    <ListItemText primary="Dashboard" />
                 </ListItem>
-                {/* <ListItem button onClick={handleSkincareClick}>
-                    <ListItemText primary="Skincare" />
-                    {skincareOpen ? <ExpandLess /> : <ExpandMore />}
+                
+                {/* Selling Section */}
+                <ListItem button onClick={handleSellingMobileClick}>
+                    <ListItemText primary="Selling" />
+                    {sellingMobileOpen ? <ExpandLess /> : <ExpandMore />}
                 </ListItem>
-                <Collapse in={skincareOpen} timeout="auto" unmountOnExit>
+                <Collapse in={sellingMobileOpen} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
-                        <ListItem button component={Link} to="/skincare/cleansers" sx={{ pl: 4 }}>
-                            <ListItemText primary="Cleansers" />
+                        {/* New Products */}
+                        <ListItem button onClick={handleNewSellingClick} sx={{ pl: 4 }}>
+                            <ListItemText primary="New" />
+                            {newSellingOpen ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
-                        <ListItem button component={Link} to="/skincare/moisturizers" sx={{ pl: 4 }}>
-                            <ListItemText primary="Moisturizers" />
-                        </ListItem>
-                        <ListItem button component={Link} to="/skincare/serums" sx={{ pl: 4 }}>
-                            <ListItemText primary="Serums" />
-                        </ListItem>
-                        <ListItem button component={Link} to="/skincare/sunscreen" sx={{ pl: 4 }}>
-                            <ListItemText primary="Sunscreen" />
-                        </ListItem>
-                    </List>
-                </Collapse> */}
-                {/* Shop main category */}
-                <ListItem button onClick={handleShopMobileClick}>
-                    <ListItemText primary="Shop" />
-                    {shopMobileOpen ? <ExpandLess /> : <ExpandMore />}
-                </ListItem>
-                <Collapse in={shopMobileOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        {/* Selling category */}
-                        <ListItem button onClick={handleSellingMobileClick} sx={{ pl: 4 }}>
-                            <ListItemText primary="Selling" />
-                            {sellingMobileOpen ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={sellingMobileOpen} timeout="auto" unmountOnExit>
+                        <Collapse in={newSellingOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
-                                {/* New subcategory under Selling */}
-                                <ListItem button onClick={handleNewSellingClick} sx={{ pl: 8 }}>
-                                    <ListItemText primary="New" />
-                                    {newSellingOpen ? <ExpandLess /> : <ExpandMore />}
-                                </ListItem>
-                                <Collapse in={newSellingOpen} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/selling/new/category1" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Computer Hardware" />
+                            {categories && categories.map(category => (
+                                        <ListItem 
+                                            key={`new-${category.slug}`}
+                                            button 
+                                            component={Link} 
+                                            to={`/category/${category.slug}?condition=new`}
+                                            sx={{ pl: 4 }}
+                                            onClick={handleDrawerToggle}
+                                        >
+                                            <ListItemText className="category_name" primary={category.name} />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category2" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Networking Components" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category3" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Peripherals and Accessories" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category4" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Storage and Backup" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category5" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Power and Electrical" />
-                                        </ListItem>
-                                    </List>
-                                </Collapse>
-                                
-                                {/* Second Hand subcategory under Selling */}
-                                <ListItem button onClick={handleSecondHandSellingClick} sx={{ pl: 8 }}>
-                                    <ListItemText primary="Second Hand" />
-                                    {secondHandSellingOpen ? <ExpandLess /> : <ExpandMore />}
-                                </ListItem>
-                                <Collapse in={secondHandSellingOpen} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category1" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Computer Hardware" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category2" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Networking Components" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category3" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Peripherals and Accessories" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category4" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Storage and Backup" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category5" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Power and Electrical" />
-                                        </ListItem>
-                                    </List>
-                                </Collapse>
+                                    ))}
                             </List>
                         </Collapse>
                         
-                        {/* Rental category */}
-                        <ListItem button onClick={handleRentalMobileClick} sx={{ pl: 4 }}>
-                            <ListItemText primary="Rental" />
-                            {rentalMobileOpen ? <ExpandLess /> : <ExpandMore />}
+                        {/* Second Hand Products */}
+                        <ListItem button onClick={handleSecondHandSellingClick} sx={{ pl: 4 }}>
+                            <ListItemText primary="Second Hand" />
+                            {secondHandSellingOpen ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
-                        <Collapse in={rentalMobileOpen} timeout="auto" unmountOnExit>
+                        <Collapse in={secondHandSellingOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding>
-                                {/* New subcategory under Rental */}
-                                <ListItem button onClick={handleNewRentalClick} sx={{ pl: 8 }}>
-                                    <ListItemText primary="New" />
-                                    {newRentalOpen ? <ExpandLess /> : <ExpandMore />}
-                                </ListItem>
-                                <Collapse in={newRentalOpen} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/rental/new/category1" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Computer Hardware" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category2" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Networking Components" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category3" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Peripherals and Accessories" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category4" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Storage and Backup" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category5" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Power and Electrical" />
-                                        </ListItem>
-                                    </List>
-                                </Collapse>
-                                
-                                {/* Second Hand subcategory under Rental */}
-                                <ListItem button onClick={handleSecondHandRentalClick} sx={{ pl: 8 }}>
-                                    <ListItemText primary="Second Hand" />
-                                    {secondHandRentalOpen ? <ExpandLess /> : <ExpandMore />}
-                                </ListItem>
-                                <Collapse in={secondHandRentalOpen} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category1" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Computer Hardware" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category2" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Networking Components" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category3" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Peripherals and Accessories" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category4" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Storage and Backup" />
-                                        </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category5" sx={{ pl: 12 }}>
-                                            <ListItemText primary="Power and Electrical" />
-                                        </ListItem>
-                                    </List>
-                                </Collapse>
+                                {categories && categories.map(category => (
+                                    <ListItem 
+                                        key={`second-hand-${category.slug}`}
+                                        button 
+                                        component={Link} 
+                                        to={`/category/${category.slug}?condition=second-hand`}
+                                        sx={{ pl: 4 }}
+                                        onClick={handleDrawerToggle}
+                                    >
+                                        <ListItemText primary={category.name} />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Collapse>
+                    </List>
+                </Collapse>
+                
+                {/* Rental Section */}
+                <ListItem button onClick={handleRentalMobileClick}>
+                    <ListItemText primary="Rental" />
+                    {rentalMobileOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItem>
+                <Collapse in={rentalMobileOpen} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        {/* New Rental Products */}
+                        <ListItem button onClick={handleNewRentalClick} sx={{ pl: 4 }}>
+                            <ListItemText primary="New" />
+                            {newRentalOpen ? <ExpandLess /> : <ExpandMore />}
+                        </ListItem>
+                        <Collapse in={newRentalOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                                {categories && categories.map(category => (
+                                    <ListItem 
+                                        key={`rental-new-${category.slug}`}
+                                        button 
+                                        component={Link} 
+                                        to={`/rental-category/${category.slug}?condition=new`}
+                                        sx={{ pl: 4 }}
+                                        onClick={handleDrawerToggle}
+                                    >
+                                        <ListItemText primary={category.name} />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Collapse>
+                        
+                        {/* Second Hand Rental Products */}
+                        <ListItem button onClick={handleSecondHandRentalClick} sx={{ pl: 4 }}>
+                            <ListItemText primary="Second Hand" />
+                            {secondHandRentalOpen ? <ExpandLess /> : <ExpandMore />}
+                        </ListItem>
+                        <Collapse in={secondHandRentalOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                                {categories && categories.map(category => (
+                                    <ListItem 
+                                        key={`rental-second-hand-${category.slug}`}
+                                        button 
+                                        component={Link} 
+                                        to={`/rental-category/${category.slug}?condition=second-hand`}
+                                        sx={{ pl: 4 }}
+                                        onClick={handleDrawerToggle}
+                                    >
+                                        <ListItemText primary={category.name} />
+                                    </ListItem>
+                                ))}
                             </List>
                         </Collapse>
                     </List>
@@ -856,6 +916,7 @@ export default function PrimarySearchAppBar() {
             </List>
         </Drawer>
     );
+
 
     return (
         <ThemeProvider theme={theme}>

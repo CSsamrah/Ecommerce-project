@@ -235,6 +235,64 @@ const userRentals=asyncHandler(async(req,res)=>{
     ))
 })
 
+const getAllRentals = asyncHandler(async (req, res) => {
+    try {
+        console.log("getAllRentals function called");
+
+        const query = `
+            SELECT 
+                p.product_id as id,
+                p.name as title,
+                p.price as price,
+                p.product_image as image,
+                p.description,
+                p.condition,
+                p.stock_quantity,
+                p.rental_available,
+                r.rental_id,
+                r.rental_status,
+                r.rental_price as rental_price,
+                r.rental_duration,
+                r.return_date
+            FROM product p
+            LEFT JOIN rental r ON p.product_id = r.product_id
+            WHERE p.rental_available = true
+            AND (r.rental_id IS NULL OR r.rental_status = 'Returned')
+            LIMIT 50
+        `;
+        
+        console.log("Executing query:", query);
+        const result = await pool.query(query);
+        console.log(`Query executed successfully. Retrieved ${result.rows.length} rental products`);
+
+        const rentals = result.rows.map(rental => ({
+            id: rental.id,
+            title: rental.title,
+            price: rental.price,
+            image: rental.image,
+            description: rental.description,
+            condition: rental.condition,
+            stock_quantity: rental.stock_quantity,
+            rental_available: rental.rental_available,
+            rental_id: rental.rental_id,
+            rental_status: rental.rental_status,
+            rental_price: rental.rental_price,
+            rental_duration: rental.rental_duration,
+            return_date: rental.return_date,
+            owner_name: rental.owner_name,
+            avg_rating: '0', 
+            people_rated: '0'
+        }));
+
+        return res.status(200).json(
+            new ApiResponse(200, rentals, "Rental products fetched successfully")
+        );
+    } catch (error) {
+        console.error("Error in getAllRentals:", error);
+        throw new ApiError(500, "Failed to fetch rental products: " + error.message);
+    }
+});
 
 
-export { returnRentalOrder ,getRentalDetails,userRentals}
+
+export { returnRentalOrder ,getRentalDetails,userRentals, getAllRentals}

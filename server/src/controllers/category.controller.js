@@ -36,50 +36,47 @@ const createCategory = asyncHandler(async (req, res) => {
 
 })
 
-const getSingleCategory = asyncHandler(async (req, res) => {
-    const { slug } = req.params;
-    if (!slug) {
-        throw new ApiError(400, "Category slug is required");
+
+// const getAllCategories = asyncHandler(async (req, res) => {
+//     const allCategories = await pool.query("SELECT category_name, slug FROM category");
+
+//     if (!allCategories.rows.length) {
+//         throw new ApiError(404, "No categories found");
+//     }
+
+//     return res.status(200).json(new ApiResponse(200, {
+//         categories: allCategories.rows
+//     }, "Categories fetched successfully"));
+
+
+// });
+
+const getAllCategories = async (req, res) => {
+    try {
+        const allCategories = await pool.query("SELECT category_name, slug FROM category");
+
+      const categories = allCategories.rows.map(category => ({
+        name: category.category_name,
+        slug: category.slug,
+      }));
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Categories fetched successfully",
+        data: categories
+      });
+    } catch (error) {
+      console.error("Error in getAllCategories:", error);
+
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: "Failed to fetch categories: " + error.message,
+        data: null
+      });
     }
-    const findCategory = await pool.query("SELECT * FROM category WHERE slug=$1", [slug]);
-    if (!findCategory.rows.length) {
-        throw new ApiError(404, "Category not found");
-    }
-    const categoryId = findCategory.rows[0].category_id;
-    const findProducts = await pool.query("SELECT * FROM product WHERE category_id=$1", [categoryId]);
-
-    return res.status(200).json(new ApiResponse(200, {
-        category: {
-            category_id: findCategory.rows[0].category_id,  
-            category_name: findCategory.rows[0].category_name,
-            slug: findCategory.rows[0].slug
-        },
-        products: findProducts.rows.map(product => ({
-            product_id: product.product_id,
-            name: product.name.trim(),  // Remove unnecessary newlines
-            price: product.price,
-            condition: product.condition,
-            stock_quantity: product.stock_quantity,
-            product_image: product.product_image,
-            product_features: product.product_features, 
-            rental_available:product.rental_available
-        }))  
-    }, "Category and products found successfully"));
-})
-
-const getAllCategories = asyncHandler(async (req, res) => {
-    const allCategories = await pool.query("SELECT category_name, slug FROM category");
-
-    if (!allCategories.rows.length) {
-        throw new ApiError(404, "No categories found");
-    }
-
-    return res.status(200).json(new ApiResponse(200, {
-        categories: allCategories.rows
-    }, "Categories fetched successfully"));
-
-
-});
+  };
 
 const updateCategory = asyncHandler(async (req, res) => {
     if (req.user.role !== "admin") {
@@ -147,6 +144,142 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, {}, `Category ${slug} deleted successfully`));
 })
+
+const getSingleCategory = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    const { condition } = req.query; // Get condition from query params
+    
+    if (!slug) {
+        throw new ApiError(400, "Category slug is required");
+    }
+
+    // Find the category
+    const findCategory = await pool.query("SELECT * FROM category WHERE slug=$1", [slug]);
+    if (!findCategory.rows.length) {
+        throw new ApiError(404, "Category not found");
+    }
+
+    const categoryId = findCategory.rows[0].category_id;
+    
+    // Base query
+    let query = `
+        SELECT 
+            p.product_id,
+            p.name,
+            p.price, 
+            p.condition, 
+            p.stock_quantity, 
+            p.product_image, 
+            p.product_features,
+            p.rental_available,
+            c.category_name
+        FROM product p
+        JOIN category c ON p.category_id = c.category_id
+        WHERE p.category_id = $1 && 
+    `;
+    const queryParams = [categoryId];
+    
+    // Add condition filter if provided
+    if (condition && ['new', 'second-hand', 'second hand'].includes(condition.toLowerCase())) {
+        query += " AND LOWER(p.condition) = $2";
+        queryParams.push(condition.toLowerCase().replace(' ', '-'));
+    }
+
+    // Add limit
+    query += " LIMIT 50";
+
+    // Execute the query
+    const findProducts = await pool.query(query, queryParams);
+
+    return res.status(200).json(new ApiResponse(200, {
+        category: {
+            category_id: findCategory.rows[0].category_id,  
+            category_name: findCategory.rows[0].category_name,
+            slug: findCategory.rows[0].slug
+        },
+        products: findProducts.rows.map(product => ({
+            product_id: product.product_id,
+            name: product.name.trim(),
+            price: product.price,
+            condition: product.condition,
+            stock_quantity: product.stock_quantity,
+            product_image: product.product_image,
+            product_features: product.product_features, 
+            rental_available: product.rental_available,
+            category_name: product.category_name
+        })),
+        condition: condition || 'all'
+    }, "Category and products found successfully"));
+});
+
+
+// const getSingleRentalCategory = asyncHandler(async (req, res) => {
+//     const { slug } = req.params;
+//     const { condition } = req.query; // Get condition from query params
+    
+//     if (!slug) {
+//         throw new ApiError(400, "Category slug is required");
+//     }
+
+//     // Find the category
+//     const findCategory = await pool.query("SELECT * FROM category WHERE slug=$1", [slug]);
+//     if (!findCategory.rows.length) {
+//         throw new ApiError(404, "Category not found");
+//     }
+
+//     const categoryId = findCategory.rows[0].category_id;
+    
+//     // Base query
+//     let query = `
+//         SELECT 
+//             p.product_id,
+//             p.name,
+//             p.price, 
+//             p.condition, 
+//             p.stock_quantity, 
+//             p.product_image, 
+//             p.product_features,
+//             p.rental_available,
+//             c.category_name
+//         FROM product p
+//         JOIN category c ON p.category_id = c.category_id
+//         WHERE p.category_id = $1 && 
+//     `;
+//     const queryParams = [categoryId];
+    
+//     // Add condition filter if provided
+//     if (condition && ['new', 'second-hand', 'second hand'].includes(condition.toLowerCase())) {
+//         query += " AND LOWER(p.condition) = $2";
+//         queryParams.push(condition.toLowerCase().replace(' ', '-'));
+//     }
+
+//     // Add limit
+//     query += " LIMIT 50";
+
+//     // Execute the query
+//     const findProducts = await pool.query(query, queryParams);
+
+//     return res.status(200).json(new ApiResponse(200, {
+//         category: {
+//             category_id: findCategory.rows[0].category_id,  
+//             category_name: findCategory.rows[0].category_name,
+//             slug: findCategory.rows[0].slug
+//         },
+//         products: findProducts.rows.map(product => ({
+//             product_id: product.product_id,
+//             name: product.name.trim(),
+//             price: product.price,
+//             condition: product.condition,
+//             stock_quantity: product.stock_quantity,
+//             product_image: product.product_image,
+//             product_features: product.product_features, 
+//             rental_available: product.rental_available,
+//             category_name: product.category_name
+//         })),
+//         condition: condition || 'all'
+//     }, "Category and products found successfully"));
+// });
+
 
 
 export { createCategory, getSingleCategory, getAllCategories, updateCategory, deleteCategory }

@@ -144,11 +144,17 @@ import Cards from "./components/pages/feedback"
 import "./components/pages/feedback.css"
 import SignIn from "./components/pages/signUp"
 import "./components/pages/signUp.css";
-import Catalog from "./components/pages/catalog"
+import Catalog from "./components/pages/catalog";
+import SecondhandCatalog from "./components/pages/secondHandCatalog";
+import RentalCatalog from "./components/pages/rentalCatalog";
+import RentalSecondhandCatalog from "./components/pages/rentalSecondhandCatalog";
+import CategoryCatalog from "./components/pages/CategoryCatalog";
 import { CartProvider } from './components/pages/cartContext';
 import "./components/pages/catalog.css";
 import ProductDetail from "./components/pages/productDescription";
 import "./components/pages/productDescription.css"
+import RentalProductDetail from "./components/pages/rentalProductDescription";
+import "./components/pages/rentalProductDescription.css"
 import Cart from "./components/pages/cart"
 import "./components/pages/cart.css";
 import Navbar from "./components/Navbar/navbar1";
@@ -171,6 +177,8 @@ import AdminOverview from './components/Dashboards/Admin/AdminOverview'
 import PayFast from './components/pages/PayFast.jsx'
 import Success from './components/pages/sucess.jsx'
 import Failure from "./components/pages/cancel.jsx"
+
+
 
 const HomePage = () => (
   <>
@@ -198,13 +206,20 @@ function App() {
       <CartProvider>
         <Box>
           <div className='content'>
+          {/* <Navbar /> */}
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/navbar" element={<Navbar />} />
               <Route path="/sign" element={<SignIn />} />
               <Route path="/catalog" element={<Catalog />} />
+              <Route path="/secondhandCatalog" element={<SecondhandCatalog />} />
+              <Route path="/rentalsecondhandCatalog" element={<RentalSecondhandCatalog />} />
+              <Route path="/rentalCatalog" element={<RentalCatalog />} />
+              <Route path="/category/:slug" element={<CategoryCatalog />} />
+              {/* <Route path="/rental-category/:slug" element={<CategoryCatalog isRental={true} />} /> */}
               <Route path="/cart" element={<Cart />} />
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/product/:id" element={<RentalProductDetail />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
               <Route path='/checkout' element={<Checkout />} />
               <Route path='/order-confirmation' element={<OrderConfirmation />} />
@@ -217,7 +232,7 @@ function App() {
               <Route path="/analytics" element={<AnalyticsDashboard />} />
 
               {/* Buyer Routes */}
-              <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
+              <Route path="/buyerdashboard" element={<BuyerDashboard />} />
               <Route path="/orderHistory" element={<OrderHistory />} />
               <Route path="/rentalAgreements" element={<RentalAgreement />} />
 

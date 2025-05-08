@@ -5,8 +5,8 @@ import { isLoggedIn } from "../middlewares/authentication.middleware.js";
 const categoryRoutes=express.Router();
 
 //ALL users
-categoryRoutes.get("/getCategory/:slug",isLoggedIn,getSingleCategory);   
-categoryRoutes.get("/getAllCategories",isLoggedIn,getAllCategories);
+categoryRoutes.get("/getCategory/:slug",getSingleCategory);   
+categoryRoutes.get("/getAllCategories",getAllCategories);
 
 //ONLY admin
 categoryRoutes.post("/createCategory",isLoggedIn,createCategory);

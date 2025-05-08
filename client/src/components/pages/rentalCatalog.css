@@ -21,6 +21,7 @@
   }
   
   .catalog_container {
+    position: relative;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -126,12 +127,18 @@
     /* height: 20%; */
     font-size: 20px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     /* padding: 10px 0 20px 0; */
     border-width: 0px 0px 2px 2px;
     border-style: solid;
-    border-color: #c0b7b7
+    border-color: #c0b7b7;
+  }
+
+  .product_price .rental-price-tag {
+    font-size: 14px;
+
   }
   
   .price span {
@@ -366,7 +373,12 @@
 }
 
 .secondhand_button {
+  position: absolute;
+  left: 20px;
+  top: 20px; 
   padding: 10px;
+  margin-bottom: 60px;
   background-color: #52667E;
   color: white;
+  z-index: 10; 
 }

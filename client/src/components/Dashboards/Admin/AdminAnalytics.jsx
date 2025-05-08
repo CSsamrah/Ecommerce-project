@@ -231,13 +231,13 @@ const AdminAnalytics = () => {
 
   return (
     <div className="admin-analytics-container">
-<<<<<<< HEAD
+
 
         <AdminDashboard />
       
 
       <h2>Admin Analytics Dashboard</h2>
-=======
+
       {renderConfetti()}
       <AdminDashboard />
       <br></br>
@@ -245,7 +245,7 @@ const AdminAnalytics = () => {
         <Sparkles className="header-icon" size={32} />
         <h2>Analytics Dashboard</h2>
       </div>
->>>>>>> db08a38e802df88b33525097f2ef7b7fab1eaaf6
+
 
       <div className="stats-summary">
         <div className="stat-card animated">

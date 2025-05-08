@@ -13,10 +13,12 @@ function BuyerDashboard() {
     };
 
     return (
-        
-        <div className="buyer-dashboard-body">
+        <div className="buyer-dashboard-main">
 
             <Navbar />
+
+        <div className="buyer-dashboard-body">
+
 
             <button className="hamburger" onClick={toggleSidebar}>
                 &#9776;
@@ -27,6 +29,7 @@ function BuyerDashboard() {
                     <li onClick={() => navigate("/rentalAgreements")}>Rental Agreements</li>
                 </ul>
             </div>
+        </div>
         </div>
 
     );

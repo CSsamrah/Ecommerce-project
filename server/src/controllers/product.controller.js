@@ -376,6 +376,7 @@ const getAllProducts = async (req, res) => {
     try {
       console.log("getAllProducts function called");
 
+      const rental= false;
       const query = `
         SELECT 
             p.product_id as id,
@@ -383,14 +384,16 @@ const getAllProducts = async (req, res) => {
             p.price,
             p.product_image as image,
             p.description,
-            p.condition,
-             p.stock_quantity
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
         FROM product p
+        WHERE p.rental_available = $1
         LIMIT 50
       `;
       
       console.log("Executing query:", query);
-      const result = await pool.query(query);
+      const result = await pool.query(query, [rental]);
       console.log(`Query executed successfully. Retrieved ${result.rows.length} products`);
 
       const products = result.rows.map(product => ({
@@ -401,6 +404,7 @@ const getAllProducts = async (req, res) => {
         description: product.description,
         condition: product.condition,
         stock_quantity: product.stock_quantity,
+        rental: product.rental,
         avg_rating: '0', 
         people_rated: '0'
       }));

@@ -1,5 +1,12 @@
-
+buyer-dashboard-main {
+    width: 100%;
+    background-color: #52667E;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
 .buyer-dashboard-body {
+    width: 100%;
     position: relative;
     font-family: Arial, sans-serif;
 }

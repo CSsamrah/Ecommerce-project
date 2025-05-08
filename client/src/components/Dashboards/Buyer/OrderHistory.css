@@ -1,3 +1,10 @@
+.order-body {
+    width: 100%;
+    background-color: #52667E;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
 .order-history-container {
     max-width: 1200px;
     margin: 0 auto;

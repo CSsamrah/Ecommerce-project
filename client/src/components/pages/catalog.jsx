@@ -194,6 +194,7 @@ const Catalog = () => {
         const response = await axios.get("http://localhost:3000/api/products/getAllProducts");
         
         console.log("Response received:", response.data);
+        // console.log("1Current products state:", products)
         
         // Check if response has data property
         if (response.data && (response.data.data || Array.isArray(response.data))) {
@@ -202,6 +203,8 @@ const Catalog = () => {
                               (response.data.data ? response.data.data : []);
           
           setProducts(productsData);
+          // console.log("2Current products state:", products)
+          // console.log("The products are:", products);
         } else {
           console.error("Unexpected response format:", response.data);
           setError("Invalid data format received from server");
@@ -217,6 +220,10 @@ const Catalog = () => {
 
     fetchProducts();
   }, []);
+
+  // useEffect(() => {
+  //         console.log("3Current products state:", products);
+  //       }, [products]);
 
   // Add this to your product listing page where you get all products
 useEffect(() => {
@@ -246,6 +253,10 @@ useEffect(() => {
     navigate(`/product/${productId}`);
   };
 
+  // const navigateToSecondHand = () => {
+  //   navigate(`/product/${productId}`);
+  // }
+
   const renderStars = (rating) => {
     const numericRating = typeof rating === 'string' ? parseFloat(rating) : rating || 0;
     return [...Array(5)].map((_, i) => (
@@ -271,6 +282,7 @@ useEffect(() => {
       <Navbar />
       <div className="catalog">
         <div className="catalog_container">
+          <button className='secondhand_button' onClick={() => navigate('/secondhandCatalog')}>Second hand products</button>
           <div className="products">
             {products.map((product) => {
               const averageRating = getProductRating(product);
@@ -283,6 +295,8 @@ useEffect(() => {
                     </div>
                     <div className="product_price">
                       <b>Rs.{product.price}</b>
+                      {/* <p>{product.condition}</p> */}
+                      {/* <p>{product.rental?"TRUE": "False"}</p> */}
                     </div>
                   </div>
 
