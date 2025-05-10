@@ -87,162 +87,98 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
-      throw new ApiError(400, 'Please provide both email and password fields');
+        throw new ApiError(400, 'Please provide both email and password');
     }
-  
+
     const userResult = await pool.query('SELECT * FROM "Users" WHERE email=$1', [email]);
-    if (userResult.rows.length == 0) {
-      throw new ApiError(400, 'User not registered');
+    if (userResult.rows.length === 0) {
+        throw new ApiError(404, 'User not registered');
     }
-  
+
     const user = userResult.rows[0];
-    const checkPwd = await bcrypt.compare(password, user.password);
-    if (!checkPwd) {
-      throw new ApiError(400, 'Incorrect password');
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        throw new ApiError(401, 'Incorrect password');
     }
-  
+
+    // Generate tokens
     const accessToken = jwt.sign(
-      { id: user.user_id },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+        { id: user.user_id, email: user.email, role: user.role },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '15m' }
     );
-  
+
     const refreshToken = jwt.sign(
-      { id: user.user_id },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: '7d' }
+        { id: user.user_id },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: '7d' }
     );
-  
+
     // Update refresh token in DB
     await pool.query(
-      'UPDATE "Users" SET refresh_token=$1 WHERE email=$2',
-      [refreshToken, email]
+        'UPDATE "Users" SET refresh_token=$1 WHERE email=$2',
+        [refreshToken, email]
     );
-  
-    
-    // Set HttpOnly cookies
+
+    // Set cookies
     res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 30 * 60 * 1000 // 30 minutes
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000 // 15 minutes
     });
-  
+
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
-  
-    // Return user data without sensitive info
+
+    // Return response with user data and token
     const userData = {
-      user_id: user.user_id,
-      name: user.name,
-      email: user.email,
-      phoneNo: user.phoneNo,
-      role: user.role,
-      address: user.address
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phoneNo: user.phoneNo,
+        address: user.address
     };
-  
-    return res.status(200).json(new ApiResponse(200, userData, "User logged in successfully"));
-  });
-  
-  const logOut = asyncHandler(async (req, res) => {
-    await pool.query(
-      'UPDATE "Users" SET refresh_token=$1 WHERE user_id=$2',
-      [null, req.user?.user_id]
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            user: userData,
+            accessToken, // Also send in response for frontend storage
+            refreshToken
+        }, "User logged in successfully")
     );
-  
-    // Clear cookies
+});
+
+const logOut = asyncHandler(async (req, res) => {
+    await pool.query(
+        'UPDATE "Users" SET refresh_token=NULL WHERE user_id=$1',
+        [req.user.user_id]
+    );
+
     res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict"
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'strict'
     });
-  
+
     res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict"
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'strict'
     });
-  
-    return res.status(200).json(new ApiResponse(200, {}, "User logged out successfully"));
-  });
 
-// const loginUser = asyncHandler(async (req, res) => {
-
-//     const { email, password } = req.body;
-//     if (!email || !password) {
-//         throw new ApiError(400, 'Please provide both email and password fields');
-//     }
-
-//     const checkIfUserIsRegistered = await pool.query('SELECT * FROM "Users" WHERE email=$1', [email]);
-//     if (checkIfUserIsRegistered.rows.length == 0) {
-//         throw new ApiError(400, 'User not registered');
-//     }
-
-//     const checkPwd = await bcrypt.compare(password, checkIfUserIsRegistered.rows[0].password);
-//     if (!checkPwd) {
-//         throw new ApiError(400, 'Incorrect password');
-//     }
-
-//     const accessToken = jwt.sign(
-//         { id: checkIfUserIsRegistered.rows[0].user_id },
-//         process.env.ACCESS_TOKEN_SECRET,
-//         { expiresIn: '15m' }
-//     )
-
-//     const refreshToken = jwt.sign(
-//         { id: checkIfUserIsRegistered.rows[0].user_id },
-//         process.env.REFRESH_TOKEN_SECRET,
-//         { expiresIn: '7d' }
-//     )
-
-//     const cookieOptions = {
-//         httpOnly: true,
-//         secure: process.env.NODE_ENV === "production",
-//         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-//     }
-
-//     res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
-//     res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-//     //storing refreshToken in DB
-//     await pool.query(
-//         'UPDATE "Users" SET refresh_token=$1 WHERE email=$2',
-//         [refreshToken, email]
-//     );
-
-//     const loggedInUser = await pool.query('SELECT name,email,"phoneNo",role,address FROM "Users" WHERE email=$1', [email]);
-
-//     return res.status(200).json(new ApiResponse(200, {
-//         user: loggedInUser.rows[0],
-//         accessToken,
-//         refreshToken
-//     }));
+    return res.status(200).json(
+        new ApiResponse(200, {}, "User logged out successfully")
+    );
+});
 
 
-// });
 
-// const logOut = asyncHandler(async (req, res) => {
-//     const findUser = await pool.query('SELECT * FROM "Users" WHERE user_id=$1', [req.user?.user_id]);
-//     if (!findUser.rows.length) {
-//         throw new ApiError(401, 'No user found');
-//     }
-//     await pool.query('UPDATE "Users" SET refresh_token=$1 WHERE user_id=$2', [null, req.user?.user_id]);
-
-//     const options = {
-//         httpOnly: true,
-//         secure: process.env.NODE_ENV == "production",
-//         sameSite: process.env.NODE_ENV == "production" ? "none" : "strict",
-//     }
-//     res.clearCookie('accessToken', options);
-//     res.clearCookie('refreshToken', options);
-
-//     return res.status(200).json(new ApiResponse(200, {}, "User logged out successfully"));
-
-// });
 
 const forgotPassowrd=asyncHandler(async(req,res)=>{
     const {email}=req.body;
@@ -487,62 +423,70 @@ const getAllSellers = asyncHandler(async (req, res) => {
     }
 });
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
-  
-    if (!refreshToken) {
-      throw new ApiError(401, "Refresh token not found");
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized request");
     }
-  
+
     try {
-      // Verify the refresh token
-      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      
-      // Find the user with this refresh token
-      const userResult = await pool.query(
-        'SELECT * FROM "Users" WHERE user_id = $1 AND refresh_token = $2',
-        [decoded.id, refreshToken]
-      );
-  
-      if (userResult.rows.length === 0) {
-        throw new ApiError(401, "Invalid refresh token");
-      }
-  
-      const user = userResult.rows[0];
-  
-      // Generate new access token
-      const accessToken = jwt.sign(
-        { id: user.user_id },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
-      );
-  
-      // Set the new access token in the cookie
-      res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        maxAge: 15 * 60 * 1000 // 15 minutes
-      });
-  
-      // Return user data without sensitive info
-      const userData = {
-        user_id: user.user_id,
-        name: user.name,
-        email: user.email,
-        phoneNo: user.phoneNo,
-        role: user.role,
-        address: user.address
-      };
-  
-      return res.status(200).json(new ApiResponse(200, userData, "Access token refreshed successfully"));
+        const decoded = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        );
+
+        const user = await pool.query(
+            'SELECT * FROM "Users" WHERE user_id=$1 AND refresh_token=$2',
+            [decoded.id, incomingRefreshToken]
+        );
+
+        if (user.rows.length === 0) {
+            throw new ApiError(401, "Invalid refresh token");
+        }
+
+        const newAccessToken = jwt.sign(
+            { id: user.rows[0].user_id },
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        const newRefreshToken = jwt.sign(
+            { id: user.rows[0].user_id },
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // Update refresh token in DB
+        await pool.query(
+            'UPDATE "Users" SET refresh_token=$1 WHERE user_id=$2',
+            [newRefreshToken, user.rows[0].user_id]
+        );
+
+        // Set new cookies
+        res.cookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000
+        });
+
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.status(200).json(
+            new ApiResponse(200, {
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken
+            }, "Access token refreshed")
+        );
     } catch (error) {
-      // If the token is invalid or expired, clear cookies
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
-      throw new ApiError(401, "Invalid or expired refresh token");
+        throw new ApiError(401, error?.message || "Invalid refresh token");
     }
-  });
-  
+});
 
 
 export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount, getAllBuyers, getAllSellers, refreshAccessToken};

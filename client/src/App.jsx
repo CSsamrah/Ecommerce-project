@@ -325,11 +325,11 @@ function App() {
                 <Route path="/navbar" element={<Navbar />} />
                 <Route path="/sign" element={<SignIn />} />
                 <Route path="/catalog" element={<Catalog />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                <Route path="/product/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
                 <Route path='/forgot-password' element={<ForgotPassword />} />
-                <Route path='/checkout' element={<Checkout />} />
-                <Route path='/order-confirmation' element={<OrderConfirmation />} />
+                <Route path='/checkout' element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path='/order-confirmation' element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
 
                 {/* Protected Seller Routes */}
                 <Route path="/seller-dashboard" element={<ProtectedRoute role="seller"><Seller_dashboard /></ProtectedRoute>} />
@@ -356,7 +356,7 @@ function App() {
                 <Route path="/regSellers" element={<ProtectedRoute role="admin"><Sellers /></ProtectedRoute>} />
                 <Route path="/adminAnalytics" element={<ProtectedRoute role="admin"><AdminAnalytics /></ProtectedRoute>} />
                 
-                <Route path='/payment' element={<PayFast />} />
+                <Route path='/payment' element={<ProtectedRoute><PayFast /></ProtectedRoute>} />
                 <Route path='payment/success' element={<Success />} />
                 <Route path='payment/failure' element={<Failure />} />
               </Routes>

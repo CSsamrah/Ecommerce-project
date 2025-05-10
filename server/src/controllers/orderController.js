@@ -201,4 +201,137 @@ export const getOrderStatus = asyncHandler(async (req, res) => {
 
     res.status(200).json({ success: true, orderStatus: result.rows[0] });
 });
+export const getUserOrders = asyncHandler(async (req, res) => {
+  const user = req.user;
+  
+  if (!user) {
+      throw new ApiError(401, "Unauthorized");
+  }
+
+  // Get all orders for the user
+  const ordersQuery = `
+      SELECT o.order_id, o.total_amount, o.status, o.created_at
+      FROM orders o
+      WHERE o.user_id = $1
+      ORDER BY o.created_at DESC
+  `;
+  const ordersResult = await pool.query(ordersQuery, [user.user_id]);
+  const orders = ordersResult.rows;
+
+  // Get order items for each order
+  for (const order of orders) {
+      const itemsQuery = `
+          SELECT oi.*, p.name AS product_name,
+          p.product_image AS product_image
+          FROM order_item oi
+          JOIN product p ON oi.product_id = p.product_id
+          WHERE oi.order_id = $1
+      `;
+      const itemsResult = await pool.query(itemsQuery, [order.order_id]);
+      
+      // Transform order items with formatted image URLs
+      order.items = itemsResult.rows.map(item => ({
+          ...item,
+          product_image: item.product_image?.includes('cloudinary.com') 
+              ? `${item.product_image}?w=150&h=150&c=fill` 
+              : item.product_image
+      }));
+  }
+
+  res.status(200).json({ success: true, orders });
+});
+
+// orderController.js
+export const cancelOrder = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { order_id } = req.params;
+
+  if (!user) {
+      throw new ApiError(401, "Unauthorized");
+  }
+
+  // Add logging to debug the issue
+  console.log(`Attempting to cancel order ${order_id} for user ${user.user_id}`);
+
+  // Validate order_id
+  if (!order_id || isNaN(parseInt(order_id))) {
+      throw new ApiError(400, "Invalid order ID");
+  }
+
+  // Check if order exists and belongs to user
+  const orderCheck = await pool.query(
+      'SELECT user_id, status FROM orders WHERE order_id = $1',
+      [order_id]
+  );
+
+  console.log(`Order check result: ${JSON.stringify(orderCheck.rows)}`);
+
+  if (orderCheck.rows.length === 0) {
+      throw new ApiError(404, "Order not found");
+  }
+
+  const orderData = orderCheck.rows[0];
+  
+  console.log(`Order status: ${orderData.status}, Owner: ${orderData.user_id}, Requester: ${user.user_id}`);
+
+  if (orderData.user_id !== user.user_id) {
+      throw new ApiError(403, "Not authorized to cancel this order");
+  }
+
+  // Check status (case-insensitive)
+  const status = orderData.status.toLowerCase();
+  if (status !== "processing") {
+      throw new ApiError(400, `Only processing orders can be cancelled. Current status: ${orderData.status}`);
+  }
+
+  // Start transaction
+  const client = await pool.connect();
+  try {
+      await client.query('BEGIN');
+
+      // Update order status
+      await client.query(
+          'UPDATE orders SET status = $1 WHERE order_id = $2',
+          ['cancelled', order_id]
+      );
+
+      // Get order items
+      const itemsQuery = 'SELECT * FROM order_item WHERE order_id = $1';
+      const itemsResult = await client.query(itemsQuery, [order_id]);
+      const items = itemsResult.rows;
+
+      console.log(`Found ${items.length} items for order ${order_id}`);
+
+      for (const item of items) {
+          // Restore product quantity
+          await client.query(
+              'UPDATE product SET stock_quantity = stock_quantity + $1 WHERE product_id = $2',
+              [item.quantity, item.product_id]
+          );
+          console.log(`Restored ${item.quantity} units of product ${item.product_id}`);
+
+          // If rental, update rental status
+          if (item.is_rental) {
+              const rentalResult = await client.query(
+                  `UPDATE rental 
+                   SET rental_status = 'Available', rented_by = NULL, rented_at = NULL 
+                   WHERE product_id = $1 AND rented_by = $2
+                   RETURNING rental_id`,
+                  [item.product_id, user.user_id]
+              );
+              console.log(`Updated ${rentalResult.rowCount} rental records for product ${item.product_id}`);
+          }
+      }
+
+      await client.query('COMMIT');
+      console.log(`Successfully cancelled order ${order_id}`);
+      res.status(200).json({ success: true, message: "Order cancelled successfully" });
+  } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error cancelling order:', error);
+      throw new ApiError(500, `Failed to cancel order: ${error.message}`);
+  } finally {
+      client.release();
+  }
+});
 

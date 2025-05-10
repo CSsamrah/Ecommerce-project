@@ -3,6 +3,7 @@ import "./Buyers.css";
 import AdminDashboard from "./AdminDashboard.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from '../../Navbar/navbar1'
 
 
 function Buyers() {
@@ -53,6 +54,8 @@ function Buyers() {
     );
 
     return (
+        <div className="buyer-container">
+            <Navbar />
         <div className="buyer-body">
          
             <AdminDashboard />
@@ -104,6 +107,7 @@ function Buyers() {
                     </tbody>
                 </table>
             )}
+        </div>
         </div>
         </div>
     );

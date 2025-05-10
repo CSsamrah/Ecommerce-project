@@ -117,11 +117,11 @@ userRoutes.get("/check-auth", isLoggedIn, (req, res) => {
         success: true,
         user: {
             user_id: req.user.user_id,
-            name: req.user.name,
+            // name: req.user.name,
             email: req.user.email,
-            phoneNo: req.user.phoneNo,
+            // phoneNo: req.user.phoneNo,
             role: req.user.role,
-            address: req.user.address
+            // address: req.user.address
         }
     });
 });
