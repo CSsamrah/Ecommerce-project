@@ -145,75 +145,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, `Category ${slug} deleted successfully`));
 })
 
-const getSingleCategory = asyncHandler(async (req, res) => {
-    const { slug } = req.params;
-    const { condition } = req.query; // Get condition from query params
-    
-    if (!slug) {
-        throw new ApiError(400, "Category slug is required");
-    }
-
-    // Find the category
-    const findCategory = await pool.query("SELECT * FROM category WHERE slug=$1", [slug]);
-    if (!findCategory.rows.length) {
-        throw new ApiError(404, "Category not found");
-    }
-
-    const categoryId = findCategory.rows[0].category_id;
-    
-    // Base query
-    let query = `
-        SELECT 
-            p.product_id,
-            p.name,
-            p.price, 
-            p.condition, 
-            p.stock_quantity, 
-            p.product_image, 
-            p.product_features,
-            p.rental_available,
-            c.category_name
-        FROM product p
-        JOIN category c ON p.category_id = c.category_id
-        WHERE p.category_id = $1 && 
-    `;
-    const queryParams = [categoryId];
-    
-    // Add condition filter if provided
-    if (condition && ['new', 'second-hand', 'second hand'].includes(condition.toLowerCase())) {
-        query += " AND LOWER(p.condition) = $2";
-        queryParams.push(condition.toLowerCase().replace(' ', '-'));
-    }
-
-    // Add limit
-    query += " LIMIT 50";
-
-    // Execute the query
-    const findProducts = await pool.query(query, queryParams);
-
-    return res.status(200).json(new ApiResponse(200, {
-        category: {
-            category_id: findCategory.rows[0].category_id,  
-            category_name: findCategory.rows[0].category_name,
-            slug: findCategory.rows[0].slug
-        },
-        products: findProducts.rows.map(product => ({
-            product_id: product.product_id,
-            name: product.name.trim(),
-            price: product.price,
-            condition: product.condition,
-            stock_quantity: product.stock_quantity,
-            product_image: product.product_image,
-            product_features: product.product_features, 
-            rental_available: product.rental_available,
-            category_name: product.category_name
-        })),
-        condition: condition || 'all'
-    }, "Category and products found successfully"));
-});
-
-
-// const getSingleRentalCategory = asyncHandler(async (req, res) => {
+// const getSingleCategory = asyncHandler(async (req, res) => {
 //     const { slug } = req.params;
 //     const { condition } = req.query; // Get condition from query params
     
@@ -281,5 +213,219 @@ const getSingleCategory = asyncHandler(async (req, res) => {
 // });
 
 
+// const getSingleRentalCategory = asyncHandler(async (req, res) => {
+//     const { slug } = req.params;
+//     const { condition } = req.query; // Get condition from query params
+    
+//     if (!slug) {
+//         throw new ApiError(400, "Category slug is required");
+//     }
 
-export { createCategory, getSingleCategory, getAllCategories, updateCategory, deleteCategory }
+//     // Find the category
+//     const findCategory = await pool.query("SELECT * FROM category WHERE slug=$1", [slug]);
+//     if (!findCategory.rows.length) {
+//         throw new ApiError(404, "Category not found");
+//     }
+
+//     const categoryId = findCategory.rows[0].category_id;
+    
+//     // Base query
+//     let query = `
+//         SELECT 
+//             p.product_id,
+//             p.name,
+//             p.price, 
+//             p.condition, 
+//             p.stock_quantity, 
+//             p.product_image, 
+//             p.product_features,
+//             p.rental_available,
+//             c.category_name
+//         FROM product p
+//         JOIN category c ON p.category_id = c.category_id
+//         WHERE p.category_id = $1 
+//     `;
+//     const queryParams = [categoryId];
+    
+//     // Add condition filter if provided
+//     if (condition && ['new', 'second-hand', 'second hand'].includes(condition.toLowerCase())) {
+//         query += " AND LOWER(p.condition) = $2";
+//         queryParams.push(condition.toLowerCase().replace(' ', '-'));
+//     }
+
+//     // Add limit
+//     query += " LIMIT 50";
+
+//     // Execute the query
+//     const findProducts = await pool.query(query, queryParams);
+
+//     return res.status(200).json(new ApiResponse(200, {
+//         category: {
+//             category_id: findCategory.rows[0].category_id,  
+//             category_name: findCategory.rows[0].category_name,
+//             slug: findCategory.rows[0].slug
+//         },
+//         products: findProducts.rows.map(product => ({
+//             product_id: product.product_id,
+//             name: product.name.trim(),
+//             price: product.price,
+//             condition: product.condition,
+//             stock_quantity: product.stock_quantity,
+//             product_image: product.product_image,
+//             product_features: product.product_features, 
+//             rental_available: product.rental_available,
+//             category_name: product.category_name
+//         })),
+//         condition: condition || 'all'
+//     }, "Category and products found successfully"));
+// });
+
+// Add these functions to your existing categoryController.js
+
+const getSingleCategory = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    console.log("Fetching category with slug:", slug);
+    // const { condition } = req.query; 
+    const rental= false;
+    
+    if (!slug) {
+      throw new ApiError(400, "Category slug is required");
+    }
+    
+    // if (!condition || !['new', 'second-hand'].includes(condition)) {
+    //   throw new ApiError(400, "Valid condition (new or second-hand) is required");
+    // }
+  
+    try {
+      // First get the category ID from the slug
+      const categoryResult = await pool.query(
+        "SELECT category_id FROM category WHERE slug = $1",
+        [slug]
+      );
+  
+      if (categoryResult.rows.length === 0) {
+        throw new ApiError(404, "Category not found");
+      }
+  
+      const categoryId = categoryResult.rows[0].category_id;
+  
+      // Get products from this category with the specified condition
+      // Products should NOT be rental products
+      const productsResult = await pool.query(
+        `SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
+        FROM product p
+        WHERE p.category_id = $1 
+          AND p.rental_available = $2
+        GROUP BY p.product_id
+        LIMIT 50`,
+        [categoryId, rental]
+      );
+
+      const Result = productsResult.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
+  
+    //   return res.status(200).json(
+    //     new ApiResponse(
+    //       200, 
+    //       {
+    //         category: categoryResult.rows[0],
+    //         products: productsResult.rows,
+    //         condition
+    //       },
+    //       "Category products fetched successfully"
+    //     )
+    //   );
+
+    return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: Result
+      });
+    } catch (error) {
+      console.error("Error in getSingleCategory:", error);
+      throw new ApiError(500, "Failed to fetch category products: " + error.message);
+    }
+  });
+  
+  const getSingleRentalCategory = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    const { condition } = req.query; // 'new' or 'second-hand'
+    const rental= true;
+    
+    if (!slug) {
+      throw new ApiError(400, "Category slug is required");
+    }
+    
+    if (!condition || !['new', 'second-hand'].includes(condition)) {
+      throw new ApiError(400, "Valid condition (new or second-hand) is required");
+    }
+  
+    try {
+      // First get the category ID from the slug
+      const categoryResult = await pool.query(
+        "SELECT category_id FROM category WHERE slug = $1",
+        [slug]
+      );
+  
+      if (categoryResult.rows.length === 0) {
+        throw new ApiError(404, "Category not found");
+      }
+  
+      const categoryId = categoryResult.rows[0].category_id;
+  
+      // Get RENTAL products from this category with the specified condition
+      const rentalProductsResult = await pool.query(
+        `SELECT 
+          p.id, 
+          p.title, 
+          p.price, 
+          p.image, 
+          p.condition,
+          p.rental_period,
+          COALESCE(AVG(r.rating), 0) as avg_rating,
+          COUNT(r.id) as review_count
+        FROM product p
+        LEFT JOIN reviews r ON p.id = r.product_id
+        WHERE p.category_id = $1 
+          AND p.condition = $2
+          AND p.rental_available = $3
+        GROUP BY p.id
+        ORDER BY p.created_at DESC`,
+        [categoryId, condition, rental]
+      );
+  
+      return res.status(200).json(
+        new ApiResponse(
+          200, 
+          {
+            category: categoryResult.rows[0],
+            products: rentalProductsResult.rows,
+            condition
+          },
+          "Rental category products fetched successfully"
+        )
+      );
+    } catch (error) {
+      console.error("Error in getSingleRentalCategory:", error);
+      throw new ApiError(500, "Failed to fetch rental category products: " + error.message);
+    }
+  });
+
+export { createCategory, getSingleCategory, getSingleRentalCategory, getAllCategories, updateCategory, deleteCategory }

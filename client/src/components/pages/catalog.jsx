@@ -193,7 +193,7 @@ const Catalog = () => {
         // Simplified request - no authentication headers
         const response = await axios.get("http://localhost:3000/api/products/getAllProducts");
         
-        console.log("Response received:", response.data);
+        console.log("Products Catalog Response received:", response.data);
         // console.log("1Current products state:", products)
         
         // Check if response has data property

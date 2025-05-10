@@ -1,11 +1,16 @@
 import express from "express";
-import { createCategory,getSingleCategory,getAllCategories,updateCategory,deleteCategory} from "../controllers/category.controller.js";
+import { createCategory,getSingleCategory, getSingleRentalCategory, getAllCategories,updateCategory,deleteCategory} from "../controllers/category.controller.js";
 import { isLoggedIn } from "../middlewares/authentication.middleware.js";
 
 const categoryRoutes=express.Router();
 
 //ALL users
-categoryRoutes.get("/getCategory/:slug",getSingleCategory);   
+// categoryRoutes.get("/getCategory/:slug",getSingleCategory);
+categoryRoutes.get("/getCategory/:slug", (req, res, next) => {
+    console.log("🏁 Route hit! Slug:", req.params.slug); // Debug log
+    next();
+  }, getSingleCategory); 
+categoryRoutes.get("/getCategory/:slug/rental",getSingleRentalCategory);   
 categoryRoutes.get("/getAllCategories",getAllCategories);
 
 //ONLY admin

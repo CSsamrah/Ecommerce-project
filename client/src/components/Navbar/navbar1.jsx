@@ -815,49 +815,18 @@ export default function PrimarySearchAppBar() {
                 </ListItem>
                 <Collapse in={sellingMobileOpen} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
-                        {/* New Products */}
-                        <ListItem button onClick={handleNewSellingClick} sx={{ pl: 4 }}>
-                            <ListItemText primary="New" />
-                            {newSellingOpen ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={newSellingOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            {categories && categories.map(category => (
-                                        <ListItem 
-                                            key={`new-${category.slug}`}
-                                            button 
-                                            component={Link} 
-                                            to={`/category/${category.slug}?condition=new`}
-                                            sx={{ pl: 4 }}
-                                            onClick={handleDrawerToggle}
-                                        >
-                                            <ListItemText className="category_name" primary={category.name} />
-                                        </ListItem>
-                                    ))}
-                            </List>
-                        </Collapse>
-                        
-                        {/* Second Hand Products */}
-                        <ListItem button onClick={handleSecondHandSellingClick} sx={{ pl: 4 }}>
-                            <ListItemText primary="Second Hand" />
-                            {secondHandSellingOpen ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={secondHandSellingOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                                {categories && categories.map(category => (
-                                    <ListItem 
-                                        key={`second-hand-${category.slug}`}
-                                        button 
-                                        component={Link} 
-                                        to={`/category/${category.slug}?condition=second-hand`}
-                                        sx={{ pl: 4 }}
-                                        onClick={handleDrawerToggle}
-                                    >
-                                        <ListItemText primary={category.name} />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Collapse>
+                        {categories && categories.map(category => (
+                            <ListItem 
+                                key={`selling-${category.slug}`}
+                                button 
+                                component={Link} 
+                                to={`/category/${category.slug}`}
+                                sx={{ pl: 4 }}
+                                onClick={handleDrawerToggle}
+                            >
+                                <ListItemText primary={category.name} />
+                            </ListItem>
+                        ))}
                     </List>
                 </Collapse>
                 
@@ -868,49 +837,18 @@ export default function PrimarySearchAppBar() {
                 </ListItem>
                 <Collapse in={rentalMobileOpen} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
-                        {/* New Rental Products */}
-                        <ListItem button onClick={handleNewRentalClick} sx={{ pl: 4 }}>
-                            <ListItemText primary="New" />
-                            {newRentalOpen ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={newRentalOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                                {categories && categories.map(category => (
-                                    <ListItem 
-                                        key={`rental-new-${category.slug}`}
-                                        button 
-                                        component={Link} 
-                                        to={`/rental-category/${category.slug}?condition=new`}
-                                        sx={{ pl: 4 }}
-                                        onClick={handleDrawerToggle}
-                                    >
-                                        <ListItemText primary={category.name} />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Collapse>
-                        
-                        {/* Second Hand Rental Products */}
-                        <ListItem button onClick={handleSecondHandRentalClick} sx={{ pl: 4 }}>
-                            <ListItemText primary="Second Hand" />
-                            {secondHandRentalOpen ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={secondHandRentalOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                                {categories && categories.map(category => (
-                                    <ListItem 
-                                        key={`rental-second-hand-${category.slug}`}
-                                        button 
-                                        component={Link} 
-                                        to={`/rental-category/${category.slug}?condition=second-hand`}
-                                        sx={{ pl: 4 }}
-                                        onClick={handleDrawerToggle}
-                                    >
-                                        <ListItemText primary={category.name} />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Collapse>
+                        {categories && categories.map(category => (
+                            <ListItem 
+                                key={`rental-${category.slug}`}
+                                button 
+                                component={Link} 
+                                to={`/rental-category/${category.slug}`}
+                                sx={{ pl: 4 }}
+                                onClick={handleDrawerToggle}
+                            >
+                                <ListItemText primary={category.name} />
+                            </ListItem>
+                        ))}
                     </List>
                 </Collapse>
             </List>

@@ -149,6 +149,7 @@ import SecondhandCatalog from "./components/pages/secondHandCatalog";
 import RentalCatalog from "./components/pages/rentalCatalog";
 import RentalSecondhandCatalog from "./components/pages/rentalSecondhandCatalog";
 import CategoryCatalog from "./components/pages/CategoryCatalog";
+import RentalCategoryCatalog from "./components/pages/rentalCategoryCatalog";
 import { CartProvider } from './components/pages/cartContext';
 import "./components/pages/catalog.css";
 import ProductDetail from "./components/pages/productDescription";
@@ -213,9 +214,11 @@ function App() {
               <Route path="/sign" element={<SignIn />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/secondhandCatalog" element={<SecondhandCatalog />} />
-              <Route path="/rentalsecondhandCatalog" element={<RentalSecondhandCatalog />} />
+              {/* <Route path="/rentalsecondhandCatalog" element={<RentalSecondhandCatalog />} /> */}
               <Route path="/rentalCatalog" element={<RentalCatalog />} />
               <Route path="/category/:slug" element={<CategoryCatalog />} />
+              <Route path="/rental-category/:slug" element={<RentalCategoryCatalog />} />
+              RentalCategoryCatalog
               {/* <Route path="/rental-category/:slug" element={<CategoryCatalog isRental={true} />} /> */}
               <Route path="/cart" element={<Cart />} />
               <Route path="/product/:id" element={<ProductDetail />} />
