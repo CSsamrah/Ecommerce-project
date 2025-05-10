@@ -435,9 +435,10 @@ import {
 } from '@mui/icons-material';
 
 import { styled, alpha, createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBookOpen, FaThLarge, FaPhoneAlt } from "react-icons/fa";
 import { useCart } from '../pages/cartContext';
+import { useAuth } from '../pages/AuthProvider'; // Make sure path is correct
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -494,47 +495,45 @@ LinkTab.propTypes = {
 
 function NavTabs({shopOpen, setShopOpen}) {
     const [value, setValue] = React.useState(0);
+    const { user } = useAuth();
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
 
     const handleShopClick = () => {
         setShopOpen(!shopOpen);
-        setValue(!value); // Toggle value to potentially manage other tabs if needed
+    };
+
+    // Function to determine dashboard URL based on user role
+    const getDashboardUrl = () => {
+        if (!user) return "/sign"; // If not logged in, go to sign in
+        
+        switch (user.role?.toLowerCase()) {
+            case 'admin':
+                return "/adminAnalytics";
+            case 'seller':
+                return "/analytics"; // Using your existing seller dashboard route
+            case 'buyer':
+                return "/orderhistory"; // Using your existing buyer dashboard route
+            default:
+                return "/sign";
+        }
     };
 
     return (
         <Box sx={{ width: '100%' }}>
             <Tabs
                 value={value}
-                onChange={() => {}} // Prevent default tab change behavior
+                onChange={handleChange}
                 aria-label="nav tabs example"
                 role="navigation"
                 sx={{ display: { xs: 'none', md: 'flex' } }}
             >
                 <LinkTab label="Home" to="/" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-                <LinkTab label="Dashboard" to="/dashboard" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
+                <LinkTab label="Dashboard" to={getDashboardUrl()} sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
                 <LinkTab label="Shop" to="/catalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-
-                {/* <Tab
-                    label="Shop"
-                    onClick={handleShopClick}
-                    sx={{ fontWeight: '800', fontFamily: 'Inter', display: 'flex', alignItems: 'center', gap: '5px' }}
-                    icon={shopOpen ? <ExpandLess /> : <ExpandMore />}
-                    iconPosition="end"
-                /> */}
             </Tabs>
-            {/* {shopOpen && (
-                <Box sx={{ display: { xs: 'none', md: 'flex' }, position: 'absolute', top: '64px', left: '50%', transform: 'translateX(-50%)', bgcolor: 'white', boxShadow: 1, zIndex: 10 }}>
-                    <Box sx={{ display: 'flex' }}>
-                        <List disablePadding>
-                            <ListItem button component={Link} to="/shop/selling" onClick={() => setShopOpen(false)}>
-                                <ListItemText primary="Selling" />
-                            </ListItem>
-                            <ListItem button component={Link} to="/shop/rental" onClick={() => setShopOpen(false)}>
-                                <ListItemText primary="Rental" />
-                            </ListItem>
-                        </List>
-                    </Box>
-                </Box>
-            )} */}
         </Box>
     );
 }
@@ -561,6 +560,8 @@ const theme = createTheme({
 
 export default function PrimarySearchAppBar() {
     const { cartItems } = useCart();
+    const { user, logout } = useAuth(); // Include logout function
+    const navigate = useNavigate();
     const cart_items = cartItems ? cartItems.length : 0;
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -576,9 +577,24 @@ export default function PrimarySearchAppBar() {
     const [newRentalOpen, setNewRentalOpen] = useState(false);
     const [secondHandRentalOpen, setSecondHandRentalOpen] = useState(false);
 
-
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+    // Function to determine dashboard URL based on user role - same as in NavTabs
+    const getDashboardUrl = () => {
+        if (!user) return "/sign"; // If not logged in, go to sign in
+        
+        switch (user.role?.toLowerCase()) {
+            case 'admin':
+                return "/adminAnalytics";
+            case 'seller':
+                return "/analytics";
+            case 'buyer':
+                return "/orderhistory";
+            default:
+                return "/sign";
+        }
+    };
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -633,6 +649,12 @@ export default function PrimarySearchAppBar() {
         setSecondHandRentalOpen(!secondHandRentalOpen);
     };
 
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+        handleMenuClose();
+    };
+
     const menuId = 'primary-search-account-menu';
     const renderMenu = (
         <Menu
@@ -650,8 +672,18 @@ export default function PrimarySearchAppBar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Sign Up</MenuItem>
-            <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Log In</MenuItem>
+            {!user ? (
+                <>
+                    <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Sign Up</MenuItem>
+                    <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Log In</MenuItem>
+                </>
+            ) : (
+                <>
+                    <MenuItem onClick={handleMenuClose} component={Link} to={getDashboardUrl()}>Dashboard</MenuItem>
+                    <MenuItem onClick={handleMenuClose} component={Link} to="/profile">Profile</MenuItem>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </>
+            )}
         </Menu>
     );
 
@@ -703,32 +735,13 @@ export default function PrimarySearchAppBar() {
             sx={{ '& .MuiDrawer-paper': { width: 300 } }}
         >
             <List>
-                <ListItem button component={Link} to="/">
+                <ListItem button component={Link} to="/" onClick={handleDrawerToggle}>
                     <ListItemText primary="Home" />
                 </ListItem>
-                <ListItem button component={Link} to="/">
-                    <ListItemText primary="Dashborad" />
+                <ListItem button component={Link} to={getDashboardUrl()} onClick={handleDrawerToggle}>
+                    <ListItemText primary="Dashboard" />
                 </ListItem>
-                {/* <ListItem button onClick={handleSkincareClick}>
-                    <ListItemText primary="Skincare" />
-                    {skincareOpen ? <ExpandLess /> : <ExpandMore />}
-                </ListItem>
-                <Collapse in={skincareOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        <ListItem button component={Link} to="/skincare/cleansers" sx={{ pl: 4 }}>
-                            <ListItemText primary="Cleansers" />
-                        </ListItem>
-                        <ListItem button component={Link} to="/skincare/moisturizers" sx={{ pl: 4 }}>
-                            <ListItemText primary="Moisturizers" />
-                        </ListItem>
-                        <ListItem button component={Link} to="/skincare/serums" sx={{ pl: 4 }}>
-                            <ListItemText primary="Serums" />
-                        </ListItem>
-                        <ListItem button component={Link} to="/skincare/sunscreen" sx={{ pl: 4 }}>
-                            <ListItemText primary="Sunscreen" />
-                        </ListItem>
-                    </List>
-                </Collapse> */}
+                
                 {/* Shop main category */}
                 <ListItem button onClick={handleShopMobileClick}>
                     <ListItemText primary="Shop" />
@@ -750,19 +763,19 @@ export default function PrimarySearchAppBar() {
                                 </ListItem>
                                 <Collapse in={newSellingOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/selling/new/category1" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/new/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Computer Hardware" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category2" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/new/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Networking Components" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category3" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/new/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Peripherals and Accessories" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category4" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/new/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Storage and Backup" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/new/category5" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/new/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Power and Electrical" />
                                         </ListItem>
                                     </List>
@@ -775,19 +788,19 @@ export default function PrimarySearchAppBar() {
                                 </ListItem>
                                 <Collapse in={secondHandSellingOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category1" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Computer Hardware" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category2" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Networking Components" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category3" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Peripherals and Accessories" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category4" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Storage and Backup" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/selling/second-hand/category5" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Power and Electrical" />
                                         </ListItem>
                                     </List>
@@ -809,19 +822,19 @@ export default function PrimarySearchAppBar() {
                                 </ListItem>
                                 <Collapse in={newRentalOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/rental/new/category1" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/new/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Computer Hardware" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category2" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/new/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Networking Components" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category3" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/new/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Peripherals and Accessories" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category4" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/new/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Storage and Backup" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/new/category5" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/new/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Power and Electrical" />
                                         </ListItem>
                                     </List>
@@ -834,19 +847,19 @@ export default function PrimarySearchAppBar() {
                                 </ListItem>
                                 <Collapse in={secondHandRentalOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category1" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Computer Hardware" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category2" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Networking Components" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category3" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Peripherals and Accessories" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category4" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Storage and Backup" />
                                         </ListItem>
-                                        <ListItem button component={Link} to="/shop/rental/second-hand/category5" sx={{ pl: 12 }}>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
                                             <ListItemText primary="Power and Electrical" />
                                         </ListItem>
                                     </List>
@@ -855,6 +868,12 @@ export default function PrimarySearchAppBar() {
                         </Collapse>
                     </List>
                 </Collapse>
+
+                {user && (
+                    <ListItem button onClick={handleLogout}>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                )}
             </List>
         </Drawer>
     );
@@ -875,33 +894,26 @@ export default function PrimarySearchAppBar() {
                             <MenuIcon />
                         </IconButton>
                         <Box sx={{ flexGrow: 1 }}>
-                            <NavTabs />
+                            <NavTabs shopOpen={shopOpen} setShopOpen={setShopOpen} />
                         </Box>
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography
                                 variant="h4"
                                 noWrap
-                                component="div"
+                                component={Link}
+                                to="/"
                                 sx={{
                                     display: 'flex',
                                     fontWeight: '600',
                                     color: 'white',
                                     flexGrow: 1,
                                     justifyContent: { xs: 'center', md: 'flex-start' },
+                                    textDecoration: 'none'
                                 }}
                             >
                                 TechWare
                             </Typography>
                         </Box>
-                        {/* <Search>
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }}
-                            />
-                        </Search> */}
                         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                             <Box onMouseLeave={() => setShopOpen(false)}>
                                 {shopOpen && (
@@ -917,7 +929,7 @@ export default function PrimarySearchAppBar() {
                                     </Box>
                                 )}
                             </Box>
-                            <Link to="/cart" style={{ textDecoration: 'none' }}>
+                            <Link to="/cart" style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <IconButton aria-label="cart">
                                     <Badge badgeContent={cart_items} color="secondary">
                                         <ShoppingCartIcon />

@@ -292,6 +292,7 @@ import Success from './components/pages/sucess.jsx'
 import Failure from "./components/pages/cancel.jsx"
 import { SocketProvider } from './components/Dashboards/Seller/SocketContext.jsx';
 import ProtectedRoute from './components/pages/ProtectedRoute';
+import DashboardNavigation from './components/pages/DashboardNavigation.jsx';
 
 const HomePage = () => (
   <>
@@ -330,6 +331,7 @@ function App() {
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/checkout' element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
                 <Route path='/order-confirmation' element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
+                <Route path='/dashboard' element={<ProtectedRoute><DashboardNavigation /></ProtectedRoute>} />
 
                 {/* Protected Seller Routes */}
                 <Route path="/seller-dashboard" element={<ProtectedRoute role="seller"><Seller_dashboard /></ProtectedRoute>} />
