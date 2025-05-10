@@ -13,7 +13,7 @@ productRoutes.post("/addProduct",
 ]),
 isLoggedIn,
 addProduct);
-productRoutes.get("/getAllProducts", getAllProducts);
+productRoutes.get("/getAllProducts", isLoggedIn,getAllProducts);
 // productRoutes.get("/getProduct/:id",isLoggedIn,getOneProduct)
 
 productRoutes.get("/getProduct/:id",getOneProduct)

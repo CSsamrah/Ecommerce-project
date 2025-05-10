@@ -7,6 +7,7 @@ import crypto from "crypto"
 import fs from "fs";
 import path from "path";
 import generateKeyPair from "../utils/generateKeys.js";
+import { features } from "process";
 
 const keysDir = path.resolve("src/keys");
 const privateKeyPath = path.join(keysDir, "private_key.pem");
@@ -53,7 +54,7 @@ const addProduct = asyncHandler(async (req, res) => {
         case !product_features || !Array.isArray(JSON.parse(product_features)):   //Array.isArray() is a built-in JavaScript method used to check whether a given value is an array.
             throw new ApiError(400, "Product features must be an array");
         case !category_id:
-            throw new ApiError(400, "Category ID is required");
+            throw new ApiError(400, "Category slug is required");
 
         default:
             console.log("All validations passed. Proceeding with product creation...");
@@ -68,11 +69,13 @@ const addProduct = asyncHandler(async (req, res) => {
     if (findProduct.rows.length > 0) {
         throw new ApiError(409, "Product already exists");
     }
+    if(isNaN(category_id)){
+        throw new ApiError(400, "Category ID should be a number");  
+    }
 
-    const categoryID = Number(req.body.category_id)
+    const findCategory = await pool.query("SELECT * FROM category WHERE category_id=$1", [category_id]);
 
-    const findCategory = await pool.query("SELECT * FROM category WHERE category_id=$1", [categoryID]);
-    if (findCategory.rowCount == 0) {
+    if (findCategory.rowCount === 0) {
         throw new ApiError(404, "Category not found");
     }
 
@@ -198,21 +201,21 @@ const updateProduct = asyncHandler(async (req, res) => {
     const priceNumber = price !== undefined ? parseFloat(price) : undefined;
     const stockNumber = stock_quantity !== undefined ? parseInt(stock_quantity, 10) : undefined;
     const rentalAvailableBoolean = rental_available === "true" || rental_available === true;
-    
+
     let updatedProductImage;
     // Ensure product image exists before uploading
     if (req.files?.product_image) {
         try {
-            
-            updatedProductImage = await uploadOnCloudinary(req.files.product_image[0].path);  
+
+            updatedProductImage = await uploadOnCloudinary(req.files.product_image[0].path);
             console.log(`The image format is ${updatedProductImage.format}`); // or you can use image format
-    
+
         } catch (err) {
             console.log("Error uploading on Cloudinary", err);
-          
+
         }
     }
- 
+
     if (
         name === undefined &&
         description === undefined &&
@@ -221,8 +224,8 @@ const updateProduct = asyncHandler(async (req, res) => {
         stock_quantity === undefined &&
         rental_available === undefined &&
         product_features === undefined &&
-        updatedProductImage===undefined
-        
+        updatedProductImage === undefined
+
     ) {
         throw new ApiError(400, "Please provide at least one field to update");
     }
@@ -244,7 +247,7 @@ const updateProduct = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Product features must be a valid JSON array.");
         }
     }
-    
+
     //nobody can set rental_available to true while the product is still rented
     if (rental_available === true || rental_available === "true") {
         const checkProduct = await pool.query(
@@ -252,13 +255,13 @@ const updateProduct = asyncHandler(async (req, res) => {
             [product_id]
         );
         const isProductRented = checkProduct.rows[0]?.rental_status;
-    
+
         if (isProductRented === 'Rented') {
             throw new ApiError(403, "Cannot set rental_available to TRUE while the product is still rented.");
         }
     }
-    
-    
+
+
     let digital_signature = "";
     try {
         const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
@@ -387,53 +390,48 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 })
 
-const getAllProducts = async (req, res) => {
-    try {
-    
+const getAllProducts = asyncHandler(async (req, res) => {
 
-      const query = `
+    const userID = req.user?.user_id;
+    if (!userID) {
+        throw new ApiError(400, "User ID is required for authentication");
+    }
+   
+    const query = `
         SELECT 
             p.product_id as id,
             p.name as title,
             p.price,
-            p.product_image as image,
             p.description,
             p.condition,
-             p.stock_quantity
+            p.stock_quantity,
+            p.rental_available,
+            p.product_features,
+            p.product_image as image,
+            p.rental_available
         FROM product p
+        WHERE p.user_id = $1
         LIMIT 50
-      `;
-      
-      const result = await pool.query(query);
-      
-      const products = result.rows.map(product => ({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        image: product.image,
-        description: product.description,
-        condition: product.condition,
-        stock_quantity: product.stock_quantity,
-        avg_rating: '0', 
-        people_rated: '0'
-      }));
+    `;
 
-      return res.status(200).json({
-        success: true,
-        statusCode: 200,
-        message: "Products fetched successfully",
-        data: products
-      });
-    } catch (error) {
-      console.error("Error in getAllProducts:", error);
+        const result = await pool.query(query,[userID]);
 
-      return res.status(500).json({
-        success: false,
-        statusCode: 500,
-        message: "Failed to fetch products: " + error.message,
-        data: null
-      });
+        const products = result.rows.map(product => ({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            description: product.description,
+            condition: product.condition,
+            stock_quantity: product.stock_quantity,
+            image: product.image,
+            features:product.product_features,
+            rental_available: product.rental_available,
+            avg_rating: '0',
+            people_rated: '0'
+        }));
+
+        return res.status(200).json(new ApiResponse(200, products, "Products fetched successfully"));
     }
-  };
+);
 
 export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts }

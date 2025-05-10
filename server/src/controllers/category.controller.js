@@ -68,7 +68,7 @@ const getSingleCategory = asyncHandler(async (req, res) => {
 })
 
 const getAllCategories = asyncHandler(async (req, res) => {
-    const allCategories = await pool.query("SELECT category_name, slug FROM category");
+    const allCategories = await pool.query("SELECT * FROM category");
 
     if (!allCategories.rows.length) {
         throw new ApiError(404, "No categories found");
