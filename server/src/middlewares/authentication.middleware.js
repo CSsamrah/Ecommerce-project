@@ -12,7 +12,7 @@ const isLoggedIn = asyncHandler(async (req, _, next) => {
       token = req.header("Authorization").replace("Bearer ", "").trim();
     }
   
-    console.log("TOKEN:", token);
+    console.log("TOKEN1:", token);
   
     if (!token) {
       throw new ApiError(401, 'Unauthorized request: No token received');
