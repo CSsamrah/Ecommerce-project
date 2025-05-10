@@ -15,6 +15,14 @@ export const dashboardSeller=asyncHandler(async (req, res) => {
     JOIN product p ON oi.product_id = p.product_id
     WHERE p.user_id = $1
   `;
+
+  const getSellerOrders =`
+  SELECT product_name as product.name
+    FROM orders o
+    JOIN order_item oi ON o.order_id = oi.order_id
+    JOIN product p ON oi.product_id = p.product_id
+    WHERE p.user_id = $1
+  `;
   
   // Get total sales
   const salesQuery = `
@@ -671,5 +679,101 @@ export const orderDetails=asyncHandler(async (req, res) => {
       status: updatedOrder.status
     }
   });
+});
+
+export const ordersByQuery = asyncHandler(async (req, res) => {
+  const sellerId = req.user?.user_id;
+  const { page = 1, limit = 10, status = null } = req.body;
+  const offset = (page - 1) * limit;
+  
+  // Base query - using the same structure as the total_orders count query
+  // but selecting the specific order details we need
+  let orderQuery = `
+    SELECT DISTINCT
+      o.order_id,
+      o.created_at,
+      o.status,
+      o.total_amount,
+      u.user_id as customer_id,
+      u.name as customer_name
+    FROM orders o
+    JOIN order_item oi ON o.order_id = oi.order_id
+    JOIN product p ON oi.product_id = p.product_id
+    JOIN "Users" u ON o.user_id = u.user_id
+    WHERE p.user_id = $1
+  `;
+  
+  const queryParams = [sellerId];
+  let paramIndex = 2;
+  
+  // Add status filter if provided
+  if (status) {
+    orderQuery += ` AND o.status = $${paramIndex}`;
+    queryParams.push(status);
+    paramIndex++;
+  }
+  
+  // Add order by, limit and offset
+  orderQuery += `
+    ORDER BY o.created_at DESC
+    LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+  `;
+  queryParams.push(limit, offset);
+  
+  // Count query - this is the exact same structure as the total_orders query
+  // but we're counting distinct order_ids to match the pagination
+  let countQuery = `
+    SELECT COUNT(DISTINCT o.order_id) as total
+    FROM orders o
+    JOIN order_item oi ON o.order_id = oi.order_id
+    JOIN product p ON oi.product_id = p.product_id
+    WHERE p.user_id = $1
+  `;
+  
+  // Add status filter to count query if provided
+  if (status) {
+    countQuery += ` AND o.status = $2`;
+  }
+  
+  try {
+    // Execute queries
+    const [ordersResult, countResult] = await Promise.all([
+      pool.query(orderQuery, queryParams),
+      pool.query(countQuery, status ? [sellerId, status] : [sellerId])
+    ]);
+    
+    const totalOrders = parseInt(countResult.rows[0].total);
+    const totalPages = Math.ceil(totalOrders / limit);
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        orders: ordersResult.rows.map(row => ({
+          order_id: row.order_id,
+          created_at: row.created_at,
+          status: row.status,
+          total_amount: parseFloat(row.total_amount),
+          customer: {
+            id: row.customer_id,
+            name: row.customer_name
+          }
+        })),
+        pagination: {
+          total_orders: totalOrders,
+          total_pages: totalPages,
+          current_page: parseInt(page),
+          has_next_page: parseInt(page) < totalPages,
+          has_previous_page: parseInt(page) > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message
+    });
+  }
 });
 

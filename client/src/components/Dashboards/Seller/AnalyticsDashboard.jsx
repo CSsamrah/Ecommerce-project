@@ -16,8 +16,6 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import Seller_dashboard from "./Seller_dashboard";
 import "./AnalyticsDashboard.css";
-import OrdersTable from "./OrdersTable";
-import ProductRatingsTable from "./ProductRatingsTable";
 import StatCard from "./StatCard";
 
 axios.defaults.withCredentials = true;
@@ -33,6 +31,7 @@ ChartJS.register(
   Legend,
   Title
 );
+import Navbar from '../../Navbar/navbar1'
 
 const AnalyticsDashboard = () => {
   // Dashboard overview data
@@ -307,9 +306,11 @@ const AnalyticsDashboard = () => {
   }
 
   return (
+    <div className="sellerAnalytics-body">
+      <Navbar />
     <div className="analytics-body">
+      <Seller_dashboard />
       <div className="analytics-container">
-        <Seller_dashboard />
         <h2 className="dashboard-title">Seller Analytics Dashboard</h2>
 
         {/* Stats Overview Section */}
@@ -336,184 +337,194 @@ const AnalyticsDashboard = () => {
           />
         </div>
 
-        
-
-        {/* Charts Grid - First Row */}
+        {/* Charts Grid */}
         <div className="charts-grid">
-        <div className="chart-card full-width">
-          <div className="chart-header">
-            <h3>Revenue Overview</h3>
-            <div className="period-selector">
-              <button 
-                className={period === "week" ? "active" : ""} 
-                onClick={() => handlePeriodChange("week")}
-              >
-                Week
-              </button>
-              <button 
-                className={period === "month" ? "active" : ""} 
-                onClick={() => handlePeriodChange("month")}
-              >
-                Month
-              </button>
-              <button 
-                className={period === "year" ? "active" : ""} 
-                onClick={() => handlePeriodChange("year")}
-              >
-                Year
-              </button>
+          <div className="chart-card full-width">
+            <div className="chart-header">
+              <h3>Revenue Overview</h3>
+              <div className="period-selector">
+                <button 
+                  className={period === "week" ? "active" : ""} 
+                  onClick={() => handlePeriodChange("week")}
+                >
+                  Week
+                </button>
+                <button 
+                  className={period === "month" ? "active" : ""} 
+                  onClick={() => handlePeriodChange("month")}
+                >
+                  Month
+                </button>
+                <button 
+                  className={period === "year" ? "active" : ""} 
+                  onClick={() => handlePeriodChange("year")}
+                >
+                  Year
+                </button>
+              </div>
+            </div>
+            <div className="chart-container">
+              <Line 
+                data={revenueChartData} 
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          let label = context.dataset.label || '';
+                          if (label) {
+                            label += ': ';
+                          }
+                          if (context.parsed.y !== null) {
+                            label += new Intl.NumberFormat('en-US', { 
+                              style: 'currency', 
+                              currency: 'USD' 
+                            }).format(context.parsed.y);
+                          }
+                          return label;
+                        }
+                      }
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function(value) {
+                          return '$' + value;
+                        }
+                      }
+                    }
+                  }
+                }}
+              />
             </div>
           </div>
-          <Line 
-            data={revenueChartData} 
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: 'top',
-                },
-                title: {
-                  display: true,
-                  text: 'Revenue Over Time'
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      let label = context.dataset.label || '';
-                      if (label) {
-                        label += ': ';
-                      }
-                      if (context.parsed.y !== null) {
-                        label += new Intl.NumberFormat('en-US', { 
-                          style: 'currency', 
-                          currency: 'USD' 
-                        }).format(context.parsed.y);
-                      }
-                      return label;
-                    }
-                  }
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: function(value) {
-                      return '$' + value;
-                    }
-                  }
-                }
-              }
-            }}
-          />
-        </div>
+          
           <div className="chart-card">
             <h3>Revenue Sources</h3>
-            <Pie 
-              data={salesBreakdownData} 
-              options={{
-                plugins: {
-                  legend: {
-                    position: 'bottom',
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: function(context) {
-                        let label = context.label || '';
-                        label += ': ';
-                        if (context.parsed !== null) {
-                          label += new Intl.NumberFormat('en-US', { 
-                            style: 'currency', 
-                            currency: 'USD' 
-                          }).format(context.parsed);
+            <div className="chart-container">
+              <Pie 
+                data={salesBreakdownData} 
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          let label = context.label || '';
+                          label += ': ';
+                          if (context.parsed !== null) {
+                            label += new Intl.NumberFormat('en-US', { 
+                              style: 'currency', 
+                              currency: 'USD' 
+                            }).format(context.parsed);
+                          }
+                          return label;
                         }
-                        return label;
                       }
                     }
                   }
-                }
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
           
           <div className="chart-card">
             <h3>Top Selling Products</h3>
-            <Bar 
-              data={topSellingData}
-              options={{
-                indexAxis: 'y',
-                plugins: {
-                  legend: {
-                    display: false
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: function(context) {
-                        let label = context.dataset.label || '';
-                        label += ': ';
-                        if (context.parsed.x !== null) {
-                          label += new Intl.NumberFormat('en-US', { 
-                            style: 'currency', 
-                            currency: 'USD' 
-                          }).format(context.parsed.x);
+            <div className="chart-container">
+              <Bar 
+                data={topSellingData}
+                options={{
+                  indexAxis: 'y',
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: false
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          let label = context.dataset.label || '';
+                          label += ': ';
+                          if (context.parsed.x !== null) {
+                            label += new Intl.NumberFormat('en-US', { 
+                              style: 'currency', 
+                              currency: 'USD' 
+                            }).format(context.parsed.x);
+                          }
+                          return label;
                         }
-                        return label;
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function(value) {
+                          return '$' + value;
+                        }
                       }
                     }
                   }
-                },
-                scales: {
-                  x: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: function(value) {
-                        return '$' + value;
-                      }
-                    }
-                  }
-                }
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
           
           <div className="chart-card">
             <h3>Top Rental Products</h3>
-            <Bar 
-              data={topRentedData}
-              options={{
-                indexAxis: 'y',
-                plugins: {
-                  legend: {
-                    display: false
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: function(context) {
-                        let label = context.dataset.label || '';
-                        label += ': ';
-                        if (context.parsed.x !== null) {
-                          label += new Intl.NumberFormat('en-US', { 
-                            style: 'currency', 
-                            currency: 'USD' 
-                          }).format(context.parsed.x);
+            <div className="chart-container">
+              <Bar 
+                data={topRentedData}
+                options={{
+                  indexAxis: 'y',
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: false
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          let label = context.dataset.label || '';
+                          label += ': ';
+                          if (context.parsed.x !== null) {
+                            label += new Intl.NumberFormat('en-US', { 
+                              style: 'currency', 
+                              currency: 'USD' 
+                            }).format(context.parsed.x);
+                          }
+                          return label;
                         }
-                        return label;
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function(value) {
+                          return '$' + value;
+                        }
                       }
                     }
                   }
-                },
-                scales: {
-                  x: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: function(value) {
-                        return '$' + value;
-                      }
-                    }
-                  }
-                }
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -521,35 +532,43 @@ const AnalyticsDashboard = () => {
         <div className="charts-grid">
           <div className="chart-card">
             <h3>Order Status</h3>
-            <Pie 
-              data={orderStatusChartData}
-              options={{
-                plugins: {
-                  legend: {
-                    position: 'bottom',
+            <div className="chart-container">
+              <Pie 
+                data={orderStatusChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                    }
                   }
-                }
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
           
           <div className="chart-card">
             <h3>Rating Distribution</h3>
-            <Bar 
-              data={ratingChartData}
-              options={{
-                plugins: {
-                  legend: {
-                    display: false
+            <div className="chart-container">
+              <Bar 
+                data={ratingChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true
+                    }
                   }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true
-                  }
-                }
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
           
           <div className="chart-card rating-summary">
@@ -581,24 +600,8 @@ const AnalyticsDashboard = () => {
             </div>
           </div>
         </div>
-        
-        {/* Recent Orders Table
-        <div className="table-section">
-          <h3>Recent Orders</h3>
-          <OrdersTable 
-            orders={orderStatusData.recent_orders} 
-            onStatusUpdate={fetchOrderBreakdown}
-          />
-        </div> */}
-        
-        {/* Product Ratings Table */}
-        {/* <div className="table-section">
-          <h3>Product Ratings</h3>
-          <ProductRatingsTable 
-            products={ratingsData?.product_ratings || []} 
-          />
-        </div> */}
       </div>
+    </div>
     </div>
   );
 };

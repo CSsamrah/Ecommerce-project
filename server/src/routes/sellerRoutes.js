@@ -2,7 +2,7 @@ import express from "express";
 import {getTotalProductsSold,productBreakdown,monthlyAnalytics,updateOrderStatus,getAllOrders,getProductRentalHistory,getUserSecondhandProducts} from "../controllers/sellerAnalyticsController.js";
 import { isLoggedIn ,isAdmin, authorizeSeller} from "../middlewares/authentication.middleware.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { dashboardSeller, revenueReport ,topProducts, ratingSummary, orderBreakdown, orderPagination, orderDetails, updateStatus} from "../controllers/seller.js";
+import { dashboardSeller, revenueReport ,topProducts, ratingSummary, orderBreakdown, orderPagination, orderDetails, updateStatus, ordersByQuery} from "../controllers/seller.js";
 
 const router=express.Router();
 
@@ -21,6 +21,7 @@ router.get('/rating-summary', isLoggedIn, authorizeSeller,ratingSummary);
 router.get('/order-status', isLoggedIn, authorizeSeller,orderBreakdown);
 router.get('/all-orders', isLoggedIn,authorizeSeller,orderPagination);
 router.get('/order/:orderId', isLoggedIn,authorizeSeller,orderDetails);
+router.post('/orders-by-query', isLoggedIn, authorizeSeller, ordersByQuery);
 router.patch('/order/:orderId/status', isLoggedIn,authorizeSeller,updateStatus);
 
 

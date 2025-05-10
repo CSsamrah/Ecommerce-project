@@ -1,4 +1,4 @@
-body, html {
+/* body, html {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -9,10 +9,11 @@ body, html {
     align-items: center;
     font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
     color: #2d3748;
-}
+} */
+
 
 .analytics-body {
-    /* background-color: #f0f4f8; */
+    background-color: #1a365d;
     min-height: 100vh;
     padding-bottom: 2.5rem;
     width: 100%;
@@ -26,10 +27,10 @@ body, html {
 
 .dashboard-title {
     font-size: 2rem;
-    color: #1a365d;
+    color: rgb(24, 161, 148);
     margin: 1.5rem 0;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid #cbd5e0;
+    border-bottom: 2px solid rgb(24, 161, 148);
     font-weight: 600;
     letter-spacing: -0.5px;
 }
@@ -70,7 +71,7 @@ body, html {
 
 .stat-card .stat-title {
     font-size: 0.875rem;
-    color: #718096;
+    color: rgb(24, 161, 148);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -114,7 +115,7 @@ body, html {
 
 .chart-card h3 {
     font-size: 1.25rem;
-    color: #2d3748;
+    color: rgb(13, 102, 93);
     margin-top: 0;
     margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
@@ -188,7 +189,7 @@ body, html {
 .rating-number {
     font-size: 3.5rem;
     font-weight: bold;
-    color: #2c5282;
+    color: rgb(24, 161, 148);
     line-height: 1;
 }
 
@@ -208,7 +209,7 @@ body, html {
 
 .review-count {
     font-size: 0.875rem;
-    color: #718096;
+    color: rgb(24, 161, 148);
     margin-top: 0.25rem;
 }
 
@@ -229,7 +230,7 @@ body, html {
 .rating-bar-item span:first-child {
     width: 70px;
     font-size: 0.875rem;
-    color: #718096;
+    color: rgb(19, 126, 115);
     font-weight: 500;
 }
 

@@ -815,94 +815,94 @@ const Cart = () => {
 
   if (loading && cartItems.length === 0) {
     return (
-      <div className="main_cart_page">
+      <div className="shopping_cart_page_container">
         <Navbar />
-        <div className="loading-spinner">Loading cart...</div>
+        <div className="cart_loading_spinner">Loading cart...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="main_cart_page">
+      <div className="shopping_cart_page_container">
         <Navbar />
-        <div className="error-message">Error loading cart: {error}</div>
+        <div className="cart_error_message">Error loading cart: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="main_cart_page">
+    <div className="shopping_cart_page_container">
       <Navbar />
-      <div className="cart_page">
-        <h1 className="shopping_cart_heading">Shopping Cart</h1>
-        <div className="cart_container">
-          <div className="cart_items_section">
-            <div className="cart_header">
-              <div className="header_product">Product</div>
-              <div className="header_quantity column_header">Quantity</div>
-              <div className="header_total column_header">Total</div>
-              <div className="header_action column_header">Action</div>
+      <div className="shopping_cart_content_wrapper">
+        <h1 className="shopping_cart_main_heading">Shopping Cart</h1>
+        <div className="shopping_cart_layout_container">
+          <div className="shopping_cart_items_container">
+            <div className="shopping_cart_items_header">
+              <div className="shopping_cart_header_product">Product</div>
+              <div className="shopping_cart_header_quantity column_header">Quantity</div>
+              <div className="shopping_cart_header_total column_header">Total</div>
+              <div className="shopping_cart_header_action column_header">Action</div>
             </div>
             
             {cartItems.length === 0 ? (
-              <div className="empty_cart_message">
+              <div className="shopping_cart_empty_message">
                 <p className="text-xl text-gray-600 mb-9">You haven't added any products yet</p>
                 <button 
                   onClick={() => navigate('/catalog')} 
-                  className="start_shopping_button"
+                  className="shopping_cart_start_shopping_button"
                 >
                   Start Shopping
                 </button>
               </div>
             ) : (
-              <div className="cart_info">
+              <div className="shopping_cart_items_list">
                 {cartItems.map((item) => {
                   const price = parseFloat(item.unit_price || item.price);
                   const itemTotal = parseFloat(item.total_price || (price * item.quantity));
                   
                   return (
-                    <div className="product_box" key={item.cart_id}>
-                      <div className="product_details">
+                    <div className="shopping_cart_product_item" key={item.cart_id}>
+                      <div className="shopping_cart_product_details">
                         <img 
                           src={item.image || item.image_url} 
                           alt={item.product_name || item.name || item.title} 
-                          className="cart_product_image" 
+                          className="shopping_cart_product_image" 
                           onError={(e) => {
                             e.target.src = '/default-product.jpg';
                           }}
                         />
-                        <div className="cart_product_info">
-                          <div className="cart_product_title">
+                        <div className="shopping_cart_product_info">
+                          <div className="shopping_cart_product_title">
                             {item.product_name || item.name || item.title}
                           </div>
-                          <div className="cart_product_price">
+                          <div className="shopping_cart_product_price">
                             Rs.{price.toFixed(2)}
                           </div>
                           {item.is_rental && (
-                            <div className="cart_rental_info">
+                            <div className="shopping_cart_rental_info">
                               Rental: {item.rental_days} days
                             </div>
                           )}
                           {item.condition && (
-                            <div className="cart_condition">
+                            <div className="shopping_cart_condition">
                               Condition: {item.condition}
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <div className="cart_item_quantity">
+                      <div className="shopping_cart_item_quantity">
                         <button
-                          className="quantity-btn"
+                          className="shopping_cart_quantity_button"
                           onClick={() => handleQuantityChange(item.cart_id, item.quantity - 1)}
                           disabled={item.quantity <= 1 || loading}
                         >
                           <FontAwesomeIcon icon={faMinus} />
                         </button>
-                        <span className="quantity-value">{item.quantity}</span>
+                        <span className="shopping_cart_quantity_value">{item.quantity}</span>
                         <button
-                          className="quantity-btn"
+                          className="shopping_cart_quantity_button"
                           onClick={() => handleQuantityChange(item.cart_id, item.quantity + 1)}
                           disabled={loading}
                         >
@@ -910,13 +910,13 @@ const Cart = () => {
                         </button>
                       </div>
 
-                      <div className="total_price">
+                      <div className="shopping_cart_total_price">
                         Rs.{itemTotal.toFixed(2)}
                       </div>
 
-                      <div className="remove_item">
+                      <div className="shopping_cart_remove_item">
                         <button 
-                          className="cart_remove" 
+                          className="shopping_cart_remove_button" 
                           onClick={() => handleRemoveItem(item.cart_id)}
                           disabled={loading}
                         >
@@ -929,9 +929,9 @@ const Cart = () => {
               </div>
             )}
 
-            <div className="update_cart_section">
+            <div className="shopping_cart_continue_shopping_section">
               <button 
-                className="update_cart_button" 
+                className="shopping_cart_continue_shopping_button" 
                 onClick={() => navigate('/catalog')}
                 disabled={loading}
               >
@@ -940,26 +940,26 @@ const Cart = () => {
             </div>
           </div>
 
-          <div className="order_summary">
+          <div className="shopping_cart_order_summary">
             <h2>Order Summary</h2>
-            <div className="summary_details">
-              <div className="summary_row">
+            <div className="shopping_cart_summary_details">
+              <div className="shopping_cart_summary_row">
                 <span>Sub Total:</span>
                 <span>Rs.{subtotal.toFixed(2)}</span>
               </div>
-              <div className="summary_row">
+              <div className="shopping_cart_summary_row">
                 <span>Delivery Fee:</span>
                 <span>Rs.{deliveryFee.toFixed(2)}</span>
               </div>
               <hr />
-              <div className="summary_total">
+              <div className="shopping_cart_summary_total">
                 <span>Total:</span>
                 <span>Rs.{total.toFixed(2)}</span>
               </div>
             </div>
 
             <button 
-              className="checkout_button" 
+              className="shopping_cart_checkout_button" 
               onClick={handleCheckout}
               disabled={cartItems.length === 0 || loading}
             >

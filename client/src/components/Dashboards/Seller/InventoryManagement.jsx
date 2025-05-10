@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import "./InventoryManagement.css";
-import Seller_dashboard from "./Seller_dashboard";
 import axios from "axios"; // Make sure to install axios if not already done
-axios.defaults.withCredentials = true;
+import Seller_dashboard from "./Seller_dashboard";
+import "./InventoryManagement.css";
+import Navbar from "../../Navbar/navbar1";
 
+axios.defaults.withCredentials = true;
 
 function InventoryManagement() {
     const [selectedCategory, setSelectedCategory] = useState("all");
@@ -65,13 +66,12 @@ function InventoryManagement() {
         fetchCategories();
     }, []);
 
-
     // Fetch all products from the API
     const fetchProducts = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get('http://localhost:3000/api/products/getAllProducts');
+            const response = await axios.get('http://localhost:3000/api/products/getProducts');
             setProducts(response.data.data);
             console.log("Products fetched:", response.data.data);
         } catch (err) {
@@ -160,7 +160,6 @@ function InventoryManagement() {
     };
 
     const addNewProduct = async () => {
-
         const validationError = validateProductData(newProduct);
         if (validationError) {
             alert(validationError);
@@ -286,223 +285,269 @@ function InventoryManagement() {
         }
     };
 
-
-
-
-
     return (
         <div className="inv-body">
-            <br />
-            <div className="inventory-container">
+            <Navbar />
+            <div className="inventory-page-container">
                 <Seller_dashboard />
-                <h2>Inventory Management</h2>
+                <div className="inventory-content">
+                    <h2>Inventory Management</h2>
 
-                {error && <div className="error-message">{error}</div>}
+                    {error && <div className="error-message">{error}</div>}
 
-                <div className="category-tabs">
-                    <button onClick={() => setSelectedCategory("all")}>All Products</button>
-                    <button onClick={() => setSelectedCategory("new")}>New Products</button>
-                    <button onClick={() => setSelectedCategory("secondHand")}>Second-Hand</button>
-                    <button onClick={() => setSelectedCategory("rental")}>Rental</button>
-                </div>
-
-                <input
-                    type="text"
-                    className="search-bar"
-                    placeholder="Search products..."
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-
-                <button
-                    className="add-product-btn"
-                    onClick={() =>
-                        setNewProduct({
-                            name: "",
-                            description: "",
-                            price: "",
-                            stock_quantity: "",
-                            product_features: "[]",
-                            condition: "",
-                            rental_available: "FALSE",
-                            category_id: ""
-                        })
-                    }
-                >
-                    Add New Product
-                </button>
-
-                {loading ? (
-                    <div className="loading">Loading...</div>
-                ) : (
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Price</th>
-                                <th>Condition</th>
-                                <th>Stock</th>
-                                <th>Rental Available</th>
-                                <th>Features</th>
-                                <th>Image</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredProducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan="9" className="no-products">No products found</td>
-                                </tr>
-                            ) : (
-                                filteredProducts.map((product) => (
-                                    <tr key={product.product_id}>
-                                        <td>{product.title}</td>
-                                        <td>{product.description}</td>
-                                        <td>${product.price}</td>
-                                        <td>{product.condition}</td>
-                                        <td>{product.stock_quantity}</td>
-                                        <td>{product.rental_available ? "TRUE" : "FALSE"}</td>
-                                        <td>
-                                            {Array.isArray(product.features) && product.features.length > 0
-                                                ? product.features.slice(0, 2).join(", ") + "..."
-                                                : "N/A"}
-                                        </td>
-
-                                        <td>
-                                            <img src={product.image || "https://via.placeholder.com/50"} alt="Product" width="50" />
-                                        </td>
-                                        <td>
-                                            <button onClick={() => setEditingProduct({ ...product })}>Edit</button>
-                                            <button onClick={() => deleteProduct(product.product_id)}>Delete</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                )}
-
-                {(editingProduct || newProduct) && (
-                    <div className="edit-form">
-                        <h3>{editingProduct ? "Edit Product" : "Add New Product"}</h3>
-
-                        <label>Name: <span className="required">*</span></label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={(editingProduct || newProduct).name}
-                            onChange={handleChange}
-                            required
-                        />
-
-                        <label>Description: <span className="required">*</span></label>
-                        <textarea
-                            name="description"
-                            value={(editingProduct || newProduct).description}
-                            onChange={handleChange}
-                            required
-                        />
-
-                        <label>Price: <span className="required">*</span></label>
-                        <input
-                            type="number"
-                            name="price"
-                            value={(editingProduct || newProduct).price}
-                            onChange={handleChange}
-                            min="0.01"
-                            step="0.01"
-                            required
-                        />
-
-                        <label>Stock Quantity: <span className="required">*</span></label>
-                        <input
-                            type="number"
-                            name="stock_quantity"
-                            value={(editingProduct || newProduct).stock_quantity}
-                            onChange={handleChange}
-                            min="0"
-                            required
-                        />
-
-                        <label>Condition: <span className="required">*</span></label>
-                        <select
-                            name="condition"
-                            value={(editingProduct || newProduct).condition}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Select</option>
-                            <option value="new">new</option>
-                            <option value="second-hand">second-hand</option>
-
-                        </select>
-
-                        <label>Category: <span className="required">*</span></label>
-                        <select
-                            name="category_id"
-                            value={(editingProduct || newProduct).category_id}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Select</option>
-                            {categories.map(cat => (
-                                <option key={cat.category_id} value={cat.category_id}>
-                                    {cat.category_name}
-                                </option>
-                            ))}
-                        </select>
-
-
-                        <label>Product Features (JSON Array): <span className="required">*</span></label>
-                        <textarea
-                            name="product_features"
-                            value={(editingProduct || newProduct).product_features}
-                            onChange={handleFeaturesChange}
-                            placeholder='["feature1", "feature2"]'
-                            required
-                        />
-
-                        <label>Rental Available:</label>
-                        <select
-                            name="rental_available"
-                            value={(editingProduct || newProduct).rental_available === true ? "Yes" : "No"}
-                            onChange={handleChange}
-                        >
-                            <option value="FALSE">No</option>
-                            <option value="TRUE">Yes</option>
-                        </select>
-
-                        <label>Product Image: {!editingProduct && <span className="required">*</span>}</label>
-                        <input
-                            type="file"
-                            onChange={handleImageUpload}
-                            accept="image/*"
-                            required={!editingProduct}
-                        />
-
-                        {editingProduct && editingProduct.product_image && (
-                            <div className="current-image">
-                                <p>Current Image:</p>
-                                <img src={editingProduct.product_image} alt="Current product" width="100" />
-                            </div>
-                        )}
-
-                        <div className="form-buttons">
-                            <button
-                                onClick={editingProduct ? saveEdit : addNewProduct}
-                                disabled={loading}
+                    <div className="filters-container">
+                        <div className="category-tabs">
+                            <button 
+                                className={selectedCategory === "all" ? "active" : ""}
+                                onClick={() => setSelectedCategory("all")}
                             >
-                                {loading ? "Processing..." : (editingProduct ? "Save" : "Add")}
+                                All Products
                             </button>
-                            <button
-                                onClick={() => (editingProduct ? setEditingProduct(null) : setNewProduct(null))}
-                                disabled={loading}
+                            <button 
+                                className={selectedCategory === "new" ? "active" : ""}
+                                onClick={() => setSelectedCategory("new")}
                             >
-                                Cancel
+                                New Products
+                            </button>
+                            <button 
+                                className={selectedCategory === "secondHand" ? "active" : ""}
+                                onClick={() => setSelectedCategory("secondHand")}
+                            >
+                                Second-Hand
+                            </button>
+                            <button 
+                                className={selectedCategory === "rental" ? "active" : ""}
+                                onClick={() => setSelectedCategory("rental")}
+                            >
+                                Rental
+                            </button>
+                        </div>
+
+                        <div className="search-and-add">
+                            <input
+                                type="text"
+                                className="search-bar"
+                                placeholder="Search products..."
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+
+                            <button
+                                className="add-product-btn"
+                                onClick={() =>
+                                    setNewProduct({
+                                        name: "",
+                                        description: "",
+                                        price: "",
+                                        stock_quantity: "",
+                                        product_features: "[]",
+                                        condition: "",
+                                        rental_available: "FALSE",
+                                        category_id: ""
+                                    })
+                                }
+                            >
+                                Add New Product
                             </button>
                         </div>
                     </div>
-                )}
+
+                    {loading ? (
+                        <div className="loading">Loading...</div>
+                    ) : (
+                        <div className="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Price</th>
+                                        <th>Condition</th>
+                                        <th>Stock</th>
+                                        <th>Rental</th>
+                                        <th>Features</th>
+                                        <th>Image</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredProducts.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="9" className="no-products">No products found</td>
+                                        </tr>
+                                    ) : (
+                                        filteredProducts.map((product) => (
+                                            <tr key={product.product_id}>
+                                                <td>{product.title}</td>
+                                                <td className="description-cell">{product.description}</td>
+                                                <td>${product.price}</td>
+                                                <td>{product.condition}</td>
+                                                <td>{product.stock_quantity}</td>
+                                                <td>{product.rental_available ? "YES" : "NO"}</td>
+                                                <td>
+                                                    {Array.isArray(product.features) && product.features.length > 0
+                                                        ? product.features.slice(0, 2).join(", ") + "..."
+                                                        : "N/A"}
+                                                </td>
+
+                                                <td>
+                                                    <img src={product.image || "https://via.placeholder.com/50"} alt="Product" className="product-thumbnail" />
+                                                </td>
+                                                <td className="action-buttons">
+                                                    <button className="edit-btn" onClick={() => setEditingProduct({ ...product })}>Edit</button>
+                                                    <button className="delete-btn" onClick={() => deleteProduct(product.product_id)}>Delete</button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {(editingProduct || newProduct) && (
+                        <div className="modal-overlay">
+                            <div className="edit-form">
+                                <h3>{editingProduct ? "Edit Product" : "Add New Product"}</h3>
+
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label>Name: <span className="required">*</span></label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={(editingProduct || newProduct).name}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Price: <span className="required">*</span></label>
+                                        <input
+                                            type="number"
+                                            name="price"
+                                            value={(editingProduct || newProduct).price}
+                                            onChange={handleChange}
+                                            min="0.01"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Stock Quantity: <span className="required">*</span></label>
+                                        <input
+                                            type="number"
+                                            name="stock_quantity"
+                                            value={(editingProduct || newProduct).stock_quantity}
+                                            onChange={handleChange}
+                                            min="0"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Condition: <span className="required">*</span></label>
+                                        <select
+                                            name="condition"
+                                            value={(editingProduct || newProduct).condition}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="new">New</option>
+                                            <option value="second-hand">Second-hand</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Category: <span className="required">*</span></label>
+                                        <select
+                                            name="category_id"
+                                            value={(editingProduct || newProduct).category_id}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="">Select</option>
+                                            {categories.map(cat => (
+                                                <option key={cat.category_id} value={cat.category_id}>
+                                                    {cat.category_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Rental Available:</label>
+                                        <select
+                                            name="rental_available"
+                                            value={(editingProduct || newProduct).rental_available === true ? "Yes" : "No"}
+                                            onChange={handleChange}
+                                        >
+                                            <option value="FALSE">No</option>
+                                            <option value="TRUE">Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-group full-width">
+                                    <label>Description: <span className="required">*</span></label>
+                                    <textarea
+                                        name="description"
+                                        value={(editingProduct || newProduct).description}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group full-width">
+                                    <label>Product Features (JSON Array): <span className="required">*</span></label>
+                                    <textarea
+                                        name="product_features"
+                                        value={(editingProduct || newProduct).product_features}
+                                        onChange={handleFeaturesChange}
+                                        placeholder='["feature1", "feature2"]'
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group full-width">
+                                    <label>Product Image: {!editingProduct && <span className="required">*</span>}</label>
+                                    <input
+                                        type="file"
+                                        onChange={handleImageUpload}
+                                        accept="image/*"
+                                        required={!editingProduct}
+                                    />
+
+                                    {editingProduct && editingProduct.product_image && (
+                                        <div className="current-image">
+                                            <p>Current Image:</p>
+                                            <img src={editingProduct.product_image} alt="Current product" width="100" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="form-buttons">
+                                    <button
+                                        className="save-btn"
+                                        onClick={editingProduct ? saveEdit : addNewProduct}
+                                        disabled={loading}
+                                    >
+                                        {loading ? "Processing..." : (editingProduct ? "Save" : "Add")}
+                                    </button>
+                                    <button
+                                        className="cancel-btn"
+                                        onClick={() => (editingProduct ? setEditingProduct(null) : setNewProduct(null))}
+                                        disabled={loading}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import express from "express"
-import { addProduct, deleteProduct, getOneProduct, updateProduct, getAllProducts } from "../controllers/product.controller.js"
+import { addProduct, deleteProduct, getOneProduct, updateProduct, getAllProducts, getProducts } from "../controllers/product.controller.js"
 import { isLoggedIn } from "../middlewares/authentication.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -14,6 +14,7 @@ productRoutes.post("/addProduct",
 isLoggedIn,
 addProduct);
 productRoutes.get("/getAllProducts", isLoggedIn,getAllProducts);
+productRoutes.get("/getProducts", isLoggedIn,getProducts);
 // productRoutes.get("/getProduct/:id",isLoggedIn,getOneProduct)
 
 productRoutes.get("/getProduct/:id",getOneProduct)

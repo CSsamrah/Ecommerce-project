@@ -142,8 +142,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
-import Navbar from '../Navbar/navbar1'; // Adjust path as needed
-import './OrderConfirmation.css'; // Create this CSS file
+import Navbar from '../Navbar/navbar1';
+import './OrderConfirmation.css';
 
 function OrderConfirmation() {
   const location = useLocation();
@@ -151,8 +151,17 @@ function OrderConfirmation() {
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
+    // Check if PWA installation is available
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    });
+
     const fetchOrderDetails = async () => {
       if (!orderId) {
         setError('Order ID not found');
@@ -181,11 +190,21 @@ function OrderConfirmation() {
     return orderDetails.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
   };
 
+  const handleAddToHome = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setShowInstallPrompt(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
-      <div className="order-confirmation-container">
+      <div className="order_confirmation_page_container">
         <Navbar />
-        <div className="order-confirmation-content">
+        <div className="order_confirmation_content">
           <h2>Loading order details...</h2>
         </div>
       </div>
@@ -194,29 +213,31 @@ function OrderConfirmation() {
 
   if (error) {
     return (
-      <div className="order-confirmation-container">
+      <div className="order_confirmation_page_container">
         <Navbar />
-        <div className="order-confirmation-content">
+        <div className="order_confirmation_content">
           <h2>Error</h2>
-          <p className="error-message">{error}</p>
-          <Link to="/" className="continue-shopping-btn">Return to Home</Link>
+          <p className="order_confirmation_error_message">{error}</p>
+          <Link to="/" className="order_confirmation_home_button">Return to Home</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="order-confirmation-container">
+    <div className="order_confirmation_page_container">
       <Navbar />
-      <div className="order-confirmation-content">
-        <div className="confirmation-header">
+      <div className="order_confirmation_content">
+        <div className="order_confirmation_header">
           <h1>Order Confirmation</h1>
-          <div className="confirmation-icon">
-            <i className="fas fa-check-circle"></i>
+          <div className="order_confirmation_icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="#4CAF50">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
           </div>
         </div>
 
-        <div className="confirmation-message">
+        <div className="order_confirmation_message">
           <h2>Thank you for your order!</h2>
           <p>Your order has been received and is now being processed.</p>
           <p>Order ID: <strong>{orderId}</strong></p>
@@ -224,37 +245,46 @@ function OrderConfirmation() {
         </div>
 
         {orderDetails && (
-          <div className="order-summary">
+          <div className="order_confirmation_summary">
             <h3>Order Summary</h3>
-            <div className="order-items">
+            <div className="order_confirmation_items">
               {orderDetails.map((item, index) => (
-                <div key={index} className="order-item">
-                  <div className="item-name">
+                <div key={index} className="order_confirmation_item">
+                  <div className="order_confirmation_item_name">
                     <p>{item.product_name}</p>
-                    <p className="item-quantity">x{item.quantity}</p>
+                    <p className="order_confirmation_item_quantity">x{item.quantity}</p>
                   </div>
-                  <div className="item-price">
+                  <div className="order_confirmation_item_price">
                     <p>Rs. {parseFloat(item.total_price).toFixed(2)}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="order-total">
+            <div className="order_confirmation_total">
               <p>Total</p>
               <p>Rs. {calculateTotal().toFixed(2)}</p>
             </div>
           </div>
         )}
 
-        <div className="shipping-info">
+        <div className="order_confirmation_shipping_info">
           <h3>Shipping Information</h3>
           <p>Your order will be shipped within 2-3 business days.</p>
           <p>You will receive an email with tracking information once your order ships.</p>
         </div>
 
-        <div className="confirmation-actions">
-          <Link to="/" className="continue-shopping-btn">Continue Shopping</Link>
-          <Link to="/account/orders" className="view-orders-btn">View My Orders</Link>
+        <div className="order_confirmation_actions">
+          {showInstallPrompt && (
+            <button 
+              onClick={handleAddToHome}
+              className="order_confirmation_add_to_home_button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              Add to Home Screen
+            </button>
+          )}
         </div>
       </div>
     </div>

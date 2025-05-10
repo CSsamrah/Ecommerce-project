@@ -595,115 +595,105 @@ const OrderHistory = () => {
         }
 
         return (
-            <div className="orders-list">
-                {orders
-                    .filter(order => {
-                        try {
-                            return (
-                                (order.order_id && String(order.order_id).toLowerCase().includes(searchTerm)) ||
-                                (order.items && order.items.some(item =>
-                                    item.product_name && String(item.product_name).toLowerCase().includes(searchTerm)
-                                ))
-                            );
-                        } catch (err) {
-                            return false;
+            <div className="orders-table-container">
+                <table className="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orders
+                            .filter(order => {
+                                try {
+                                    return (
+                                        (order.order_id && String(order.order_id).toLowerCase().includes(searchTerm)) ||
+                                        (order.items && order.items.some(item =>
+                                            item.product_name && String(item.product_name).toLowerCase().includes(searchTerm)
+                                        ))
+                                    );
+                                } catch (err) {
+                                    return false;
+                                }
+                            })
+                            .map((order) => (
+                                <tr key={order.order_id} className="order-row">
+                                    <td className="order-id-cell">#{order.order_id || 'N/A'}</td>
+                                    <td>
+                                        {new Date(order.created_at).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                    </td>
+                                    <td>
+                                        <span className={`order-status ${order.status?.toLowerCase() || 'pending'}`}>
+                                            {order.status === 'Delivered' && <MdCheckCircleOutline className="status-icon" />}
+                                            {order.status === 'Processing' && <MdLocalShipping className="status-icon" />}
+                                            {order.status === 'Shipped' && <MdLocalShipping className="status-icon" />}
+                                            {order.status === 'Cancelled' && <MdCancel className="status-icon" />}
+                                            {order.status !== 'Delivered' && order.status !== 'Processing' && order.status !== 'Shipped' && order.status !== 'Cancelled' && <FaBoxOpen className="status-icon" />}
+                                            {order.status}
+                                        </span>
+                                    </td>
+                                    <td className="items-cell">
+                                        <div className="items-container">
+                                            {order.items && Array.isArray(order.items) && order.items.map((item, index) => (
+                                                <div key={index} className="item-row">
+                                                    <div className="item-image">
+                                                        {item.product_image ? (
+                                                            <img 
+                                                                src={item.product_image} 
+                                                                alt={item.product_name} 
+                                                                className="product-thumbnail"
+                                                                onError={(e) => {
+                                                                    e.target.src = '/placeholder-product.png';
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <span className="no-image">No image</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="item-details">
+                                                        <span className="item-name">{item.product_name}</span>
+                                                        <span className="item-quantity">Qty: {item.quantity}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="total-cell">${order.total_amount}</td>
+                                    <td className="actions-cell">
+                                        {order.status && order.status.toLowerCase() === "processing" && (
+                                            <button
+                                                className={`cancel-button ${cancelling === order.order_id ? 'is-cancelling' : ''}`}
+                                                onClick={() => cancelOrder(order.order_id)}
+                                                disabled={cancelling === order.order_id}
+                                            >
+                                                {cancelling === order.order_id ? (
+                                                    <>
+                                                        <FaSpinner className="spinner-icon" />
+                                                        Cancelling...
+                                                    </>
+                                                ) : 'Cancel Order'}
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
                         }
-                    })
-                    .map((order) => (
-                        <div key={order.order_id} className="order-card">
-                            <div className="order-content">
-                                <div className="order-header">
-                                    <div className="order-info">
-                                        <h3 className="order-id">Order #{order.order_id || 'N/A'}</h3>
-                                        <p className="order-date">
-                                            {new Date(order.created_at).toLocaleDateString(undefined, {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}
-                                        </p>
-                                    </div>
-                                    <span className={`order-status ${order.status?.toLowerCase() || 'pending'}`}>
-                                        {order.status === 'Delivered' && <MdCheckCircleOutline className="status-icon" />}
-                                        {order.status === 'Processing' && <MdLocalShipping className="status-icon" />}
-                                        {order.status === 'Shipped' && <MdLocalShipping className="status-icon" />}
-                                        {order.status === 'Cancelled' && <MdCancel className="status-icon" />}
-                                        {order.status !== 'Delivered' && order.status !== 'Processing' && order.status !== 'Shipped' && order.status !== 'Cancelled' && <FaBoxOpen className="status-icon" />}
-                                        {order.status}
-                                    </span>
-                                </div>
-
-                                {order.items && Array.isArray(order.items) && (
-                                    <div className="table-container">
-                                        <table className="items-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Product</th>
-                                                    <th className="centered">Quantity</th>
-                                                    <th className="centered">Image</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {order.items.map((item, index) => (
-                                                    <tr key={index} className="table-row">
-                                                        <td className="product-name">{item.product_name}</td>
-                                                        <td className="centered">{item.quantity} pcs</td>
-                                                        <td className="centered">
-                                                                    {item.product_image ? (
-                                                                    <img 
-                                                                        src={item.product_image} 
-                                                                        alt={item.product_name} 
-                                                                        style={{
-                                                                        width: '70px',
-                                                                        height: '60px',
-                                                                        objectFit: 'cover',
-                                                                        borderRadius: '0px'
-                                                                        }}
-                                                                        onError={(e) => {
-                                                                        e.target.src = '/placeholder-product.png';
-                                                                        }}
-                                                                    />
-                                                                    ) : (
-                                                                    <span>No image</span>
-                                                                    )}
-                                                                </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-
-                                <div className="order-footer">
-                                    <span className="order-total">
-                                        Total: <span className="total-amount">${order.total_amount}</span>
-                                    </span>
-
-                                    {order.status && order.status.toLowerCase() === "processing" && (
-                                        <button
-                                            className={`cancel-button ${cancelling === order.order_id ? 'is-cancelling' : ''}`}
-                                            onClick={() => cancelOrder(order.order_id)}
-                                            disabled={cancelling === order.order_id}
-                                        >
-                                            {cancelling === order.order_id ? (
-                                                <>
-                                                    <FaSpinner className="spinner-icon" />
-                                                    Cancelling...
-                                                </>
-                                            ) : 'Cancel Order'}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                }
+                    </tbody>
+                </table>
             </div>
         );
     };
 
     return (
-        <div className="OrderHistory-body">
         <div className="app-layout">
             <div className="app-sidebar">
                 <BuyerDashboard />
@@ -712,9 +702,12 @@ const OrderHistory = () => {
             <div className="app-main">
                 <Navbar />
                
-                <div className="order-panel">
+                <div className="order-management-container">
                     <div className="panel-header">
                         <h2 className="section-title">Order History</h2>
+                    </div>
+                    
+                    <div className="order-controls">
                         <div className="search-bar">
                             <input
                                 type="text"
@@ -738,7 +731,6 @@ const OrderHistory = () => {
                     {renderContent()}
                 </div>
             </div>
-        </div>
         </div>
     );
 };

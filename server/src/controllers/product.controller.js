@@ -390,7 +390,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 })
 
-const getAllProducts = asyncHandler(async (req, res) => {
+const getProducts = asyncHandler(async (req, res) => {
 
     const userID = req.user?.user_id;
     if (!userID) {
@@ -434,4 +434,49 @@ const getAllProducts = asyncHandler(async (req, res) => {
     }
 );
 
-export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts }
+const getAllProducts = asyncHandler(async (req, res) => {
+    // Still check for authentication, but don't restrict products by user
+    const userID = req.user?.user_id;
+    if (!userID) {
+        throw new ApiError(400, "User ID is required for authentication");
+    }
+   
+    // Modified query to return ALL products (without filtering by user_id)
+    const query = `
+        SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.description,
+            p.condition,
+            p.stock_quantity,
+            p.rental_available,
+            p.product_features,
+            p.product_image as image,
+            p.rental_available
+        FROM product p
+        LIMIT 50
+    `;
+
+        // Run query without filtering by userID
+        const result = await pool.query(query);
+
+        const products = result.rows.map(product => ({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            description: product.description,
+            condition: product.condition,
+            stock_quantity: product.stock_quantity,
+            image: product.image,
+            features: product.product_features,
+            rental_available: product.rental_available,
+            avg_rating: '0',
+            people_rated: '0'
+        }));
+
+        return res.status(200).json(new ApiResponse(200, products, "Products fetched successfully"));
+    }
+);
+
+export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts, getProducts }

@@ -561,17 +561,13 @@ function Checkout() {
     } catch (error) {
       console.error("Error clearing cart:", error);
       
-      // More detailed error handling
       if (error.response) {
-        // The request was made and the server responded with a status code
         console.error("Response data:", error.response.data);
         console.error("Response status:", error.response.status);
         console.error("Response headers:", error.response.headers);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error("No response received:", error.request);
       } else {
-        // Something happened in setting up the request
         console.error("Error setting up request:", error.message);
       }
       
@@ -586,22 +582,20 @@ function Checkout() {
       setLoading(true);
       
       try {
-        // First, place the order with the backend
         const response = await axios.post(
           'http://localhost:3000/api/orders/placeOrder', 
           { 
             status: 'processing' 
-            // The backend will extract cart items from the user's session
           },
           {
-            withCredentials: true // Important for sending cookies with the request
+            withCredentials: true
           }
         );
 
         const orderId = response.data.order_id;
         
         if (paymentMethod === "payFast") {
-          const cartId = uuidv4(); // simple way to generate a unique Order ID
+          const cartId = uuidv4();
           
           navigate("/payment", {
             state: {
@@ -615,7 +609,6 @@ function Checkout() {
             },
           });
         } else if (paymentMethod === "cod") {
-          // Clear the cart before navigation
           await clearUserCart();
           
           navigate("/order-confirmation", {
@@ -642,38 +635,40 @@ function Checkout() {
   };
 
   return (
-    <div className="checkout-container">
+    <div className="checkout_page_body">
       <Navbar />
+    <div className="checkout_page_container">
+      
       <br></br>
-      <h1 className="checkout-header">Checkout</h1>
+      <h1 className="checkout_page_heading">Checkout</h1>
 
-      <div className="checkout-grid">
-        <div className="checkout-form-column">
+      <div className="checkout_page_layout">
+        <div className="checkout_form_section">
           {errors.submission && (
-            <div className="error-alert">
+            <div className="checkout_error_alert">
               {errors.submission}
             </div>
           )}
           
-          <div className={`checkout-section ${expandedSections.shipping ? 'expanded' : ''}`}>
-            <div className="section-header" onClick={() => toggleSection('shipping')}>
-              <div className="section-title">
-                <span className={`step-number ${expandedSections.shipping ? 'active' : ''}`}>1</span>
+          <div className={`checkout_form_section_container ${expandedSections.shipping ? 'expanded' : ''}`}>
+            <div className="checkout_section_header" onClick={() => toggleSection('shipping')}>
+              <div className="checkout_section_title">
+                <span className={`checkout_step_number ${expandedSections.shipping ? 'active' : ''}`}>1</span>
                 <h2>Shipping Address</h2>
               </div>
-              <span className="toggle-icon">
+              <span className="checkout_toggle_icon">
                 {expandedSections.shipping ? '−' : '+'}
               </span>
             </div>
 
             {expandedSections.shipping && (
-              <div className="section-content">
-                <p className="address-lookup-note">
+              <div className="checkout_section_content">
+                <p className="checkout_address_note">
                   Address lookup powered by Google. <a href="#">View Privacy policy</a>.
                 </p>
 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="checkout_form_row">
+                  <div className="checkout_form_group">
                     <label>FIRST NAME *</label>
                     <input
                       type="text"
@@ -681,9 +676,9 @@ function Checkout() {
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                       required
                     />
-                    {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                    {errors.firstName && <span className="checkout_error_message">{errors.firstName}</span>}
                   </div>
-                  <div className="form-group">
+                  <div className="checkout_form_group">
                     <label>LAST NAME *</label>
                     <input
                       type="text"
@@ -691,10 +686,10 @@ function Checkout() {
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                       required
                     />
-                    {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+                    {errors.lastName && <span className="checkout_error_message">{errors.lastName}</span>}
                   </div>
                 </div>
-                <div className="form-group">
+                <div className="checkout_form_group">
                   <label>ADDRESS *</label>
                   <input
                     type="text"
@@ -702,10 +697,10 @@ function Checkout() {
                     onChange={(e) => setFormData({ ...formData, address1: e.target.value })}
                     required
                   />
-                  {errors.address1 && <span className="error-message">{errors.address1}</span>}
+                  {errors.address1 && <span className="checkout_error_message">{errors.address1}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="checkout_form_group">
                   <label>APT, SUITE, FLOOR</label>
                   <input
                     type="text"
@@ -714,8 +709,8 @@ function Checkout() {
                   />
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="checkout_form_row">
+                  <div className="checkout_form_group">
                     <label>ZIP CODE *</label>
                     <input
                       type="text"
@@ -723,10 +718,10 @@ function Checkout() {
                       onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                       required
                     />
-                    {errors.zipCode && <span className="error-message">{errors.zipCode}</span>}
+                    {errors.zipCode && <span className="checkout_error_message">{errors.zipCode}</span>}
                   </div>
 
-                  <div className="form-group">
+                  <div className="checkout_form_group">
                     <label>CITY *</label>
                     <input
                       type="text"
@@ -734,11 +729,11 @@ function Checkout() {
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       required
                     />
-                    {errors.city && <span className="error-message">{errors.city}</span>}
+                    {errors.city && <span className="checkout_error_message">{errors.city}</span>}
                   </div>
                 </div>
 
-                <div className="form-group">
+                <div className="checkout_form_group">
                   <label>STATE *</label>
                   <select
                     value={formData.state}
@@ -752,10 +747,10 @@ function Checkout() {
                     <option value='Bal'>Balochistan</option>
                     <option value='GB'>Gilgit Baltistan</option>
                   </select>
-                  {errors.state && <span className="error-message">{errors.state}</span>}
+                  {errors.state && <span className="checkout_error_message">{errors.state}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="checkout_form_group">
                   <label>PHONE *</label>
                   <input
                     type="tel"
@@ -763,10 +758,10 @@ function Checkout() {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     required
                   />
-                  {errors.phone && <span className="error-message">{errors.phone}</span>}
+                  {errors.phone && <span className="checkout_error_message">{errors.phone}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="checkout_form_group">
                   <label>EMAIL *</label>
                   <input
                     type="email"
@@ -774,13 +769,13 @@ function Checkout() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                   />
-                  {errors.email && <span className="error-message">{errors.email}</span>}
+                  {errors.email && <span className="checkout_error_message">{errors.email}</span>}
                 </div>
 
-                <div className="form-actions">
+                <div className="checkout_form_actions">
                   <button
                     type="button"
-                    className="continue-button"
+                    className="checkout_continue_button"
                     onClick={() => {
                       toggleSection('shipping');
                       toggleSection('billing');
@@ -793,20 +788,20 @@ function Checkout() {
             )}
           </div>
 
-          <div className={`checkout-section ${expandedSections.billing ? 'expanded' : ''}`}>
-            <div className="section-header" onClick={() => toggleSection('billing')}>
-              <div className="section-title">
-                <span className={`step-number ${expandedSections.billing ? 'active' : ''}`}>2</span>
+          <div className={`checkout_form_section_container ${expandedSections.billing ? 'expanded' : ''}`}>
+            <div className="checkout_section_header" onClick={() => toggleSection('billing')}>
+              <div className="checkout_section_title">
+                <span className={`checkout_step_number ${expandedSections.billing ? 'active' : ''}`}>2</span>
                 <h2>Billing Address</h2>
               </div>
-              <span className="toggle-icon">
+              <span className="checkout_toggle_icon">
                 {expandedSections.billing ? '−' : '+'}
               </span>
             </div>
 
             {expandedSections.billing && (
-              <div className="section-content">
-                <div className="form-group checkbox-group">
+              <div className="checkout_section_content">
+                <div className="checkout_form_group checkout_checkbox_group">
                   <input
                     type="checkbox"
                     id="sameAsShipping"
@@ -818,8 +813,8 @@ function Checkout() {
 
                 {!formData.sameAsShipping && (
                   <>
-                    <div className="form-row">
-                      <div className="form-group">
+                    <div className="checkout_form_row">
+                      <div className="checkout_form_group">
                         <label>FIRST NAME *</label>
                         <input
                           type="text"
@@ -827,10 +822,10 @@ function Checkout() {
                           onChange={(e) => setFormData({ ...formData, billingFirstName: e.target.value })}
                           required
                         />
-                        {errors.billingFirstName && <span className="error-message">{errors.billingFirstName}</span>}
+                        {errors.billingFirstName && <span className="checkout_error_message">{errors.billingFirstName}</span>}
                       </div>
 
-                      <div className="form-group">
+                      <div className="checkout_form_group">
                         <label>LAST NAME *</label>
                         <input
                           type="text"
@@ -838,11 +833,11 @@ function Checkout() {
                           onChange={(e) => setFormData({ ...formData, billingLastName: e.target.value })}
                           required
                         />
-                        {errors.billingLastName && <span className="error-message">{errors.billingLastName}</span>}
+                        {errors.billingLastName && <span className="checkout_error_message">{errors.billingLastName}</span>}
                       </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className="checkout_form_group">
                       <label>ADDRESS *</label>
                       <input
                         type="text"
@@ -850,10 +845,10 @@ function Checkout() {
                         onChange={(e) => setFormData({ ...formData, billingAddress1: e.target.value })}
                         required
                       />
-                      {errors.billingAddress1 && <span className="error-message">{errors.billingAddress1}</span>}
+                      {errors.billingAddress1 && <span className="checkout_error_message">{errors.billingAddress1}</span>}
                     </div>
 
-                    <div className="form-group">
+                    <div className="checkout_form_group">
                       <label>APT, SUITE, FLOOR</label>
                       <input
                         type="text"
@@ -862,8 +857,8 @@ function Checkout() {
                       />
                     </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
+                    <div className="checkout_form_row">
+                      <div className="checkout_form_group">
                         <label>ZIP CODE *</label>
                         <input
                           type="text"
@@ -871,10 +866,10 @@ function Checkout() {
                           onChange={(e) => setFormData({ ...formData, billingZipCode: e.target.value })}
                           required
                         />
-                        {errors.billingZipCode && <span className="error-message">{errors.billingZipCode}</span>}
+                        {errors.billingZipCode && <span className="checkout_error_message">{errors.billingZipCode}</span>}
                       </div>
 
-                      <div className="form-group">
+                      <div className="checkout_form_group">
                         <label>CITY *</label>
                         <input
                           type="text"
@@ -882,11 +877,11 @@ function Checkout() {
                           onChange={(e) => setFormData({ ...formData, billingCity: e.target.value })}
                           required
                         />
-                        {errors.billingCity && <span className="error-message">{errors.billingCity}</span>}
+                        {errors.billingCity && <span className="checkout_error_message">{errors.billingCity}</span>}
                       </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className="checkout_form_group">
                       <label>STATE *</label>
                       <select
                         value={formData.billingState}
@@ -900,15 +895,15 @@ function Checkout() {
                         <option value='Bal'>Balochistan</option>
                         <option value='GB'>Gilgit Baltistan</option>
                       </select>
-                      {errors.billingState && <span className="error-message">{errors.billingState}</span>}
+                      {errors.billingState && <span className="checkout_error_message">{errors.billingState}</span>}
                     </div>
                   </>
                 )}
 
-                <div className="form-actions">
+                <div className="checkout_form_actions">
                   <button
                     type="button"
-                    className="continue-button"
+                    className="checkout_continue_button"
                     onClick={() => {
                       toggleSection('billing');
                       toggleSection('payment');
@@ -921,21 +916,21 @@ function Checkout() {
             )}
           </div>
 
-          <div className={`checkout-section ${expandedSections.payment ? 'expanded' : ''}`}>
-            <div className="section-header" onClick={() => toggleSection('payment')}>
-              <div className="section-title">
-                <span className={`step-number ${expandedSections.payment ? 'active' : ''}`}>3</span>
+          <div className={`checkout_form_section_container ${expandedSections.payment ? 'expanded' : ''}`}>
+            <div className="checkout_section_header" onClick={() => toggleSection('payment')}>
+              <div className="checkout_section_title">
+                <span className={`checkout_step_number ${expandedSections.payment ? 'active' : ''}`}>3</span>
                 <h2>Payment Method</h2>
               </div>
-              <span className="toggle-icon">
+              <span className="checkout_toggle_icon">
                 {expandedSections.payment ? '−' : '+'}
               </span>
             </div>
 
             {expandedSections.payment && (
-              <div className="section-content">
-                <div className="payment-options">
-                  <div className="payment-option">
+              <div className="checkout_section_content">
+                <div className="checkout_payment_options">
+                  <div className="checkout_payment_option">
                     <input
                       type="radio"
                       id="cod"
@@ -946,11 +941,11 @@ function Checkout() {
                       required
                     />
                     <label htmlFor="cod">
-                      <span className="payment-label">Cash on Delivery</span>
+                      <span className="checkout_payment_label">Cash on Delivery</span>
                     </label>
                   </div>
 
-                  <div className="payment-option">
+                  <div className="checkout_payment_option">
                     <input
                       type="radio"
                       id="payFast"
@@ -961,15 +956,15 @@ function Checkout() {
                       required
                     />
                     <label htmlFor="payFast">
-                      <span className="payment-label">PayFast</span>
+                      <span className="checkout_payment_label">PayFast</span>
                     </label>
                   </div>
                 </div>
-                {errors.paymentMethod && <span className="error-message">{errors.paymentMethod}</span>}
+                {errors.paymentMethod && <span className="checkout_error_message">{errors.paymentMethod}</span>}
 
-                <div className="form-actions">
+                <div className="checkout_form_actions">
                   <button
-                    className="place-order-button"
+                    className="checkout_place_order_button"
                     onClick={handlePlaceOrder}
                     disabled={loading}
                   >
@@ -981,48 +976,48 @@ function Checkout() {
           </div>
         </div>
 
-        <div className="checkout-summary-column">
-          <div className="order-summary">
+        <div className="checkout_summary_section">
+          <div className="checkout_order_summary">
             <h2>Summary</h2>
 
-            <div className="promo-code">
+            <div className="checkout_promo_code">
               <p>Promo code 3 per order maximum</p>
               <input type="text" placeholder="Enter code" />
             </div>
 
-            <div className="price-breakdown">
-              <div className="price-row">
+            <div className="checkout_price_breakdown">
+              <div className="checkout_price_row">
                 <span>Subtotal</span>
                 <span>Rs. {calculateSubtotal().toFixed(2)}</span>
               </div>
-              <div className="price-row">
+              <div className="checkout_price_row">
                 <span>Shipping</span>
                 <span>Rs. {deliveryFee.toFixed(2)}</span>
               </div>
 
-              <div className="divider"></div>
-              <div className="price-row total">
+              <div className="checkout_divider"></div>
+              <div className="checkout_price_row checkout_total_row">
                 <span>Total</span>
                 <span>Rs. {total.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
-          <div className="cart-items">
+          <div className="checkout_cart_items">
             <h2>Cart ({cartItems.length} items)</h2>
             
             {cartItems.map((item) => (
-              <div className="cart-item" key={item.title}>
-                <div className="cart-item-image">
+              <div className="checkout_cart_item" key={item.title}>
+                <div className="checkout_cart_item_image">
                   <img src={item.image} alt={item.title} />
                 </div>
-                <div className="cart-item-details">
+                <div className="checkout_cart_item_details">
                   <h3>{item.title}</h3>
                   <p>Rs. {item.price} × {item.quantity}</p>
                   <p>Rs. {(parseFloat(item.price.replace('Rs.', '')) * item.quantity).toFixed(2)}</p>
                 </div>
                 <button 
-                  className="remove-item-btn" 
+                  className="checkout_remove_item_button" 
                   onClick={() => removeCartItem(item.title)}
                 >
                   <FontAwesomeIcon icon={faTrash} />
@@ -1032,6 +1027,7 @@ function Checkout() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

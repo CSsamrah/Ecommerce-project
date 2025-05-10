@@ -3,8 +3,7 @@ import "./Buyers.css";
 import AdminDashboard from "./AdminDashboard.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Navbar from '../../Navbar/navbar1'
-
+import Navbar from '../../Navbar/navbar1';
 
 function Buyers() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -12,6 +11,7 @@ function Buyers() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
 
     useEffect(() => {
         const fetchBuyers = async () => {
@@ -48,67 +48,73 @@ function Buyers() {
         fetchBuyers();
     }, [navigate]);
 
+    // Listen for sidebar toggle events from AdminDashboard
+    const handleSidebarToggle = (isOpen) => {
+        setIsSidebarOpen(isOpen);
+    };
+
     const filteredBuyers = buyers.filter(buyer => 
         buyer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         buyer.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className="buyer-container">
+        <div className="buyers-page-container">
             <Navbar />
-        <div className="buyer-body">
-         
-            <AdminDashboard />
-        <div className="buyers-container">
-            <br></br>
-            
-            <h2 className="buyers-title">Registered Buyers</h2>
+            <div className="buyers-page-content">
+                <AdminDashboard onSidebarToggle={handleSidebarToggle} />
+                <div className={`buyers-data-container ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+                    <div className="buyers-inner-container">
+                        <h2 className="buyers-page-title">Registered Buyers</h2>
 
-            <div className="table-controls">
-                <input
-                    type="text"
-                    className="search-bar"
-                    placeholder="Search buyers..."
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    value={searchTerm}
-                />
-            </div>
+                        <div className="buyers-table-controls">
+                            <input
+                                type="text"
+                                className="buyers-search-input"
+                                placeholder="Search buyers..."
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                value={searchTerm}
+                            />
+                        </div>
 
-            {loading ? (
-                <div className="loading">Loading buyers...</div>
-            ) : error ? (
-                <div className="error-message">
-                    Error: {error}
-                    <button onClick={() => window.location.reload()}>Retry</button>
+                        {loading ? (
+                            <div className="buyers-loading-state">Loading buyers...</div>
+                        ) : error ? (
+                            <div className="buyers-error-message">
+                                Error: {error}
+                                <button className="buyers-retry-btn" onClick={() => window.location.reload()}>Retry</button>
+                            </div>
+                        ) : filteredBuyers.length === 0 ? (
+                            <div className="buyers-no-results">No buyers found</div>
+                        ) : (
+                            <div className="buyers-table-wrapper">
+                                <table className="buyers-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredBuyers.map((buyer, index) => (
+                                            <tr key={buyer.user_id || index}>
+                                                <td>{index + 1}</td>
+                                                <td>{buyer.name}</td>
+                                                <td>{buyer.email}</td>
+                                                <td>{buyer.phoneNo || 'N/A'}</td>
+                                                <td>{buyer.address || 'N/A'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            ) : filteredBuyers.length === 0 ? (
-                <div className="no-results">No buyers found</div>
-            ) : (
-                <table className="buyers-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Address</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredBuyers.map((buyer, index) => (
-                            <tr key={buyer.user_id || index}>
-                                <td>{index + 1}</td>
-                                <td>{buyer.name}</td>
-                                <td>{buyer.email}</td>
-                                <td>{buyer.phoneNo || 'N/A'}</td>
-                                <td>{buyer.address || 'N/A'}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </div>
-        </div>
+            </div>
         </div>
     );
 }

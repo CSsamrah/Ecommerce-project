@@ -1,30 +1,82 @@
 .inv-body {
-    background-color: #f5f5f5;
+    padding-top: 80px;
+    background-color: #1a365d;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.inventory-page-container {
+    padding-top: 80px;
+    display: flex;
     min-height: 100vh;
 }
 
-.inventory-container {
-    max-width: 1200px;
-    margin: 0 auto;
+
+.inventory-content {
+    flex: 1;
     padding: 20px;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    background-color: #1a365d;
+    color: white;
+    margin-left: 250px; 
+    min-height: 100vh;
+    width: calc(100% - 250px); 
+    box-sizing: border-box;
 }
 
+/* Responsive layout adjustments */
+@media screen and (max-width: 1024px) {
+    .inventory-content {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .inventory-page-container {
+        flex-direction: column;
+    }
+    
+    .inventory-content {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Header styling */
+.inventory-content h2 {
+    margin-top: 0;
+    color: rgb(24, 161, 148);
+    font-size: 34px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgb(24, 161, 148);
+}
+
+/* Filters and search container */
+.filters-container {
+    margin-bottom: 20px;
+}
+
+/* Category tabs section */
 .category-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
+
 }
 
 .category-tabs button {
     padding: 8px 16px;
-    background-color: #f0f0f0;
+    background-color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: 500;
+    color: #1a365d;
 }
 
 .category-tabs button:hover {
@@ -32,55 +84,97 @@
 }
 
 .category-tabs button.active {
-    background-color: #4a90e2;
+    background-color: rgb(140, 140, 209);
     color: white;
 }
 
-.search-bar {
-    width: 100%;
-    padding: 10px;
+/* Search and add button section */
+.search-and-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 20px;
+}
+
+.search-bar {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
 }
 
 .add-product-btn {
-    background-color: #4CAF50;
-    color: white;
+    background-color:white;
+    color: midnightblue;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-bottom: 20px;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .add-product-btn:hover {
     background-color: #45a049;
 }
 
+/* Table styles with improved responsiveness */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    min-width: 800px;
+    background-color: white;
+    color: #1a365d;
 }
 
 table th, table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid white;
+    padding: 10px;
     text-align: left;
 }
 
 table th {
-    background-color: #f0f0f0;
+    background-color: rgb(20, 119, 109);
     font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    color: white;
 }
 
 table tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: white;
 }
 
-table button {
+/* Cell-specific styles */
+.description-cell {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.action-buttons {
+    white-space: nowrap;
+}
+
+.edit-btn, .delete-btn {
     margin-right: 5px;
     padding: 5px 10px;
     border: none;
@@ -88,47 +182,89 @@ table button {
     cursor: pointer;
 }
 
-table button:first-child {
-    background-color: #4a90e2;
+.edit-btn {
+    background-color: rgb(24, 161, 148);
     color: white;
+    border-color: #1a365d;
+    width: 5vw;
+    height: 5vh;
 }
 
-table button:last-child {
+.delete-btn {
     background-color: #e74c3c;
     color: white;
 }
 
-.edit-form {
-    background-color: #f9f9f9;
+/* Modal overlay for edit/add form */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
     padding: 20px;
+}
+
+/* Form styling */
+.edit-form {
+    background-color: lightblue;
+    padding: 25px;
     border-radius: 8px;
-    margin-top: 20px;
-    border: 1px solid #ddd;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .edit-form h3 {
     margin-top: 0;
     margin-bottom: 20px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
 }
 
-.edit-form label {
+/* Grid layout for form fields */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 500;
+    color: #333;
 }
 
-.edit-form input,
-.edit-form select,
-.edit-form textarea {
+.form-group input,
+.form-group select,
+.form-group textarea {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
+    padding: 10px;
+    border: 1px solid midnightblue;
     border-radius: 4px;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
-.edit-form textarea {
+.form-group textarea {
     min-height: 100px;
     resize: vertical;
 }
@@ -136,24 +272,34 @@ table button:last-child {
 .form-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 20px;
+    justify-content: flex-end;
 }
 
-.form-buttons button {
-    padding: 8px 16px;
+.save-btn, .cancel-btn {
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: 500;
 }
 
-.form-buttons button:first-child {
+.save-btn {
     background-color: #4CAF50;
     color: white;
 }
 
-.form-buttons button:last-child {
+.save-btn:hover {
+    background-color: #45a049;
+}
+
+.cancel-btn {
     background-color: #f44336;
     color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #d32f2f;
 }
 
 .required {
@@ -184,10 +330,10 @@ table button:last-child {
 }
 
 .current-image {
-    margin-bottom: 15px;
+    margin-top: 10px;
 }
 
 .current-image p {
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 500;
 }

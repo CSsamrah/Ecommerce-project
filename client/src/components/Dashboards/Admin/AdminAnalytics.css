@@ -1,10 +1,10 @@
 .admin-analytics-container {
     padding: 40px;
     padding-top: 40px; 
-    /* padding-left: 140px;  */
-    width: 90%;
-    max-width: 1200px;
-    background-color: transparent;
+    padding-left: 260px; 
+    width: 100%;
+    max-width: 1500px;
+    background-color: #1C2E4A;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -19,11 +19,12 @@
     display: flex;
     align-items: center;
     margin-bottom: 30px;
+    color: rgb(24, 161, 148);
 }
 
 .header-icon {
     margin-right: 15px;
-    color: #FF9F1C;
+    color: rgb(24, 161, 148);
     animation: sparkle 2s infinite;
 }
 
@@ -39,7 +40,7 @@
     color: #fff;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     margin: 10px 0;
-    background: linear-gradient(45deg, #FF9F1C, #FF006E);
+    background: linear-gradient(45deg, #FF9F1C, rgb(24, 161, 148));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -73,7 +74,7 @@
 }
 
 .stat-card svg {
-    color: #FF006E;
+    color: rgb(24, 161, 148);
     margin-right: 15px;
 }
 
@@ -121,7 +122,7 @@
 }
 
 .chart-toggle-btn.active {
-    background: #FF006E;
+    background: rgb(24, 161, 148);
     box-shadow: 0 4px 8px rgba(255, 0, 110, 0.3);
 }
 
@@ -159,7 +160,7 @@
     left: 0;
     width: 100%;
     height: 5px;
-    background: linear-gradient(90deg, #FF9F1C, #FF006E, #3A86FF);
+    background: linear-gradient(90deg, #FF9F1C, rgb(67, 170, 160), #3A86FF);
 }
 
 .chart-card h3 {
@@ -199,7 +200,7 @@
 }
 
 .fun-fact-box svg {
-    color: #FF9F1C;
+    color: rgb(24, 161, 148);
     margin-right: 15px;
     flex-shrink: 0;
 }
@@ -212,7 +213,7 @@
 
 .fun-fact-header {
     font-weight: bold;
-    color: #FF006E;
+    color: rgb(24, 161, 148);
 }
 
 .loading-container {
@@ -228,7 +229,7 @@
     height: 50px;
     border: 5px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top-color: #FF006E;
+    border-top-color: rgb(24, 161, 148);
     animation: spin 1s ease-in-out infinite;
 }
 
@@ -310,7 +311,7 @@
 }
 
 .confetti:nth-child(4n) {
-    background: #FF006E;
+    background: rgb(24, 161, 148);
     width: 8px;
     height: 8px;
 }
@@ -372,9 +373,12 @@
 }
 .revenue-summary {
     margin-bottom: 25px;
+    padding-top: 30px;
+    padding-left: 120px;
   }
   
   .revenue-card {
+    
     background: white;
     border-radius: 10px;
     padding: 20px;
@@ -382,9 +386,10 @@
   }
   
   .revenue-card h3 {
+    color: rgb(24, 161, 148);
     margin-top: 0;
     margin-bottom: 20px;
-    color: #333;
+
     font-size: 18px;
   }
   
@@ -407,12 +412,12 @@
   .stat-label {
     display: block;
     font-size: 14px;
-    color: #666;
+    color: rgb(24, 161, 148);
     margin-bottom: 5px;
   }
   
   .stat-amount {
     font-size: 20px;
     font-weight: bold;
-    color: #333;
+    color: rgb(24, 161, 148);
   }
