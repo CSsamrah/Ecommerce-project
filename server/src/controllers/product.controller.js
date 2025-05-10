@@ -407,7 +407,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
             p.stock_quantity,
             p.rental_available,
             p.product_features,
-            p.product_image as image   
+            p.product_image as image,
+            p.rental_available
         FROM product p
         WHERE p.user_id = $1
         LIMIT 50
@@ -424,6 +425,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
             stock_quantity: product.stock_quantity,
             image: product.image,
             features:product.product_features,
+            rental_available: product.rental_available,
             avg_rating: '0',
             people_rated: '0'
         }));
