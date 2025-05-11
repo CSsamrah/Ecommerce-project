@@ -113,6 +113,34 @@ const addProductToCart = (product) => {
   if (loading) return <div className="loading">Loading products...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
+
+  if (!loading && !error && rentalCategoryData.length === 0) {
+  return (
+    <main>
+      <Navbar />
+      <div className="catalog">
+        <div className="catalog_container">
+          <div className="no-products-message">
+            {/* <img src="/empty-state.svg" alt="No products" className="empty-state-img" /> */}
+            <Typography variant="h5" className="empty-state-title">
+              There are currently no rental products in this category.
+            </Typography>
+            {/* <Typography variant="body1" className="empty-state-text">
+              There are currently no rental products in this category.
+            </Typography> */}
+            <button 
+              className="browse-categories-btn"
+              onClick={() => navigate('/rentalCatalog')}
+            >
+              Browse Other Rental Products
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
   return (
     <main>
     <Navbar />

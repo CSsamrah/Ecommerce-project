@@ -1,13 +1,12 @@
 
 .analytics-body {
-    background-color: #2A4E61;
+    background-color: rgb(219, 238, 243);
     min-height: 100vh;
     padding-bottom: 2.5rem;
     width: 100%;
 }
 
 .analytics-container {
-    /* max-width: 1400px; */
     margin: 0 auto;
     padding: 1.5rem;
 }

@@ -4,9 +4,19 @@ import { validateProduct } from "../controllers/prod_authentication.controller.j
 
 const validationRoutes=express.Router();
 
-validationRoutes.post("/validate-product/:product_id", (req, res, next) => {
-    console.log("🏁 Validate Product Route hit! Id:", req.params.product_id); // Debug log
+// validationRoutes.post("/validate-product/:product_id", (req, res, next) => {
+//     console.log("🏁 Validate Product Route hit! Id:", req.params.product_id); // Debug log
+//     next();
+//   },isLoggedIn, validateProduct);
+
+validationRoutes.post(
+  "/validate-product/:product_id",
+  (req, res, next) => {
+    console.log("Auth headers:", req.headers.authorization); // Debug
     next();
-  }, validateProduct);
+  },
+  isLoggedIn, 
+  validateProduct
+);
 
 export default validationRoutes

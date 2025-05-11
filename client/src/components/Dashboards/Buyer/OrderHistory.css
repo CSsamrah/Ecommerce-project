@@ -128,7 +128,7 @@
 
  .app-main {
     flex: 1;
-    background-color: #2A4E61;
+    background-color: rgb(219, 238, 243);
     overflow-x: hidden;
 }
 
@@ -147,7 +147,7 @@
 
 .oh-app-main {
     flex: 1;
-    background-color: #2A4E61;
+    background-color: rgb(219, 238, 243);
     overflow-x: hidden;
     margin-left: 250px; 
     width: calc(100% - 250px);
@@ -156,7 +156,7 @@
 
 .oh-order-management-container {
     padding: 20px;
-    background-color: #2A4E61;
+    background-color: rgb(219, 238, 243);
 }
 
 .oh-panel-header {

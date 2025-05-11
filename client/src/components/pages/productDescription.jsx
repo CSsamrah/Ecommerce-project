@@ -297,9 +297,10 @@
 // export default ProductDetail;
 
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { IonIcon } from '@ionic/react';
+import { useCart } from './cartContext';
 import axios from 'axios';
 import { heartOutline, 
   heart, 
@@ -445,6 +446,9 @@ const ProductDetail = () => {
   const [averageRating, setAverageRating] = useState(0);
   const [authStatus, setAuthStatus] = useState(null);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const { addToCart, error: cartError, loading: cartLoading } = useCart();
+  const [addingToCart, setAddingToCart] = useState(null); // Track which product is being added
+  
 
 
   useEffect(() => {
@@ -532,12 +536,12 @@ const ProductDetail = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#b1857d', // Rose gold color from Samsung example
+    background: 'rgb(24, 161, 148)',
     color: 'white',
     fontSize: '16px',
     fontWeight: '500',
     border: 'none',
-    borderRadius: '25px', // Rounded corners like in the Samsung example
+    borderRadius: '25px', 
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     boxShadow: '0 2px 8px rgba(230, 184, 176, 0.3)'
@@ -568,14 +572,36 @@ const ProductDetail = () => {
 
   };
 
-  const handleAddToCart = () => {
-    if (isInCart) {
-      alert("Already in cart!");
-    } else {
-      setIsInCart(true);
-      alert("Added to cart!");
+  const addProductToCart = async (product) => {
+    console.log("Adding product to cart:", product);
+    const productId = product.id || product.product_id;
+    
+    try {
+      setAddingToCart(productId); // Set the product being added
+      const success = await addToCart(product);
+      
+      if (success) {
+        setIsInCart(true);
+        console.log("successfully added to cart", success)
+      } else {
+        // Show a more user-friendly message
+        alert(cartError || "Failed to add product to cart. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error in addProductToCart:", err);
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
+      setAddingToCart(null); // Clear the adding state
     }
   };
+  // const handleAddToCart = () => {
+  //   if (isInCart) {
+  //     alert("Already in cart!");
+  //   } else {
+  //     setIsInCart(true);
+  //     alert("Added to cart!");
+  //   }
+  // };
 
 
   const toggleRatingPopup = () => {
@@ -697,7 +723,7 @@ const ProductDetail = () => {
             <div className="PD_product_detail_buttons">
               <button 
                 className={`PD_cart-button ${isInCart ? 'in-cart':''}`} 
-                onClick={handleAddToCart}
+                onClick={() => addProductToCart(product)}
                 style={isInCart ? inCartButtonStyle : buyNowButtonStyle}
               >
                 {isInCart ? 'Added to Cart' : 'Buy now'}
@@ -735,16 +761,6 @@ const ProductDetail = () => {
         </div>
       </div>
 
-                    {product.seller_name && (
-                        <div className="seller-info">
-                            <span>Sold by: {product.seller_name}</span>
-                        </div>
-                    )}
-
-                    <div className="product-description">
-                        <h3>Description</h3>
-                        <p>{product.description || "No description available"}</p>
-                    </div>
 
         {/* Display Individual Reviews 
         <div className="review_box_container">
@@ -775,7 +791,10 @@ const ProductDetail = () => {
           <h1>Client Says</h1>
         </div>
 
-                <Rating addReview={addReview} />
+                {/* <Rating addReview={addReview} /> */}
+                {showRatingPopup && (
+  <Rating addReview={addReview} closePopup={toggleRatingPopup} />
+)}
 
       {reviews.length > 0 ? (
                 <div className="review_box_container">

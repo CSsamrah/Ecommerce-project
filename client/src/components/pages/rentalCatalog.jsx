@@ -315,7 +315,7 @@ const RentalCatalog = () => {
                         onClick={() => addProductToCart(product)}
                         disabled={isAddingThisProduct || cartLoading}
                       >
-                        {isAddingThisProduct ? 'ADDING...' : 'BUY NOW'}
+                        {isAddingThisProduct ? 'ADDING...' : 'RENT NOW'}
                       </button>
                     </div>
                   </div>
