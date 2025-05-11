@@ -36,6 +36,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaHome, FaBookOpen, FaThLarge, FaPhoneAlt } from "react-icons/fa";
 import { useCart } from '../pages/cartContext';
 import { useAuth } from '../pages/AuthProvider'; // Make sure path is correct
+import axios from 'axios';
 
 // Enhanced styled components
 const Search = styled('div')(({ theme }) => ({
@@ -196,10 +197,19 @@ const theme = createTheme({
                 root: {
                     backdropFilter: 'blur(8px)',
                     backgroundColor: '#1C2E4A',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderBottom: 'none',
                 },
             },
         },
+
+        MuiToolbar: {
+      styleOverrides: {
+        root: {
+          minHeight: '70px !important', // Ensure consistent height
+          backgroundColor: 'inherit', // Inherit from AppBar
+        },
+      },
+    },
         MuiMenu: {
             styleOverrides: {
                 paper: {

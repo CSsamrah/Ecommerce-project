@@ -329,6 +329,16 @@ const getSingleCategory = asyncHandler(async (req, res) => {
         [categoryId, rental]
       );
 
+      if (productsResult.rows.length === 0) {
+        return res.status(200).json({
+          success: true,
+          statusCode: 200,
+          message: "No selling products found in this category",
+          data: []
+        });
+      }
+
+
       const Result = productsResult.rows.map(product => ({
         id: product.id,
         title: product.title,
@@ -410,6 +420,15 @@ const getSingleCategory = asyncHandler(async (req, res) => {
         LIMIT 50`,
         [categoryId, rental]
       );
+
+      if (productsResult.rows.length === 0) {
+        return res.status(200).json({
+          success: true,
+          statusCode: 200,
+          message: "No rental products found in this category",
+          data: []
+        });
+      }
 
       const Result = productsResult.rows.map(product => ({
         id: product.id,

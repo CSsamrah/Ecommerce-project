@@ -370,3 +370,49 @@
   background-color: #52667E;
   color: white;
 }
+
+/* Add to your catalog.css */
+.no-products-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.empty-state-img {
+  width: 200px;
+  height: auto;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.empty-state-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: white;
+  padding: 100px;
+}
+
+.empty-state-text {
+  color: #353355;
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+
+.browse-categories-btn {
+  padding: 10px 20px;
+  background-color: #b1857d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.browse-categories-btn:hover {
+  background-color: #9a746d;
+}
