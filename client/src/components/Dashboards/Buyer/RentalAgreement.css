@@ -1,6 +1,6 @@
 .rental-page-container {
     display: flex;
-    width: 1360px;
+    width: 100%;
     min-height: 100vh;
     font-family: "Arial", sans-serif;
     background-color: rgb(219, 238, 243);
@@ -18,7 +18,7 @@
     flex: 3;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 83px;
     padding: 30px;
 }
 
@@ -28,8 +28,9 @@
 }
 
 h2 {
-    color: rgb(24, 161, 148);
-    font-weight: bold;
+    color: rgb(2, 81, 74);
+    font-weight:800;
+    font-size: 2em;
     margin-bottom: 20px;
 }
 
@@ -40,7 +41,7 @@ h2 {
 }
 
 .rental-card {
-    background: white;
+    background: rgb(81, 120, 139);
     padding: 15px;
     border-radius: 8px;
     box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
@@ -122,20 +123,21 @@ h2 {
 }
 
 .rental-details {
-    flex: 1;
+    /* flex: 1; */
     min-width: 250px;
     max-width: 400px;
-    background: white;
+    background:  rgb(81, 120, 139);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
     height: fit-content;
+    margin-top: 4.4em;
 }
 
 .rental-info {
     margin-top: 15px;
     padding: 15px;
-    background: #f1f1f1;
+    background: #023f41;
     border-radius: 6px;
 }
 

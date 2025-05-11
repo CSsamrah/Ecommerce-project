@@ -1,73 +1,3 @@
-// import React, { useState } from "react";
-// import "./RentalAgreement.css";
-// import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-// import BuyerDashboard from "./BuyerDashboard";
-
-// const RentalAgreement = () => {
-//   const [selectedRental, setSelectedRental] = useState(null);
-
-//   const rentals = [
-//     { id: 1, item: "Scanner", rentedOn: "2025-03-10", returned: false },
-//     { id: 2, item: "Laptop", rentedOn: "2025-02-15", returned: true },
-//     { id: 3, item: "Projector", rentedOn: "2025-01-20", returned: false },
-//   ];
-
-//   return (
-//     <div className="rent-body">
-//       <br></br>
-//       <br></br>
-//     <div className="rental-container">
-//       <br></br>
-//       <br></br>
-//         <BuyerDashboard />
-//       <div className="rental-items">
-//         <h2> Your Rentals</h2>
-//         <div className="rental-list">
-//           {rentals.map((rental) => (
-//             <div
-//               key={rental.id}
-//               className={`rental-card ${selectedRental?.id === rental.id ? "selected" : ""}`}
-//               onClick={() => setSelectedRental(rental)}
-//             >
-//               <div className="rental-header">
-//                 <h3>{rental.item}</h3>
-//                 {rental.returned ? (
-//                   <FaCheckCircle className="status-icon returned" />
-//                 ) : (
-//                   <FaTimesCircle className="status-icon pending" />
-//                 )}
-//               </div>
-//               <p><strong>Rented On:</strong> {rental.rentedOn}</p>
-//               <span className={`status-badge ${rental.returned ? "returned" : "pending"}`}>
-//                 {rental.returned ? "Returned" : "Pending"}
-//               </span>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-
-//       <div className="rental-details">
-//         <h2> Rental Policy</h2>
-//         <p>Late returns charges set by seller. Damages will be assessed, and charges may apply.</p>
-//         {selectedRental && (
-//           <div className="rental-info">
-//             <h3> Rental Details</h3>
-//             <p><strong>Item:</strong> {selectedRental.item}</p>
-//             <p><strong>Rented On:</strong> {selectedRental.rentedOn}</p>
-//             <p><strong>Status:</strong> {selectedRental.returned ? "Returned" : "Pending"}</p>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//     </div>
-//   );
-// };
-
-// export default RentalAgreement;
-
-
-
-
 import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import BuyerDashboard from "./BuyerDashboard";
@@ -93,13 +23,14 @@ const RentalAgreement = () => {
           `${API_BASE_URL}/rental/getUserRentals`, 
           { withCredentials: true }
         );
+        console.log("API Response:", response.data);
 
-        if (!response.data?.rentals) {
+        if (!response.data?.data?.rentals) {
           setRentals([]);
           return;
         }
 
-        const formattedRentals = response.data.rentals.map(rental => ({
+        const formattedRentals = response.data.data.rentals.map(rental => ({
           id: rental.id,
           item: rental.product.name,
           rentedOn: new Date(rental.rented_at).toLocaleDateString(),
@@ -161,32 +92,37 @@ const RentalAgreement = () => {
     }
   };
 
-  const viewRentalDetails = async (rentalId) => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/rental/getRental/${rentalId}`,
-        { withCredentials: true }
-      );
-      
-      const rental = response.data.data.rental;
-      setSelectedRental({
-        id: rental.id,
-        item: rental.product.name,
-        rentedOn: new Date(rental.rented_at).toLocaleDateString(),
-        dueDate: rental.return_date 
-          ? new Date(rental.return_date).toLocaleDateString() 
-          : "N/A",
-        returned: rental.status === "Returned",
-        status: rental.status,
-        productId: rental.product.id,
-        rentalDuration: rental.duration,
-        rentalPrice: rental.price
-      });
-    } catch (err) {
-      console.error("Error fetching rental details:", err);
-      alert(err.response?.data?.message || "Failed to load rental details");
-    }
-  };
+ const viewRentalDetails = async (rentalId) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/rental/getRental/${rentalId}`,
+      { withCredentials: true }
+    );
+    console.log("Rental Details Response:", response.data);
+
+    const rental = response.data.data.rental;
+    const rentalFormatted = {
+      id: rental.id,
+      item: rental.product.name,
+      rentedOn: new Date(rental.rented_at).toLocaleDateString(),
+      dueDate: rental.return_date 
+        ? new Date(rental.return_date).toLocaleDateString() 
+        : "N/A",
+      returned: rental.status === "Returned",
+      status: rental.status,
+      productId: rental.product.id,
+      rentalDuration: rental.duration,
+      rentalPrice: rental.price,
+      productImage: rental.product.image
+    };
+
+    setSelectedRental(rentalFormatted);
+  } catch (err) {
+    console.error("Error fetching rental details:", err);
+    alert(err.response?.data?.message || "Failed to load rental details");
+  }
+};
+
 
   // Cute loading component
   const LoadingAnimation = () => (
