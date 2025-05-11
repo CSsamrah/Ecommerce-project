@@ -160,6 +160,27 @@ export const placeOrder = asyncHandler(async (req, res) => {
   });
 
 
+//     const user_id=user.user_id;
+//     if (!user_id) {
+//         throw new ApiError(400, "User ID is required.");
+//     }
+
+//     const query = `SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC`;
+//     const result = await pool.query(query, [user_id]);
+
+//     if (!result.rows.length) {
+//         // throw new ApiError(404, "No orders found for this user.");
+//         return res.status(200).json({ 
+//             success: true, 
+//             orders: [],
+//             message: "No orders found" 
+//         });
+//     }
+
+//     res.status(200).json({ success: true, orders: result.rows });
+// });
+
+
 // Get Order Details
 export const getOrderDetails = asyncHandler(async (req, res) => {
     const { order_id } = req.params;

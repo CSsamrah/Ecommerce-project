@@ -1,5 +1,5 @@
-
-/* :root {
+/* Base Variables */
+:root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
   --secondary: #10b981;
@@ -19,7 +19,7 @@
   --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
   /* --radius: 8px;
   --transition: all 0.2s ease; */
-
+}
 
 /* Product Detail Page */
 /* .PD_product_detail_page {
@@ -35,9 +35,7 @@
   color: white;
   position: relative; 
   overflow: hidden;
-  /* background: #b1857d */
 }
-
 .PD_product_detail_page::before {
   content: '';
   position: absolute;
@@ -261,7 +259,7 @@
   color: #777;
 }
 
-
+/* Review Section */
 .review_container {
   display: flex;
   justify-content: center;
@@ -459,7 +457,7 @@
   padding: 20px 20px 70px 20px;
 }
 
-
+/* Rating Popup */
 .rating_popup_overlay {
   position: fixed;
   top: 0;
@@ -547,7 +545,7 @@
   color: white;
 }
 
-
+/* Loading & Error States */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -610,7 +608,7 @@
   background: var(--primary-dark);
 }
 
-
+/* Responsive Adjustments */
 @media (max-width: 1060px) {
   .review_box {
     width: calc(50% - 30px);
@@ -699,8 +697,6 @@
   color: #ffffff;
   background-color: #252525;
 }
-
-
 /* Authentication Popup Styles */
 .auth_popup_overlay {
     position: fixed;
@@ -829,4 +825,64 @@
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+
+
+/* Rental Duration Styles */
+.rental-duration-container {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rental-label {
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+}
+
+.rental-select-wrapper {
+  position: relative;
+  width: 150px;
+}
+
+.rental-select {
+  width: 100%;
+  padding: 12px 15px;
+  padding-right: 35px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  appearance: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rental-select:hover {
+  border-color: #b1857d;
+}
+
+.rental-select:focus {
+  outline: none;
+  border-color: #b1857d;
+  box-shadow: 0 0 0 2px rgba(177, 133, 125, 0.2);
+}
+
+.rental-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(270deg);
+  pointer-events: none;
+  color: #b1857d;
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.rental-select:focus + .rental-select-arrow {
+  transform: translateY(-50%) rotate(90deg);
 }

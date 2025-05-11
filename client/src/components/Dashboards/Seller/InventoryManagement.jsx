@@ -3,6 +3,7 @@ import axios from "axios"; // Make sure to install axios if not already done
 import Seller_dashboard from "./Seller_dashboard";
 import "./InventoryManagement.css";
 import Navbar from "../../Navbar/navbar1";
+import LoadingSpinner from "./LoadingSpinner";
 
 axios.defaults.withCredentials = true;
 
@@ -288,6 +289,9 @@ function InventoryManagement() {
         }
     };
 
+    if (loading) {
+        return <LoadingSpinner message="Loading inventory data..." />;
+    }
     return (
         <div className="inv-body">
             <Navbar />
@@ -382,7 +386,7 @@ function InventoryManagement() {
                                             <tr key={product.product_id}>
                                                 <td>{product.title}</td>
                                                 <td className="description-cell">{product.description}</td>
-                                                <td>${product.price}</td>
+                                                <td>Rs. {product.price}</td>
                                                 <td>{product.condition}</td>
                                                 <td>{product.stock_quantity}</td>
                                                 <td>{product.rental_available ? "YES" : "NO"}</td>
@@ -557,3 +561,5 @@ function InventoryManagement() {
 }
 
 export default InventoryManagement;
+
+

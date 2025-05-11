@@ -4,7 +4,7 @@
     padding-left: 260px; 
     width: 100%;
     max-width: 1500px;
-    background-color: #1C2E4A;
+    background-color: #2A4E61;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -40,7 +40,7 @@
     color: #fff;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     margin: 10px 0;
-    background: linear-gradient(45deg, #FF9F1C, rgb(24, 161, 148));
+    background: linear-gradient(45deg, #ec907f, rgb(24, 161, 148));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -85,7 +85,7 @@
 .stat-card h3 {
     font-size: 14px;
     margin: 0;
-    color: #666;
+    color: rgb(24, 161, 148);
 }
 
 .stat-value {
@@ -123,7 +123,7 @@
 
 .chart-toggle-btn.active {
     background: rgb(24, 161, 148);
-    box-shadow: 0 4px 8px rgba(255, 0, 110, 0.3);
+    box-shadow: 0 4px 8px #e59f93;
 }
 
 .chart-toggle-btn svg {
@@ -160,7 +160,7 @@
     left: 0;
     width: 100%;
     height: 5px;
-    background: linear-gradient(90deg, #FF9F1C, rgb(67, 170, 160), #3A86FF);
+    background: linear-gradient(90deg, #FF9F1C, #e59f93, rgb(24, 161, 148));
 }
 
 .chart-card h3 {
@@ -265,7 +265,7 @@
 
 .retry-button {
     margin-top: 20px;
-    background: #FF006E;
+    background: #df8d7f;
     color: white;
     border: none;
     padding: 10px 25px;
@@ -304,7 +304,7 @@
     position: absolute;
     width: 10px;
     height: 10px;
-    background: #FF9F1C;
+    background: rgb(24, 161, 148);
     top: -10px;
     animation: confetti-fall 4s ease-in-out forwards;
     z-index: 1;
@@ -412,12 +412,12 @@
   .stat-label {
     display: block;
     font-size: 14px;
-    color: rgb(24, 161, 148);
+    color: #e59f93;
     margin-bottom: 5px;
   }
   
   .stat-amount {
     font-size: 20px;
     font-weight: bold;
-    color: rgb(24, 161, 148);
+    color: #e59f93;
   }

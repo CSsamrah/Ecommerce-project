@@ -240,7 +240,7 @@ function Buyers() {
         fetchBuyers();
     }, [navigate]);
 
-    // Listen for sidebar toggle events from AdminDashboard
+
     const handleSidebarToggle = (isOpen) => {
         setIsSidebarOpen(isOpen);
     };
@@ -270,7 +270,7 @@ function Buyers() {
                         </div>
 
                         {loading ? (
-                            <div className="buyers-loading-state">Loading buyers...</div>
+                            <div className="buyers-loading-state">Loading sellers...</div>
                         ) : error ? (
                             <div className="buyers-error-message">
                                 Error: {error}

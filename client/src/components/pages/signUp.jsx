@@ -704,8 +704,8 @@
 
 // export default SignIn;
 
-import React, { useState } from "react";
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Navigate, Link } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
@@ -713,10 +713,10 @@ import "./signUp.css";
 
 const SignIn = () => {
   const [rightPanelActive, setRightPanelActive] = useState(false);
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
-  const { login } = useAuth();
+  const { user, login } = useAuth();
+  const [redirectTo, setRedirectTo] = useState(null);
   
   // Sign Up State
   const [signUpData, setSignUpData] = useState({
@@ -738,6 +738,13 @@ const SignIn = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Check if already logged in
+  useEffect(() => {
+    if (user) {
+      setRedirectTo('/dashboard');
+    }
+  }, [user]);
 
   // Handle Sign Up
   const handleSignUpSubmit = async (e) => {
@@ -821,31 +828,14 @@ const SignIn = () => {
   
     try {
       // Use the login function from AuthContext
-      const userData = await login(
+      await login(
         signInData.email,
         signInData.password,
         signInData.role
       );
       
-      // Decide where to redirect based on role
-      let redirectPath = "/";
-      switch (signInData.role.toLowerCase()) {
-        case "admin":
-          redirectPath = "/adminAnalytics";
-          break;
-        case "seller":
-          redirectPath = "/analytics";
-          break;
-        case "buyer":
-          redirectPath = "/orderhistory";
-          break;
-        default:
-          redirectPath = "/";
-      }
-  
-      // After successful login, navigate
-      navigate(redirectPath);
-  
+      // The useEffect above will handle redirection once user state updates
+      
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || err.message || 'Login failed');
@@ -864,6 +854,11 @@ const SignIn = () => {
     setSignInData({ ...signInData, [e.target.name]: e.target.value });
     setError("");
   };
+
+  // Immediate navigation when redirectTo is set
+  if (redirectTo) {
+    return <Navigate to={redirectTo} replace />;
+  }
 
   return (
     <div className={`sign_container ${rightPanelActive ? "right-panel-active" : ""}`} id="container">

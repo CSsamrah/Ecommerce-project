@@ -1,13 +1,14 @@
-/* OrderManagement.css */
+
 .order-management-container {
+  width: 1350px;
     display: flex;
     flex-direction: column;
-    background-color: #f5f7fa;
+    background-color: #2A4E61;
     min-height: 100vh;
   }
   
   .order-content {
-    margin-left: 250px; /* Match sidebar width */
+    margin-left: 250px; 
     padding: 24px;
     width: calc(100% - 250px);
     transition: margin-left 0.3s, width 0.3s;
@@ -18,17 +19,18 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    
   }
   
   .page-header h1 {
-    font-size: 24px;
-    color: #1a365d;
+    font-size: 34px;
+    color: rgb(24, 161, 148);
     margin: 0;
   }
   
   .order-filters {
     margin-bottom: 24px;
-    background-color: #fff;
+    background-color: #2A4E61;
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -45,7 +47,7 @@
     padding: 8px 16px;
     border: none;
     background-color: #edf2f7;
-    color: #4a5568;
+    color: rgb(24, 161, 148);
     border-radius: 6px;
     font-weight: 500;
     cursor: pointer;
@@ -66,7 +68,7 @@
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    overflow-x: auto; 
     margin-bottom: 24px;
   }
   
@@ -74,7 +76,7 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    min-width: 800px; /* Prevent table from becoming too squished */
+    min-width: 800px; 
   }
   
   .orders-table th,
@@ -148,6 +150,7 @@
     cursor: pointer;
     font-size: 12px;
     transition: background-color 0.2s;
+    width: 100%;
   }
   
   .view-button:hover {
@@ -161,6 +164,8 @@
     background-color: white;
     font-size: 12px;
     color: #4a5568;
+    width:100%;
+    cursor: pointer;
   }
   
   .pagination {
@@ -223,6 +228,76 @@
     border-radius: 4px;
     padding: 8px 12px;
     cursor: pointer;
+  }
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 10px;
+    width: 500px;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  .close-button {
+    margin-top: 20px;
+    background: #d9534f;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .order-items ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .order-items li {
+    margin-bottom: 8px;
+  }
+  
+  .action-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .action-buttons {
+    white-space: nowrap;
+  }
+
+  .actions-column {
+    width: 25% !important;
+  }
+
+  .orders-table th:nth-child(1) { width: 10%; } /* Order ID */
+  .orders-table th:nth-child(2) { width: 15%; } /* Date */
+  .orders-table th:nth-child(3) { width: 20%; } /* Customer */
+  .orders-table th:nth-child(4) { width: 15%; } /* Total */
+  .orders-table th:nth-child(5) { width: 15%; } /* Status */
+  .orders-table th:nth-child(6) { width: 10%; } /* Actions - wider for buttons */
+
+  .summary-card{
+    font-size: large;
+    font-weight: 600;
+    color: #1622c5;
+
+
   }
   
   /* Responsive styles */

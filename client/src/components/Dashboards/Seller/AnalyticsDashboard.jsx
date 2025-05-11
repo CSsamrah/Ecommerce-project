@@ -17,6 +17,7 @@ import { io } from "socket.io-client";
 import Seller_dashboard from "./Seller_dashboard";
 import "./AnalyticsDashboard.css";
 import StatCard from "./StatCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 axios.defaults.withCredentials = true;
 
@@ -240,7 +241,7 @@ const AnalyticsDashboard = () => {
           0, // We don't have second-hand data in the API
           dashboardData.rental_metrics?.total_rental_revenue || 0
         ] : [0, 0, 0],
-        backgroundColor: ["#475569", "#94A3B8", "#64748B"],
+        backgroundColor: ["#e6b8b0", "#94A3B8", "#64748B"],
         borderWidth: 1
       }
     ]
@@ -253,7 +254,7 @@ const AnalyticsDashboard = () => {
       {
         label: "Total Revenue",
         data: topProducts.top_selling_products.slice(0, 5).map(p => p.total_revenue),
-        backgroundColor: "#1E40AF"
+        backgroundColor: "#e6b8b0"
       }
     ]
   };
@@ -265,7 +266,7 @@ const AnalyticsDashboard = () => {
       {
         label: "Rental Revenue",
         data: topProducts.top_rented_products.slice(0, 5).map(p => p.rental_revenue),
-        backgroundColor: "#047857"
+        backgroundColor: "#e6b8b0"
       }
     ]
   };
@@ -277,7 +278,7 @@ const AnalyticsDashboard = () => {
       {
         label: "Order Count",
         data: orderStatusData.order_status_breakdown ? Object.values(orderStatusData.order_status_breakdown) : [],
-        backgroundColor: ["#22C55E", "#FACC15", "#3B82F6", "#F97316", "#EF4444"]
+        backgroundColor: ["lightblue", "#e6b8b0", "#3B82F6", "#F97316", "#EF4444"]
       }
     ]
   };
@@ -302,7 +303,24 @@ const AnalyticsDashboard = () => {
   };
 
   if (loading.dashboard || loading.revenue || loading.products || loading.ratings || loading.orders) {
-    return <div className="analytics-body">Loading seller analytics...</div>;
+    // Calculate which items are still loading
+    const loadingItems = [];
+    if (loading.dashboard) loadingItems.push("dashboard overview");
+    if (loading.revenue) loadingItems.push("revenue data");
+    if (loading.products) loadingItems.push("product statistics");
+    if (loading.ratings) loadingItems.push("ratings information");
+    if (loading.orders) loadingItems.push("order details");
+    
+    // Create a contextual loading message
+    let message = "Loading seller analytics...";
+    if (loadingItems.length === 1) {
+      message = `Loading ${loadingItems[0]}...`;
+    } else if (loadingItems.length > 1) {
+      const lastItem = loadingItems.pop();
+      message = `Loading ${loadingItems.join(", ")} and ${lastItem}...`;
+    }
+    
+    return <LoadingSpinner message={message} />;
   }
 
   return (
@@ -322,7 +340,7 @@ const AnalyticsDashboard = () => {
           />
           <StatCard 
             title="Total Sales" 
-            value={`$${dashboardData.total_sales.toFixed(2)}`} 
+            value={`Rs${dashboardData.total_sales.toFixed(2)}`} 
             icon="💰" 
           />
           <StatCard 
@@ -396,7 +414,7 @@ const AnalyticsDashboard = () => {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '$' + value;
+                          return 'Rs' + value;
                         }
                       }
                     }
@@ -473,7 +491,7 @@ const AnalyticsDashboard = () => {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '$' + value;
+                          return 'Rs' + value;
                         }
                       }
                     }
@@ -517,7 +535,7 @@ const AnalyticsDashboard = () => {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '$' + value;
+                          return 'Rs' + value;
                         }
                       }
                     }
