@@ -238,9 +238,8 @@ function InventoryManagement() {
             if (editingProduct.product_image && editingProduct.product_image instanceof File) {
                 formData.append('product_image', editingProduct.product_image);
             }
-            console.log("Editing product details:", editingProduct); // Check if product_id is present
 
-            const response = await axios.patch(`http://localhost:3000/api/products/updateProduct/${editingProduct.id}`, formData, {
+            const response = await axios.patch(`http://localhost:3000/api/products/updateProduct/${editingProduct.product_id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -254,7 +253,6 @@ function InventoryManagement() {
                         : product
                 )
             );
-            console.log("Product ID", editingProduct.product_id);
 
             setEditingProduct(null);
             alert("Product updated successfully!");
@@ -273,8 +271,7 @@ function InventoryManagement() {
 
         setLoading(true);
         setError(null);
-        console.log("Deleting product with ID:", id);
-        
+
         try {
             await axios.delete(`http://localhost:3000/api/products/deleteProduct/${id}`);
 
@@ -401,7 +398,7 @@ function InventoryManagement() {
                                                 </td>
                                                 <td className="action-buttons">
                                                     <button className="edit-btn" onClick={() => setEditingProduct({ ...product })}>Edit</button>
-                                                    <button className="delete-btn" onClick={() => deleteProduct(product.id)}>Delete</button>
+                                                    <button className="delete-btn" onClick={() => deleteProduct(product.product_id)}>Delete</button>
                                                 </td>
                                             </tr>
                                         ))
@@ -561,5 +558,4 @@ function InventoryManagement() {
 }
 
 export default InventoryManagement;
-
 
