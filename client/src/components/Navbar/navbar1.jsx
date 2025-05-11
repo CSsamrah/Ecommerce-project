@@ -675,6 +675,8 @@ export default function PrimarySearchAppBar() {
                                         color="secondary"
                                         sx={{
                                             '& .MuiBadge-badge': {
+                                                backgroundColor: 'rgb(24, 161, 148)',
+                                                color: 'white',
                                                 right: 4,
                                                 top: 4,
                                                 border: `2px solid ${theme.palette.primary.main}`,
@@ -682,7 +684,7 @@ export default function PrimarySearchAppBar() {
                                             }
                                         }}
                                     >
-                                        <ShoppingCartIcon />
+                                        <ShoppingCartIcon sx={{ color: 'white' }} />
                                     </Badge>
                                 </IconButton>
                             </Link>

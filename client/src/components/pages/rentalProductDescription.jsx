@@ -656,6 +656,8 @@ const RentalProductDetail = () => {
   const [authStatus, setAuthStatus] = useState(null);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [rentalDuration, setRentalDuration] = useState(1);
+  const { addToCart, error: cartError, loading: cartLoading } = useCart();
+    const [addingToCart, setAddingToCart] = useState(null); // Track which product is being added
 
 
   useEffect(() => {
@@ -743,7 +745,7 @@ const RentalProductDetail = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#b1857d', // Rose gold color from Samsung example
+    background: 'rgb(24, 161, 148)', // Rose gold color from Samsung example
     color: 'white',
     fontSize: '16px',
     fontWeight: '500',
@@ -779,14 +781,37 @@ const RentalProductDetail = () => {
 
   };
 
-  const handleAddToCart = () => {
-    if (isInCart) {
-      alert("Already in cart!");
-    } else {
-      setIsInCart(true);
-      alert("Added to cart!");
+  const addProductToCart = async (product) => {
+    console.log("Adding product to cart:", product);
+    const productId = product.id || product.product_id;
+    
+    try {
+      setAddingToCart(productId); // Set the product being added
+      const success = await addToCart(product);
+      
+      if (success) {
+        setIsInCart(true);
+        console.log("successfully added to cart", success)
+      } else {
+        // Show a more user-friendly message
+        alert(cartError || "Failed to add product to cart. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error in addProductToCart:", err);
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
+      setAddingToCart(null); // Clear the adding state
     }
   };
+
+  // const handleAddToCart = () => {
+  //   if (isInCart) {
+  //     alert("Already in cart!");
+  //   } else {
+  //     setIsInCart(true);
+  //     alert("Added to cart!");
+  //   }
+  // };
 
 
   const toggleRatingPopup = () => {
@@ -927,10 +952,10 @@ const RentalProductDetail = () => {
             <div className="PD_product_detail_buttons">
               <button 
                 className={`PD_cart-button ${isInCart ? 'in-cart':''}`} 
-                onClick={handleAddToCart}
+                onClick={() => addProductToCart(product)}
                 style={isInCart ? inCartButtonStyle : buyNowButtonStyle}
               >
-                {isInCart ? 'Added to Cart' : 'Buy now'}
+                {isInCart ? 'Added to Cart' : 'Rent now'}
               </button>
 
               <button 
