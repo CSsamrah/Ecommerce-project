@@ -4,15 +4,18 @@ import "./OrderManagement.css";
 import Seller_dashboard from "./Seller_dashboard";
 
 // Configure axios defaults for all requests
+axios.defaults.baseURL = 'http://localhost:3000'; // Or your backend URL
 axios.defaults.withCredentials = true;
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [dashboardStats, setDashboardStats] = useState({
     total_orders: 0,
     total_sales: 0,
@@ -36,7 +39,7 @@ const OrderManagement = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await axios.get("/api/seller/dashboard");
+      const response = await axios.get("/seller/dashboard-overview");
       setDashboardStats(response.data?.data || {
         total_orders: 0,
         total_sales: 0,
@@ -50,7 +53,7 @@ const OrderManagement = () => {
 
   const fetchOrderStatusBreakdown = async () => {
     try {
-      const response = await axios.get("/api/seller/order-breakdown");
+      const response = await axios.get("/seller/order-status");
       setOrderStatusCounts(response.data?.data?.order_status_breakdown || {
         NULL: 0,
         processing: 0,
@@ -68,13 +71,17 @@ const OrderManagement = () => {
     try {
       setLoading(true);
       
-      const response = await axios.get(`/api/seller/orderPagination`, {
-        params: {
-          page: currentPage,
-          limit: ordersPerPage,
-          status: selectedStatus === "all" ? undefined : selectedStatus
-        }
-      });
+      let params = {
+        page: currentPage,
+        limit: ordersPerPage
+      };
+      
+      // Only add status parameter if a specific status is selected
+      if (selectedStatus !== "all") {
+        params.status = selectedStatus;
+      }
+      
+      const response = await axios.get(`/seller/all-orders`, { params });
 
       if (response.data.success) {
         setOrders(response.data.data.orders);
@@ -91,7 +98,7 @@ const OrderManagement = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const response = await axios.patch(
-        `/api/seller/order/${orderId}/status`,
+        `/seller/order/${orderId}/status`,
         { status: newStatus }
       );
 
@@ -116,9 +123,20 @@ const OrderManagement = () => {
     setCurrentPage(newPage);
   };
 
-  const handleViewDetails = (orderId) => {
-    // Implement view details functionality
-    console.log("View details for order:", orderId);
+  const handleViewDetails = async (orderId) => {
+    try {
+      const response = await axios.get(`/seller/order/${orderId}`);
+      setSelectedOrderDetails(response.data.data); // Store the order details
+      setShowModal(true);
+    } catch (err) {
+      console.error("Error fetching order details:", err);
+      setError("Failed to load order details");
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedOrderDetails(null);
   };
 
   const formatDate = (dateString) => {
@@ -134,10 +152,9 @@ const OrderManagement = () => {
       "processing": "processing",
       "shipped": "shipped",
       "delivered": "delivered",
-      "cancelled": "cancelled",
-      "NULL": "pending"
+      "cancelled": "cancelled"
     };
-    return statusMap[status] || "pending";
+    return statusMap[status];
   };
 
   const getStatusDisplay = (status) => {
@@ -146,71 +163,40 @@ const OrderManagement = () => {
 
   return (
     <div className="order-management-container">
-      <Seller_dashboard/>
-      
+      <Seller_dashboard />
       <div className="order-content">
         <div className="page-header">
           <h1>Order Management</h1>
           <div className="order-summary">
             <div className="summary-card">
-              <span className="summary-title">Total Orders</span>
+              <span className="summary-title">Total Orders: </span>
               <span className="summary-value">{dashboardStats.total_orders}</span>
             </div>
             <div className="summary-card">
-              <span className="summary-title">Total Sales</span>
-              <span className="summary-value">${parseFloat(dashboardStats.total_sales || 0).toFixed(2)}</span>
+              <span className="summary-title">Total Sales: </span>
+              <span className="summary-value">Rs.{parseFloat(dashboardStats.total_sales || 0)}</span>
             </div>
             <div className="summary-card">
-              <span className="summary-title">This Month</span>
-              <span className="summary-value">${parseFloat(dashboardStats.current_month_revenue || 0).toFixed(2)}</span>
+              <span className="summary-title">This Month: </span>
+              <span className="summary-value">Rs.{parseFloat(dashboardStats.current_month_revenue || 0)}</span>
             </div>
           </div>
         </div>
 
         <div className="order-filters">
           <div className="status-tabs">
-            <button 
-              className={selectedStatus === "all" ? "active" : ""} 
-              onClick={() => handleStatusFilterChange("all")}
-            >
+            <button className={selectedStatus === "all" ? "active" : ""} onClick={() => handleStatusFilterChange()}>
               All Orders
-              <span className="count-badge">{dashboardStats.total_orders}</span>
             </button>
-            <button 
-              className={selectedStatus === "NULL" ? "active" : ""} 
-              onClick={() => handleStatusFilterChange("NULL")}
-            >
-              Pending
-              <span className="count-badge">{orderStatusCounts.NULL || 0}</span>
-            </button>
-            <button 
-              className={selectedStatus === "processing" ? "active" : ""} 
-              onClick={() => handleStatusFilterChange("processing")}
-            >
-              Processing
-              <span className="count-badge">{orderStatusCounts.processing || 0}</span>
-            </button>
-            <button 
-              className={selectedStatus === "shipped" ? "active" : ""} 
-              onClick={() => handleStatusFilterChange("shipped")}
-            >
-              Shipped
-              <span className="count-badge">{orderStatusCounts.shipped || 0}</span>
-            </button>
-            <button 
-              className={selectedStatus === "delivered" ? "active" : ""} 
-              onClick={() => handleStatusFilterChange("delivered")}
-            >
-              Delivered
-              <span className="count-badge">{orderStatusCounts.delivered || 0}</span>
-            </button>
-            <button 
-              className={selectedStatus === "cancelled" ? "active" : ""} 
-              onClick={() => handleStatusFilterChange("cancelled")}
-            >
-              Cancelled
-              <span className="count-badge">{orderStatusCounts.cancelled || 0}</span>
-            </button>
+            {["processing", "shipped", "delivered", "cancelled"].map((status) => (
+              <button
+                key={status}
+                className={selectedStatus === status ? "active" : ""}
+                onClick={() => handleStatusFilterChange(status)}
+              >
+                {getStatusDisplay(status)}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -236,20 +222,17 @@ const OrderManagement = () => {
                   {orders.length > 0 ? (
                     orders.map((order) => (
                       <tr key={order.order_id}>
-                        <td>#{order.order_id.substring(0, 8)}</td>
+                        <td>{order.order_id}</td>
                         <td>{formatDate(order.created_at)}</td>
                         <td>{order.customer?.name || "N/A"}</td>
-                        <td>${parseFloat(order.total_amount || 0).toFixed(2)}</td>
+                        <td>Rs.{parseFloat(order.total_amount || 0).toFixed(2)}</td>
                         <td>
                           <span className={`status-badge ${getStatusClass(order.status)}`}>
                             {getStatusDisplay(order.status)}
                           </span>
                         </td>
                         <td className="action-buttons">
-                          <button 
-                            className="view-button"
-                            onClick={() => handleViewDetails(order.order_id)}
-                          >
+                          <button className="view-button" onClick={() => handleViewDetails(order.order_id)}>
                             View Details
                           </button>
                           <select
@@ -257,7 +240,6 @@ const OrderManagement = () => {
                             onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
                             className="status-select"
                           >
-                            <option value="NULL">Pending</option>
                             <option value="processing">Processing</option>
                             <option value="shipped">Shipped</option>
                             <option value="delivered">Delivered</option>
@@ -268,9 +250,7 @@ const OrderManagement = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="no-orders">
-                        No orders found
-                      </td>
+                      <td colSpan="6" className="no-orders">No orders found</td>
                     </tr>
                   )}
                 </tbody>
@@ -279,26 +259,40 @@ const OrderManagement = () => {
 
             {totalPages > 1 && (
               <div className="pagination">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  className="pagination-button"
-                >
+                <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} className="pagination-button">
                   Previous
                 </button>
-                <span className="page-info">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  disabled={currentPage === totalPages}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  className="pagination-button"
-                >
+                <span className="page-info">Page {currentPage} of {totalPages}</span>
+                <button disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)} className="pagination-button">
                   Next
                 </button>
               </div>
             )}
           </>
+        )}
+
+        {/* Order Details Modal */}
+        {showModal && selectedOrderDetails && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <button className="close-button" onClick={closeModal}>×</button>
+              <h2>Order Details - #{selectedOrderDetails.order?.id}</h2>
+              <p><strong>Date:</strong> {formatDate(selectedOrderDetails.order?.created_at)}</p>
+              <p><strong>Customer:</strong> {selectedOrderDetails.order?.customer?.name}</p>
+              <p><strong>Email:</strong> {selectedOrderDetails.order?.customer?.email}</p>
+              <p><strong>Total:</strong> Rs.{selectedOrderDetails.order?.total_amount}</p>
+              <p><strong>Status:</strong> {getStatusDisplay(selectedOrderDetails.order?.status)}</p>
+              <hr />
+              <h3>Items:</h3>
+              <ul>
+                {selectedOrderDetails.items?.map((item, idx) => (
+                  <li key={idx}>
+                    {item.product?.name} x {item.quantity} = Rs.{item.total_price}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -306,5 +300,3 @@ const OrderManagement = () => {
 };
 
 export default OrderManagement;
-
-
