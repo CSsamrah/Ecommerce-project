@@ -83,7 +83,7 @@ const RentalCatalog = () => {
   };
 
   const navigateToRentalDetail = (rentalId) => {
-    navigate(`/rental/${rentalId}`);
+    navigate(`/rental-product/${rentalId}`);
   };
 
   const renderStars = (rating) => {
@@ -128,8 +128,9 @@ const RentalCatalog = () => {
                     </div>
                     <div className="product_price">
                       <b>Rs.{rent.price}</b>
-                      <p>{rent.condition}</p>
-                      <p>{rent.rentalavailable ?"TRUE": "False"}</p>
+                      {/* <p>{rent.condition}</p>
+                      <p>{rent.rentalavailable ?"TRUE": "False"}</p> */}
+                      {/* <p>{rent.rental_status}</p> */}
                     </div>
                   </div>
 

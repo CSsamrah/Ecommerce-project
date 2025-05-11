@@ -205,7 +205,7 @@ const ProductDetail = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#e6b8b0', // Rose gold color from Samsung example
+    background: '#b1857d', // Rose gold color from Samsung example
     color: 'white',
     fontSize: '16px',
     fontWeight: '500',

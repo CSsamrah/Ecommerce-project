@@ -158,7 +158,6 @@ import { CartProvider } from './components/pages/cartContext';
 import "./components/pages/catalog.css";
 import ProductDetail from "./components/pages/productDescription";
 import "./components/pages/productDescription.css"
-
 import RentalProductDetail from "./components/pages/rentalProductDescription";
 import "./components/pages/rentalProductDescription.css"
 import Cart from "./components/pages/cart"
@@ -229,7 +228,7 @@ function App() {
               {/* <Route path="/secondhaond-rental-category/:slug" element={<SecondhandRentalCategoryCatalog />} /> */}
               <Route path="/cart" element={<Cart />} />
               <Route path="/product/:id" element={<ProductDetail />} />
-              {/* <Route path="/product/:id" element={<RentalProductDetail />} /> */}
+              <Route path="/rental-product/:id" element={<RentalProductDetail />} />
               <Route path='/forgot-password' element={<ForgotPassword />} />
               <Route path='/checkout' element={<Checkout />} />
               <Route path='/order-confirmation' element={<OrderConfirmation />} />

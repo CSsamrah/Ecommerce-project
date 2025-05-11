@@ -197,6 +197,52 @@ const getRentalDetails=asyncHandler(async(req,res)=>{
 
 })
 
+const getRentalProduct = asyncHandler(async (req, res) => {
+    const { id: rental_id } = req.params;
+
+    if (!rental_id) {
+        throw new ApiError(400, "Product ID should be provided to search for a product");
+    }
+    const findRental = await pool.query(
+        `SELECT 
+        r.rental_id,
+        p.name, 
+        p.description, 
+        p.price, 
+        r.rental_price,
+        p.condition,
+        p.product_features, 
+        p.product_image, 
+        r.rental_duration,
+        r.return_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' as return_date
+        FROM rental r
+            JOIN product p ON r.product_id = p.product_id
+            WHERE r.rental_id = $1
+            LIMIT 50`,
+        [rental_id]
+
+    )
+
+    if (findRental.rows.length == 0) {
+        throw new ApiError(404, "Product not found")
+    }
+
+    const rental = findRental.rows.map(rental => ({
+            rental_id: rental.rental_id,
+            title: rental.name,
+            price: rental.price,
+            image: rental.product_image,
+            description: rental.description,
+            rental_price: rental.rental_price,
+            rental_duration: rental.rental_duration,
+            return_date: rental.return_date,
+            avg_rating: '0', 
+            people_rated: '0'
+        }));
+
+    return res.status(200).json(new ApiResponse(200, rental, "Product retrieved successfully"))
+})
+
 const userRentals=asyncHandler(async(req,res)=>{
     const userID=req.user?.user_id;
 
@@ -296,4 +342,4 @@ const getAllRentals = asyncHandler(async (req, res) => {
 
 
 
-export { returnRentalOrder ,getRentalDetails,userRentals, getAllRentals}
+export { returnRentalOrder ,getRentalDetails, getRentalProduct, userRentals, getAllRentals}

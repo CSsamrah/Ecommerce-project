@@ -16,12 +16,6 @@ import adminRoutes from "./src/routes/adminDashboardRoutes.js";
 import sellerRoutes from "./src/routes/sellerRoutes.js";
 import buyerRoutes from "./src/routes/buyerRoutes.js";
 import paymentRoutes from "./src/routes/paymentRoutes.js"
-
-import cors from "cors";
-import dotenv from "dotenv";
-import pool from "./dbConnect.js";
-import cartRoutes from "./src/routes/cartRoutes.js";
-import orderRoutes from "./src/routes/orderRoutes.js";
 dotenv.config();
 
 const app = express();
