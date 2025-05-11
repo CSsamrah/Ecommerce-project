@@ -735,16 +735,6 @@ const ProductDetail = () => {
         </div>
       </div>
 
-                    {product.seller_name && (
-                        <div className="seller-info">
-                            <span>Sold by: {product.seller_name}</span>
-                        </div>
-                    )}
-
-                    <div className="product-description">
-                        <h3>Description</h3>
-                        <p>{product.description || "No description available"}</p>
-                    </div>
 
         {/* Display Individual Reviews 
         <div className="review_box_container">
@@ -775,7 +765,10 @@ const ProductDetail = () => {
           <h1>Client Says</h1>
         </div>
 
-                <Rating addReview={addReview} />
+                {/* <Rating addReview={addReview} /> */}
+                {showRatingPopup && (
+  <Rating addReview={addReview} closePopup={toggleRatingPopup} />
+)}
 
       {reviews.length > 0 ? (
                 <div className="review_box_container">

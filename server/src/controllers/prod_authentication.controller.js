@@ -30,6 +30,13 @@ const validateProduct = asyncHandler(async (req, res) => {
     //this Reads the public key stored in public_key.pem
     const publicKey = fs.readFileSync(publicKeyPath, "utf-8");
 
+    //Debugging Log
+    console.log("Verifying product:", {
+      id: product.product_id,
+      name: product.name,
+      sig: product.digital_signature?.length 
+    });
+
     //this Creates a SHA-256 hash of the product's key attributes (excluding digital_signature).
     const verifyProduct = crypto.createVerify("sha256");
     const verifyingData = JSON.stringify({ 
