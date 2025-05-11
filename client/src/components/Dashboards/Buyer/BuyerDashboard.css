@@ -53,14 +53,14 @@
 .sidebar-section {
     width: 250px;
     height: 100vh;
-    background-color: #1C2E4A;
+    background-color: #2A4E61;
     color: #D1CFC9;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 100;
     padding-top: 80px; 
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+
     transition: transform 0.3s ease;
     overflow-y: auto;
 }

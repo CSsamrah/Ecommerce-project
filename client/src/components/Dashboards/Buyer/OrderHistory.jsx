@@ -501,6 +501,7 @@ import "./OrderHistory.css";
 import { FaSearch, FaTimes, FaBoxOpen, FaSpinner } from 'react-icons/fa';
 import { MdCheckCircleOutline, MdLocalShipping, MdCancel } from 'react-icons/md';
 import Navbar from '../../Navbar/navbar1'
+import LoadingSpinner from "../Seller/LoadingSpinner";
 
 const OrderHistory = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -576,27 +577,30 @@ const OrderHistory = () => {
     const renderContent = () => {
         if (loading) {
             return (
-                <div className="loader-container">
-                    <FaSpinner className="loader-icon" />
-                    <p className="loading-text">Fetching orders...</p>
+                <div className="oh-loader-container">
+                    <FaSpinner className="oh-loader-icon" />
+                    <p className="oh-loading-text">Fetching orders...</p>
                 </div>
             );
         }
 
         if (!orders || !Array.isArray(orders) || orders.length === 0) {
             return (
-                <div className="empty-panel">
-                    <div className="empty-orders">
-                        <FaBoxOpen className="empty-icon" />
-                        <p className="empty-text">No orders found.</p>
+                <div className="oh-empty-panel">
+                    <div className="oh-empty-orders">
+                        <FaBoxOpen className="oh-empty-icon" />
+                        <p className="oh-empty-text">No orders found.</p>
                     </div>
                 </div>
             );
         }
+        if (loading) {
+            return <LoadingSpinner message="Loading order history..." />;
+        }
 
         return (
-            <div className="orders-table-container">
-                <table className="orders-table">
+            <div className="oh-orders-table-container">
+                <table className="oh-orders-table">
                     <thead>
                         <tr>
                             <th>Order #</th>
@@ -622,8 +626,8 @@ const OrderHistory = () => {
                                 }
                             })
                             .map((order) => (
-                                <tr key={order.order_id} className="order-row">
-                                    <td className="order-id-cell">#{order.order_id || 'N/A'}</td>
+                                <tr key={order.order_id} className="oh-order-row">
+                                    <td className="oh-order-id-cell">#{order.order_id || 'N/A'}</td>
                                     <td>
                                         {new Date(order.created_at).toLocaleDateString(undefined, {
                                             year: 'numeric',
@@ -632,52 +636,52 @@ const OrderHistory = () => {
                                         })}
                                     </td>
                                     <td>
-                                        <span className={`order-status ${order.status?.toLowerCase() || 'pending'}`}>
-                                            {order.status === 'Delivered' && <MdCheckCircleOutline className="status-icon" />}
-                                            {order.status === 'Processing' && <MdLocalShipping className="status-icon" />}
-                                            {order.status === 'Shipped' && <MdLocalShipping className="status-icon" />}
-                                            {order.status === 'Cancelled' && <MdCancel className="status-icon" />}
-                                            {order.status !== 'Delivered' && order.status !== 'Processing' && order.status !== 'Shipped' && order.status !== 'Cancelled' && <FaBoxOpen className="status-icon" />}
+                                        <span className={`oh-order-status oh-status-${order.status?.toLowerCase() || 'pending'}`}>
+                                            {order.status === 'Delivered' && <MdCheckCircleOutline className="oh-status-icon" />}
+                                            {order.status === 'Processing' && <MdLocalShipping className="oh-status-icon" />}
+                                            {order.status === 'Shipped' && <MdLocalShipping className="oh-status-icon" />}
+                                            {order.status === 'Cancelled' && <MdCancel className="oh-status-icon" />}
+                                            {order.status !== 'Delivered' && order.status !== 'Processing' && order.status !== 'Shipped' && order.status !== 'Cancelled' && <FaBoxOpen className="oh-status-icon" />}
                                             {order.status}
                                         </span>
                                     </td>
-                                    <td className="items-cell">
-                                        <div className="items-container">
+                                    <td className="oh-items-cell">
+                                        <div className="oh-items-container">
                                             {order.items && Array.isArray(order.items) && order.items.map((item, index) => (
-                                                <div key={index} className="item-row">
-                                                    <div className="item-image">
+                                                <div key={index} className="oh-item-row">
+                                                    <div className="oh-item-image">
                                                         {item.product_image ? (
                                                             <img 
                                                                 src={item.product_image} 
                                                                 alt={item.product_name} 
-                                                                className="product-thumbnail"
+                                                                className="oh-product-thumbnail"
                                                                 onError={(e) => {
                                                                     e.target.src = '/placeholder-product.png';
                                                                 }}
                                                             />
                                                         ) : (
-                                                            <span className="no-image">No image</span>
+                                                            <span className="oh-no-image">No image</span>
                                                         )}
                                                     </div>
-                                                    <div className="item-details">
-                                                        <span className="item-name">{item.product_name}</span>
-                                                        <span className="item-quantity">Qty: {item.quantity}</span>
+                                                    <div className="oh-item-details">
+                                                        <span className="oh-item-name">{item.product_name}</span>
+                                                        <span className="oh-item-quantity">Qty: {item.quantity}</span>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="total-cell">${order.total_amount}</td>
-                                    <td className="actions-cell">
+                                    <td className="oh-total-cell">${order.total_amount}</td>
+                                    <td className="oh-actions-cell">
                                         {order.status && order.status.toLowerCase() === "processing" && (
                                             <button
-                                                className={`cancel-button ${cancelling === order.order_id ? 'is-cancelling' : ''}`}
+                                                className={`oh-cancel-button ${cancelling === order.order_id ? 'oh-is-cancelling' : ''}`}
                                                 onClick={() => cancelOrder(order.order_id)}
                                                 disabled={cancelling === order.order_id}
                                             >
                                                 {cancelling === order.order_id ? (
                                                     <>
-                                                        <FaSpinner className="spinner-icon" />
+                                                        <FaSpinner className="oh-spinner-icon" />
                                                         Cancelling...
                                                     </>
                                                 ) : 'Cancel Order'}
@@ -694,36 +698,36 @@ const OrderHistory = () => {
     };
 
     return (
-        <div className="app-layout">
-            <div className="app-sidebar">
+        <div className="oh-app-layout">
+            <div className="oh-app-sidebar">
                 <BuyerDashboard />
             </div>
 
-            <div className="app-main">
+            <div className="oh-app-main">
                 <Navbar />
                
-                <div className="order-management-container">
-                    <div className="panel-header">
-                        <h2 className="section-title">Order History</h2>
+                <div className="oh-order-management-container">
+                    <div className="oh-panel-header">
+                        <h2 className="oh-section-title">Order History</h2>
                     </div>
                     
-                    <div className="order-controls">
-                        <div className="search-bar">
+                    <div className="oh-order-controls">
+                        <div className="oh-search-bar">
                             <input
                                 type="text"
-                                className="search-input"
+                                className="oh-search-input"
                                 placeholder="Search orders..."
                                 onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
                             />
-                            <FaSearch className="search-icon" />
+                            <FaSearch className="oh-search-icon" />
                         </div>
                     </div>
 
                     {error && (
-                        <div className="error-box">
+                        <div className="oh-error-box">
                             <p>{error}</p>
                             <button onClick={() => setError(null)} aria-label="Dismiss error">
-                                <FaTimes className="dismiss-icon" />
+                                <FaTimes className="oh-dismiss-icon" />
                             </button>
                         </div>
                     )}

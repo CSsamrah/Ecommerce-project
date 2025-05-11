@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./OrderManagement.css";
 import Seller_dashboard from "./Seller_dashboard";
+import Navbar from '../../Navbar/navbar1'
 
 // Configure axios defaults for all requests
 axios.defaults.baseURL = 'http://localhost:3000'; // Or your backend URL
@@ -162,6 +163,8 @@ const OrderManagement = () => {
   };
 
   return (
+    <div className="order-management-body">
+      <Navbar />
     <div className="order-management-container">
       <Seller_dashboard />
       <div className="order-content">
@@ -295,6 +298,7 @@ const OrderManagement = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

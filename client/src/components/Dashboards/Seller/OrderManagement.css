@@ -1,13 +1,14 @@
-/* OrderManagement.css */
+
 .order-management-container {
+  width: 1350px;
     display: flex;
     flex-direction: column;
-    background-color: #f5f7fa;
+    background-color: #2A4E61;
     min-height: 100vh;
   }
   
   .order-content {
-    margin-left: 250px; /* Match sidebar width */
+    margin-left: 250px; 
     padding: 24px;
     width: calc(100% - 250px);
     transition: margin-left 0.3s, width 0.3s;
@@ -18,17 +19,18 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    
   }
   
   .page-header h1 {
-    font-size: 24px;
-    color: #1a365d;
+    font-size: 34px;
+    color: rgb(24, 161, 148);
     margin: 0;
   }
   
   .order-filters {
     margin-bottom: 24px;
-    background-color: #fff;
+    background-color: #2A4E61;
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -45,7 +47,7 @@
     padding: 8px 16px;
     border: none;
     background-color: #edf2f7;
-    color: #4a5568;
+    color: rgb(24, 161, 148);
     border-radius: 6px;
     font-weight: 500;
     cursor: pointer;
@@ -66,7 +68,7 @@
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    overflow-x: auto; 
     margin-bottom: 24px;
   }
   
@@ -74,7 +76,7 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    min-width: 800px; /* Prevent table from becoming too squished */
+    min-width: 800px; 
   }
   
   .orders-table th,

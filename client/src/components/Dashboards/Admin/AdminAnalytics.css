@@ -4,7 +4,7 @@
     padding-left: 260px; 
     width: 100%;
     max-width: 1500px;
-    background-color: #1C2E4A;
+    background-color: #2A4E61;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -19,12 +19,12 @@
     display: flex;
     align-items: center;
     margin-bottom: 30px;
-    color: #e6b8b0;
+    color: rgb(24, 161, 148);
 }
 
 .header-icon {
     margin-right: 15px;
-    color: #eba195;
+    color: rgb(24, 161, 148);
     animation: sparkle 2s infinite;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .stat-card svg {
-    color: #e9998b;
+    color: rgb(24, 161, 148);
     margin-right: 15px;
 }
 
@@ -85,7 +85,7 @@
 .stat-card h3 {
     font-size: 14px;
     margin: 0;
-    color: #ee9b8d;
+    color: rgb(24, 161, 148);
 }
 
 .stat-value {
@@ -122,8 +122,8 @@
 }
 
 .chart-toggle-btn.active {
-    background: #e59f93;
-    box-shadow: 0 4px 8px rgb(24, 161, 148);
+    background: rgb(24, 161, 148);
+    box-shadow: 0 4px 8px #e59f93;
 }
 
 .chart-toggle-btn svg {
@@ -160,7 +160,7 @@
     left: 0;
     width: 100%;
     height: 5px;
-    background: linear-gradient(90deg, #FF9F1C, #e59f93, #3A86FF);
+    background: linear-gradient(90deg, #FF9F1C, #e59f93, rgb(24, 161, 148));
 }
 
 .chart-card h3 {
@@ -200,7 +200,7 @@
 }
 
 .fun-fact-box svg {
-    color: #e59f93;
+    color: rgb(24, 161, 148);
     margin-right: 15px;
     flex-shrink: 0;
 }
@@ -213,7 +213,7 @@
 
 .fun-fact-header {
     font-weight: bold;
-    color: #eb8d7d;
+    color: rgb(24, 161, 148);
 }
 
 .loading-container {
@@ -229,7 +229,7 @@
     height: 50px;
     border: 5px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top-color: #e59f93;
+    border-top-color: rgb(24, 161, 148);
     animation: spin 1s ease-in-out infinite;
 }
 
@@ -304,14 +304,14 @@
     position: absolute;
     width: 10px;
     height: 10px;
-    background: #FF9F1C;
+    background: rgb(24, 161, 148);
     top: -10px;
     animation: confetti-fall 4s ease-in-out forwards;
     z-index: 1;
 }
 
 .confetti:nth-child(4n) {
-    background: #e59f93;
+    background: rgb(24, 161, 148);
     width: 8px;
     height: 8px;
 }
@@ -386,7 +386,7 @@
   }
   
   .revenue-card h3 {
-    color: #ee8977;
+    color: rgb(24, 161, 148);
     margin-top: 0;
     margin-bottom: 20px;
 
