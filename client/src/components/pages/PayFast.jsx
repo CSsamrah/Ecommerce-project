@@ -76,7 +76,8 @@ const PayFastForm = () => {
   };
 
   return (
-    <div style={{ maxWidth: '700px', margin: '50px auto', padding: '30px', border: '1px solid #ddd', borderRadius: '10px', backgroundColor: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,0.1)' }}>
+    <div style={{width: '1400px'}}>
+    <div style={{ maxWidth: '550px', margin: '50px auto', padding: '30px', border: '1px solid #ddd', borderRadius: '10px', backgroundColor: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,0.1)' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Proceed to Payment</h2>
 
       {error && <div style={{ color: 'red', textAlign: 'center', marginBottom: '20px' }}>{error}</div>}
@@ -152,6 +153,7 @@ const PayFastForm = () => {
           </button>
         </div>
       </form>
+    </div>
     </div>
   );
 };

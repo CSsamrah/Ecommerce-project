@@ -13,7 +13,7 @@
 
 
 .analytics-body {
-    background-color: #1a365d;
+    background-color: #2A4E61;
     min-height: 100vh;
     padding-bottom: 2.5rem;
     width: 100%;
@@ -27,10 +27,10 @@
 
 .dashboard-title {
     font-size: 2rem;
-    color: rgb(24, 161, 148);
+    color: #e6b8b0;
     margin: 1.5rem 0;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid rgb(24, 161, 148);
+    border-bottom: 2px solid #e6b8b0;
     font-weight: 600;
     letter-spacing: -0.5px;
 }
@@ -71,7 +71,7 @@
 
 .stat-card .stat-title {
     font-size: 0.875rem;
-    color: rgb(24, 161, 148);
+    color: #ee9f91;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -115,7 +115,7 @@
 
 .chart-card h3 {
     font-size: 1.25rem;
-    color: rgb(13, 102, 93);
+    color: #e28676;
     margin-top: 0;
     margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
@@ -161,7 +161,7 @@
 }
 
 .period-selector button.active {
-    background-color: #4299e1;
+    background-color: #f5b7ac;
     color: white;
     font-weight: 600;
 }
@@ -189,7 +189,7 @@
 .rating-number {
     font-size: 3.5rem;
     font-weight: bold;
-    color: rgb(24, 161, 148);
+    color: #e6b8b0;
     line-height: 1;
 }
 
@@ -209,7 +209,7 @@
 
 .review-count {
     font-size: 0.875rem;
-    color: rgb(24, 161, 148);
+    color: #e6b8b0;
     margin-top: 0.25rem;
 }
 
@@ -230,7 +230,7 @@
 .rating-bar-item span:first-child {
     width: 70px;
     font-size: 0.875rem;
-    color: rgb(19, 126, 115);
+    color: #eba89d;
     font-weight: 500;
 }
 
@@ -253,7 +253,7 @@
 
 .rating-bar {
     height: 100%;
-    background: linear-gradient(90deg, #f6ad55, #ed8936);
+    background: linear-gradient(90deg, #e6b8b0, #ed8936);
     border-radius: 5px;
     transition: width 0.5s ease;
 }
@@ -278,7 +278,7 @@
     font-weight: 600;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
     .charts-grid {
         grid-template-columns: 1fr;
@@ -316,7 +316,6 @@
     }
 }
 
-/* Enhancement for chart canvas */
 .chart-card canvas {
     width: 100% !important;
     height: auto !important;
@@ -324,7 +323,6 @@
     margin: 0 auto;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -343,7 +341,6 @@
     background: #a0aec0;
 }
 
-/* Chart Type-Specific Styling */
 .chart-card.pie-chart canvas,
 .chart-card.doughnut-chart canvas {
     max-height: 100px;
@@ -354,7 +351,6 @@
     max-height: 300px;
 }
 
-/* Add subtle hover effects to charts */
 .chart-card:hover .chart-canvas {
     filter: brightness(1.02);
 }

@@ -1,6 +1,6 @@
 .inv-body {
     padding-top: 80px;
-    background-color: #1a365d;
+    background-color: #2A4E61;
     min-height: 100vh;
     width: 100%;
     margin: 0;
@@ -17,7 +17,7 @@
 .inventory-content {
     flex: 1;
     padding: 20px;
-    background-color: #1a365d;
+    background-color: #2A4E61;
     color: white;
     margin-left: 250px; 
     min-height: 100vh;
@@ -47,11 +47,11 @@
 /* Header styling */
 .inventory-content h2 {
     margin-top: 0;
-    color: rgb(24, 161, 148);
+    color:  #e6b8b0;
     font-size: 34px;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgb(24, 161, 148);
+    border-bottom: 1px solid #e6b8b0;
 }
 
 /* Filters and search container */
@@ -76,7 +76,7 @@
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
     font-weight: 500;
-    color: #1a365d;
+    color: #2A4E61;
 }
 
 .category-tabs button:hover {
@@ -84,7 +84,7 @@
 }
 
 .category-tabs button.active {
-    background-color: rgb(140, 140, 209);
+    background-color:  #eca295;
     color: white;
 }
 
@@ -117,10 +117,10 @@
 }
 
 .add-product-btn:hover {
-    background-color: #45a049;
+    background-color: #4986a7;
 }
 
-/* Table styles with improved responsiveness */
+
 .table-responsive {
     overflow-x: auto;
     width: 100%;
@@ -143,7 +143,7 @@ table th, table td {
 }
 
 table th {
-    background-color: rgb(20, 119, 109);
+    background-color:  #f09b8c;
     font-weight: bold;
     position: sticky;
     top: 0;
@@ -183,7 +183,7 @@ table tr:nth-child(even) {
 }
 
 .edit-btn {
-    background-color: rgb(24, 161, 148);
+    background-color:  #c79a92;
     color: white;
     border-color: #1a365d;
     width: 5vw;
@@ -212,7 +212,7 @@ table tr:nth-child(even) {
 
 /* Form styling */
 .edit-form {
-    background-color: lightblue;
+    background-color:  #eec9c3;
     padding: 25px;
     border-radius: 8px;
     width: 100%;
@@ -225,7 +225,7 @@ table tr:nth-child(even) {
 .edit-form h3 {
     margin-top: 0;
     margin-bottom: 20px;
-    color: #333;
+    color:  #eca194;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
 }
@@ -250,7 +250,7 @@ table tr:nth-child(even) {
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
-    color: #333;
+    color:  #e99c8e;
 }
 
 .form-group input,
