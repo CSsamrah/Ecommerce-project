@@ -4,6 +4,9 @@ import { validateProduct } from "../controllers/prod_authentication.controller.j
 
 const validationRoutes=express.Router();
 
-validationRoutes.post("/validate-product/:product_id",isLoggedIn,validateProduct);
+validationRoutes.post("/validate-product/:product_id", (req, res, next) => {
+    console.log("🏁 Validate Product Route hit! Id:", req.params.product_id); // Debug log
+    next();
+  }, validateProduct);
 
 export default validationRoutes

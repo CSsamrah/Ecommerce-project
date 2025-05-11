@@ -301,93 +301,308 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { IonIcon } from '@ionic/react';
 import axios from 'axios';
-import { heartOutline, heart, cartOutline, arrowBackOutline } from 'ionicons/icons';
-import axios from 'axios';
-import "./productDescription.css";
-import Rating from "./Rating";
-import { useCart } from "./cartContext";
+import { heartOutline, 
+  heart, 
+  cartOutline, 
+  arrowBackOutline,
+  checkmarkCircle,
+  closeCircle } from 'ionicons/icons';
+import ProductAuthentication from "./productAuthentication";  // Import the product authentication component
+import "./productDescription.css"; // Add styling if needed
+import { ShieldCheck, Star, ShoppingBag } from 'lucide-react';
+
+
+// Rating Component Integrated Directly
+const Rating = ({ addReview, closePopup }) => {
+    const [rating, setRating] = useState(0);
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [opinion, setOpinion] = useState("");
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const newReview = { username, email, rating, content: opinion };
+        addReview(newReview); // Pass review to parent state
+        // Handle form submission logic
+        console.log({ username, email, rating, opinion });
+        alert("Thank you for your feedback!");
+        // Reset fields after submission
+        setUsername("");
+        setEmail("");
+        setRating(0);
+        setOpinion("");
+        closePopup(); // Close the popup after submission
+    };
+
+    return (
+        <div className="rating_popup_overlay">
+            <div className="rating_popup_content">
+                <div className="wrapper">
+                    <button className="close_button" onClick={closePopup}>×</button>
+                    <h3>RATE US</h3>
+                    <form onSubmit={handleSubmit}>
+                        {/* Username and Email Fields */}
+                        <input
+                            type="text"
+                            name="username"
+                            placeholder="Enter your name"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+
+                        {/* Star Rating */}
+                        <div className="rating">
+                            {[1, 2, 3, 4, 5].map((num) => (
+                                <div key={num} className="star" onClick={() => setRating(num)}>
+                                    <svg
+                                      width="30"
+                                      height="30"
+                                      viewBox="0 0 24 24"
+                                      fill={num <= rating ? "#FFD700" : "none"}
+                                      stroke="#FFD700"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <polygon points="12 2 15 9 22 9 17 14 18 21 12 17 6 21 7 14 2 9 9 9" />
+                                    </svg>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Opinion Text Area */}
+                        <textarea
+                            name="opinion"
+                            cols={30}
+                            rows={5}
+                            placeholder="Your opinion..."
+                            value={opinion}
+                            onChange={(e) => setOpinion(e.target.value)}
+                        ></textarea>
+
+                        {/* Buttons */}
+                        <div className="btn-group">
+                            <button type="submit" className="btn-submit">SUBMIT</button>
+                            <button type="button" className="btn-cancel" onClick={closePopup}>CANCEL</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AuthenticationPopup = ({ status, onClose }) => {
+  return (
+    <div className="auth_popup_overlay">
+      <div className="auth_popup_content">
+        <div className="wrapper">
+          <button className="close_button" onClick={onClose}>×</button>
+          <h3>Product Authentication</h3>
+          <div className={`auth-status ${status.includes("valid") ? "valid" : "invalid"}`}>
+            {status}
+          </div>
+          <button 
+            className="btn-close" 
+            onClick={onClose}
+            style={{ marginTop: '20px' }}
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const ProductDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const { addToCart } = useCart();
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [reviews, setReviews] = useState([]);
-    const [averageRating, setAverageRating] = useState(0);
-    const [isWishlisted, setIsWishlisted] = useState(false);
-    const [isInCart, setIsInCart] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  // const product = products.find((item) => item.id === id);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`http://localhost:3000/api/products/getProduct/${id}`);
+  // if (!product) {
+  //   return <h2>Product not found</h2>;
+  // }
+
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [authStatus, setAuthStatus] = useState(null);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        console.log("Fetching product...");
+        // Simplified request - no authentication headers
+        console.log(`Fetching product of id: ${id}`);
+          const response = await axios.get(`http://localhost:3000/api/products/getProduct/${id}`);
+          
+              console.log("Specific Product Response received:", response.data);
+              console.log("1Current products state:", product)
+              
+              // Check if response has data property
+              if (response.data && (response.data.data || Array.isArray(response.data))) {
+                // Handle both possible response formats
+                const productsData = Array.isArray(response.data) ? response.data : 
+                                    (response.data.data ? response.data.data : []);
                 
-                console.log("API Response:", response.data); // Debug log
-                
-                if (response.data) {
-                    const productData = response.data.data || response.data;
-                    setProduct({
-                        id: productData.id || productData.product_id,
-                        name: productData.title || productData.name,
-                        description: productData.description,
-                        price: productData.price,
-                        condition: productData.condition,
-                        stock_quantity: productData.stock_quantity,
-                        product_image: productData.image || productData.product_image,
-                        product_features: Array.isArray(productData.product_features) 
-                            ? productData.product_features 
-                            : (productData.features ? JSON.parse(productData.features) : []),
-                        category_name: productData.category_name,
-                        seller_name: productData.seller_name
-                    });
-                } else {
-                    throw new Error("Invalid product data format");
-                }
-            } catch (error) {
-                console.error("Error fetching product:", error);
-                setError(error.response?.data?.message || "Failed to load product details");
-            } finally {
-                setLoading(false);
+                  setProduct(productsData);
+                console.log("2Current products state:", product)
+                // console.log("The products are:", products);
+              } else {
+                console.error("Unexpected response format:", response.data);
+                setError("Invalid data format received from server");
+              }
+              
+              setLoading(false);
+            } catch (err) {
+              console.error("Error fetching the product:", err);
+              setError(err.message || "Failed to fetch the product");
+              setLoading(false);
             }
-        };
+          };
+      
+          fetchData();
+        }, [id]);
+      
+        useEffect(() => {
+                console.log("3Current products state:", product);
+              }, [product]);
+      
+  // useEffect(() => {
+  //   if (reviews.length > 0) {
+  //     const avg = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+  //     setAverageRating(avg);
+  //   }
+  // }, [reviews]);
 
-        fetchProduct();
-    }, [id]);
+  // const handleWishlist = () => {
+  //   if (!localStorage.getItem('token')) {
+  //     alert("Please log in to add items to your wishlist");
+  //     return;
+  //   }
+  //   setIsWishlisted(!isWishlisted);
+  // };
 
-    useEffect(() => {
-        if (reviews.length > 0) {
-            const avg = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
-            setAverageRating(avg);
-        }
-    }, [reviews]);
+  // const handleAddToCart = () => {
+  //   if (!localStorage.getItem('token')) {
+  //     alert("Please log in to add items to your cart");
+  //     return;
+  //   }
+    
+  //   if (product) {
+  //     addToCart({
+  //       id: product.id,
+  //       title: product.name,
+  //       price: product.price,
+  //       image: product.product_image || '/images/product-placeholder.jpg',
+  //       quantity: 1
+  //     });
+  //   }
+  // };
 
-    const handleAddToCart = () => {
-        if (!product) return;
-        
-        const cartItem = {
-            id: product.id,
-            title: product.name,
-            price: product.price,
-            image: product.product_image || '/images/product-placeholder.jpg',
-            quantity: 1
-        };
-        
-        addToCart(cartItem);
-        setIsInCart(true);
-        alert(`${product.name} added to cart!`);
-    };
+  // const handleWishlist = () => {
+  //   setIsWishlisted(!isWishlisted);
+  // };
 
-    const handleWishlist = () => {
-        if (!localStorage.getItem('token')) {
-            alert("Please log in to add items to your wishlist");
-            navigate('/login');
-            return;
-        }
-        setIsWishlisted(!isWishlisted);
-    };
+  // Define inline styles for the buttons
+  const buyNowButtonStyle = {
+    flex: '1',
+    minWidth: '150px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#b1857d', // Rose gold color from Samsung example
+    color: 'white',
+    fontSize: '16px',
+    fontWeight: '500',
+    border: 'none',
+    borderRadius: '25px', // Rounded corners like in the Samsung example
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(230, 184, 176, 0.3)'
+  };
+
+  // Style for when the item is in cart
+  const inCartButtonStyle = {
+    ...buyNowButtonStyle,
+    background: '#c2c2c2' // Grey color for "Added to Cart" state
+  };
+
+  // Style for circular buttons (Authentication and Review)
+  const reviewButtonStyle = {
+    flex: '1',
+    minWidth: '150px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'transparent',
+    color: '#d0d0d0',
+    fontSize: '16px',
+    fontWeight: '500',
+    border: '1px solid #d0d0d0',
+    borderRadius: '25px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+
+  };
+
+  const handleAddToCart = () => {
+    if (isInCart) {
+      alert("Already in cart!");
+    } else {
+      setIsInCart(true);
+      alert("Added to cart!");
+    }
+  };
+
+
+  const toggleRatingPopup = () => {
+    setShowRatingPopup(!showRatingPopup);
+  };
+
+  // Helper function to generate star icons
+  // const renderStars = (rating) => {
+  //   return [...Array(5)].map((_, i) => (
+  //     <span key={i} style={{ color: i < rating ? "#FFD700" : "#ccc", fontSize: "23px" }}>★</span>
+  //   ));
+  // };
+  const renderStars = (rating) => {
+    const numericRating = Math.round(parseFloat(rating));
+    return [...Array(5)].map((_, i) => (
+      <span key={i} className={`star ${i < numericRating ? 'filled' : ''}`}>★</span>
+    ));
+  };
+
+  // const addReview = (newReview) => {
+  //   const isReviewed = reviews.some(review => review.email === newReview.email);
+  //   if (isReviewed) {
+  //     alert("Product already reviewed!");
+  //     return;
+  //   }
+  //   setReviews([...reviews, newReview]);
+  // };
 
     const addReview = (newReview) => {
         if (!localStorage.getItem('token')) {
@@ -399,12 +614,24 @@ const ProductDetail = () => {
         localStorage.setItem(`reviews_${id}`, JSON.stringify(updatedReviews));
     };
 
-    const renderStars = (rating) => {
-        const numericRating = Math.round(parseFloat(rating));
-        return [...Array(5)].map((_, i) => (
-            <span key={i} className={`star ${i < numericRating ? 'filled' : ''}`}>★</span>
-        ));
-    };
+  // Recalculate the average rating whenever the reviews change
+  // useEffect(() => {
+  //   if (reviews.length) {
+  //     const avgRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+  //     setAverageRating(avgRating);
+  //   }
+  // }, [reviews]);
+
+  // useEffect(() => {
+  //   if (product) {
+  //     localStorage.setItem(`rating_${product.id}`, JSON.stringify(averageRating)); // Store rating
+  //   }
+  // }, [averageRating, product]);
+
+  const handleAuthResult = (status) => {
+    setAuthStatus(status);
+    setShowAuthPopup(true);
+  };
 
     if (loading) return (
         <div className="loading-state">
@@ -434,48 +661,79 @@ const ProductDetail = () => {
         </div>
     );
 
-    return (
-        <div className="product-detail-container">
-            <div className="product-header">
-                <button onClick={() => navigate(-1)} className="btn-back">
-                    <IonIcon icon={arrowBackOutline} />
-                    Back
-                </button>
-                <h1 className="product-title">{product.name}</h1>
-                {product.category_name && (
-                    <span className="product-category">{product.category_name}</span>
-                )}
+  return (
+    <div className="PD_product_detail_page">
+      <div className="PD_product-detail">
+        <div className="PD_product-container">
+          <div className="PD_back-button" onClick={() => navigate(-1)}><IonIcon icon={arrowBackOutline} /></div>
+          {/* <img src={product.image} alt={product.name} className="product-image" /> */}
+          <img 
+            className="PD_product-image"
+            src={product.image || product.product_image || '/images/product-placeholder.jpg'} 
+            alt={product.name}
+            onError={(e) => e.target.src = '/images/product-placeholder.jpg'}
+          />
+          <div className="PD_product-info">
+            <h2>{product.name}</h2>
+            <p className="PD_about-product">{product.description}</p>
+            {/* Display Average Rating */}
+            <div className="average-rating">
+              <div>{renderStars(Math.round(averageRating))} ({averageRating.toFixed(1)})</div>
             </div>
+            <div>
+              <h3 className="PD_product-price">Rs. {product.price.toLocaleString()}</h3>
+              {product.originalPrice && (
+                <span className="PD_original-price">Rs. {product.originalPrice.toLocaleString()}</span>
+              )}
+            </div>
+            {/* <div className="PD_product_detail_buttons">
+              <button className={`PD_cart-button ${isInCart ? 'in-cart':''}`} onClick={handleAddToCart}>{isInCart?'Added to Cart':'Add to Cart'}</button>
+              <div className="PD_authentication_button">
+                <ProductAuthentication productId={id} />
+              </div>
+              <button className="PD_cart-button" onClick={toggleRatingPopup}>Review Product</button>
+            </div> */}
+            
+            <div className="PD_product_detail_buttons">
+              <button 
+                className={`PD_cart-button ${isInCart ? 'in-cart':''}`} 
+                onClick={handleAddToCart}
+                style={isInCart ? inCartButtonStyle : buyNowButtonStyle}
+              >
+                {isInCart ? 'Added to Cart' : 'Buy now'}
+              </button>
 
-            <div className="product-content">
-                <div className="product-gallery">
-                    <div className="main-image">
-                        <img 
-                            src={product.product_image || '/images/product-placeholder.jpg'} 
-                            alt={product.name}
-                            onError={(e) => e.target.src = '/images/product-placeholder.jpg'}
-                        />
-                    </div>
-                </div>
+              <button 
+                onClick={toggleRatingPopup} 
+                aria-label="Review Product"
+                style={reviewButtonStyle}
+                className="PD_review-button"
+              >
+                {/* <Star size={20} color="#777" /> */}
+                Review Product
+              </button>
+              
+              {/* <div className="PD_authentication_button">
+                <button 
+                  aria-label="Authenticate Product"
+                  style={authButtonStyle}
+                >
+                  {/* <ShieldCheck size={20} color="#777" />
+                  Authenticate Product
+                </button>
+              </div> */}
 
-                <div className="product-info">
-                    <div className="price-section">
-                        <span className="current-price">Rs. {product.price?.toLocaleString()}</span>
-                    </div>
-
-                    <div className="rating-section">
-                        {renderStars(averageRating)}
-                        <span className="rating-count">({reviews.length} reviews)</span>
-                        <a href="#reviews" className="review-link">See all reviews</a>
-                    </div>
-
-                    <div className="stock-status">
-                        {product.stock_quantity > 0 ? (
-                            <span className="in-stock">In Stock ({product.stock_quantity} available)</span>
-                        ) : (
-                            <span className="out-of-stock">Out of Stock</span>
-                        )}
-                    </div>
+              <div className="PD_authentication_button">
+                <ProductAuthentication 
+                productId={id} 
+                onAuthComplete={handleAuthResult} 
+                />
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
 
                     {product.seller_name && (
                         <div className="seller-info">
@@ -488,72 +746,72 @@ const ProductDetail = () => {
                         <p>{product.description || "No description available"}</p>
                     </div>
 
-                    {product.product_features?.length > 0 && (
-                        <div className="product-features">
-                            <h3>Features</h3>
-                            <ul>
-                                {product.product_features.map((feature, index) => (
-                                    <li key={index}>{feature}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    <div className="action-buttons">
-                        <button 
-                            className={`btn-cart ${isInCart ? 'in-cart' : ''}`}
-                            onClick={handleAddToCart}
-                            disabled={product.stock_quantity <= 0}
-                        >
-                            <IonIcon icon={cartOutline} />
-                            {product.stock_quantity <= 0 ? 'Out of Stock' : isInCart ? 'Added to Cart' : 'Add to Cart'}
-                        </button>
-                        <button 
-                            className={`btn-wishlist ${isWishlisted ? 'active' : ''}`}
-                            onClick={handleWishlist}
-                        >
-                            <IonIcon icon={isWishlisted ? heart : heartOutline} />
-                            {isWishlisted ? 'Saved' : 'Save for Later'}
-                        </button>
-                    </div>
+        {/* Display Individual Reviews 
+        <div className="review_box_container">
+          {reviews.length ? (
+            reviews.map((review, index) => (
+              <div key={index} className="review_box">
+                <div className="box_top">
+                  <div className="user_name">
+                    <h4>{review.username}</h4>
+                    <span>{review.email}</span>
+                  </div>
+                  <div className="reviewed_stars">{renderStars(review.rating)}</div>
                 </div>
-            </div>
-
-            <section id="reviews" className="reviews-section">
-                <div className="section-header">
-                    <h2>Customer Reviews</h2>
-                    <div className="overall-rating">
-                        {renderStars(averageRating)}
-                        <span>{averageRating.toFixed(1)} out of 5</span>
-                    </div>
+                <div className="box_body">
+                  {review.content && <p>"{review.content}"</p>}
                 </div>
+              </div>
+            ))
+          ) : (
+            <p>No reviews yet.</p>
+          )}     
+        </div>
+      </div>  */}
+
+      <section id="reviews" className="reviews-section">
+        <div className="review_heading">
+          <span>Customer Reviews</span>
+          <h1>Client Says</h1>
+        </div>
 
                 <Rating addReview={addReview} />
 
-                {reviews.length > 0 ? (
-                    <div className="reviews-list">
-                        {reviews.map((review, index) => (
-                            <div key={index} className="review-card">
-                                <div className="reviewer-info">
-                                    <div className="avatar">{review.username.charAt(0).toUpperCase()}</div>
-                                    <div>
-                                        <h4>{review.username}</h4>
-                                        <time>{new Date(review.date).toLocaleDateString()}</time>
-                                    </div>
-                                </div>
-                                <div className="review-rating">{renderStars(review.rating)}</div>
-                                {review.content && <p className="review-content">"{review.content}"</p>}
-                            </div>
-                        ))}
+      {reviews.length > 0 ? (
+                <div className="review_box_container">
+                  {reviews.map((review, index) => (
+                    <div key={index} className="review_box">
+                      <div className="box_top">
+                        <div className="avatar">{review.username.charAt(0).toUpperCase()}</div>
+                        <div>
+                          <h4>{review.username}</h4>
+                          <time>{new Date(review.date).toLocaleDateString()}</time>
+                        </div>
+                        <div className="review-rating">{renderStars(review.rating)}</div>
+                      </div>
+                      <div className="box_body">    
+                      {review.content && <p className="review-content">"{review.content}"</p>}
+                      </div>
                     </div>
-                ) : (
-                    <div className="no-reviews">
-                        <p>No reviews yet. Be the first to review this product!</p>
-                    </div>
-                )}
-            </section>
-        </div>
-    );
+      ))}
+      </div>
+      ) : (
+      <div className="no-reviews">
+        <p>No reviews yet. Be the first to review this product!</p>
+      </div>
+      )}
+      </section>
+
+      {showAuthPopup && (
+    <AuthenticationPopup 
+      status={authStatus} 
+      onClose={() => setShowAuthPopup(false)} 
+    />
+  )}
+    </div>
+
+    
+  );
 };
 
 export default ProductDetail;

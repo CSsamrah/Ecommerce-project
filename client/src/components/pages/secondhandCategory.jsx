@@ -9,7 +9,7 @@ import './catalog.css';
 import SlidingCart from './slidingCart';
 
 
-const RentalCategoryCatalog = () => {
+const SecondhandCategoryCatalog = () => {
     const { addToCart } = useCart();
     const navigate = useNavigate();
     const [isSlidingCartOpen, setSlidingCartOpen] = useState(false);
@@ -18,19 +18,40 @@ const RentalCategoryCatalog = () => {
     const searchParams = new URLSearchParams(location.search);  
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [rentalCategoryData, setRentalCategoryData] = useState([]);
+    const [categoryData, setCategoryData] = useState([]);
 
+
+
+//   useEffect(() => {
+//     const fetchCategoryProducts = async () => {
+//       setLoading(true);
+//       setError(null);
+      
+//       try {
+//         const response = await axios.get(`http://localhost:3000/api/categories/getCategory/${slug}`);
+//         console.log(response.data);
+//         setCategoryData(response.data.data);
+//       } catch (err) {
+//         console.error('Error fetching category products:', err);
+//         setError(err.response?.data?.message || 'Failed to fetch products. Please try again later.');
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchCategoryProducts();
+//   }, [slug]);
 
 useEffect(() => {
     const fetchProducts = async () => {
       try {
-        console.log("Fetching rental category...");
+        console.log("Fetching category...");
         // Simplified request - no authentication headers
-        console.log(`Fetching products for rental category: ${slug}`);
-        const response = await axios.get(`http://localhost:3000/api/categories/getCategory/${slug}/rental`);
+        console.log(`Fetching products for category: ${slug}`);
+        const response = await axios.get(`http://localhost:3000/api/categories/getSecondhandCategory/${slug}`);
         
-        console.log("Rental Category Catalog Response received:", response.data);
-        console.log("1Current products state:", rentalCategoryData)
+        console.log("Category Catalog Response received:", response.data);
+        console.log("1Current products state:", categoryData)
         
         // Check if response has data property
         if (response.data && (response.data.data || Array.isArray(response.data))) {
@@ -38,8 +59,8 @@ useEffect(() => {
           const categoriesData = Array.isArray(response.data) ? response.data : 
                               (response.data.data ? response.data.data : []);
           
-            setRentalCategoryData(categoriesData);
-          console.log("2Current products state:", rentalCategoryData)
+            setCategoryData(categoriesData);
+          console.log("2Current products state:", categoryData)
           // console.log("The products are:", products);
         } else {
           console.error("Unexpected response format:", response.data);
@@ -48,7 +69,7 @@ useEffect(() => {
         
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching rental category:", err);
+        console.error("Error fetching category:", err);
         setError(err.message || "Failed to fetch the category");
         setLoading(false);
       }
@@ -58,8 +79,8 @@ useEffect(() => {
   }, [slug]);
 
   useEffect(() => {
-          console.log("3Current products state:", rentalCategoryData);
-        }, [rentalCategoryData]);
+          console.log("3Current products state:", categoryData);
+        }, [categoryData]);
 
 //   useEffect(() => {
 //     const fetchProducts = async () => {
@@ -118,9 +139,8 @@ const addProductToCart = (product) => {
     <Navbar />
     <div className="catalog">
       <div className="catalog_container">
-        {/* <button className='secondhand_button' onClick={() => navigate('/secondhandCatalog')}>Second hand products</button> */}
         <div className="products">
-          {rentalCategoryData.map((product) => {
+          {categoryData.map((product) => {
             const averageRating = getProductRating(product);
 
             return (
@@ -170,4 +190,4 @@ const addProductToCart = (product) => {
 );
 };
 
-export default RentalCategoryCatalog;
+export default SecondhandCategoryCatalog;

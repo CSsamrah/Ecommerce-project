@@ -36,7 +36,6 @@ const createCategory = asyncHandler(async (req, res) => {
 
 })
 
-
 // const getAllCategories = asyncHandler(async (req, res) => {
 //     const allCategories = await pool.query("SELECT category_name, slug FROM category");
 
@@ -76,6 +75,7 @@ const getAllCategories = asyncHandler(async (req, res) => {
       });
     }
   };
+
 
 const updateCategory = asyncHandler(async (req, res) => {
     if (req.user.role !== "admin") {
@@ -143,6 +143,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, {}, `Category ${slug} deleted successfully`));
 })
+
 
 // const getSingleCategory = asyncHandler(async (req, res) => {
 //     const { slug } = req.params;
@@ -365,16 +366,100 @@ const getSingleCategory = asyncHandler(async (req, res) => {
   
   const getSingleRentalCategory = asyncHandler(async (req, res) => {
     const { slug } = req.params;
-    const { condition } = req.query; // 'new' or 'second-hand'
+    console.log("Fetching rental category with slug:", slug);
+    // const { condition } = req.query; 
     const rental= true;
+    
+    if (!slug) {
+      throw new ApiError(400, "Rental Category slug is required");
+    }
+    
+    // if (!condition || !['new', 'second-hand'].includes(condition)) {
+    //   throw new ApiError(400, "Valid condition (new or second-hand) is required");
+    // }
+  
+    try {
+      // First get the category ID from the slug
+      const rentalCategoryResult = await pool.query(
+        "SELECT category_id FROM category WHERE slug = $1",
+        [slug]
+      );
+  
+      if (rentalCategoryResult.rows.length === 0) {
+        throw new ApiError(404, "Category not found");
+      }
+  
+      const categoryId = rentalCategoryResult.rows[0].category_id;
+  
+      // Get products from this category with the specified condition
+      // Products should NOT be rental products
+      const productsResult = await pool.query(
+        `SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
+        FROM product p
+        WHERE p.category_id = $1 
+          AND p.rental_available = $2
+        GROUP BY p.product_id
+        LIMIT 50`,
+        [categoryId, rental]
+      );
+
+      const Result = productsResult.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
+  
+    //   return res.status(200).json(
+    //     new ApiResponse(
+    //       200, 
+    //       {
+    //         category: categoryResult.rows[0],
+    //         products: productsResult.rows,
+    //         condition
+    //       },
+    //       "Category products fetched successfully"
+    //     )
+    //   );
+
+    return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: Result
+      });
+    } catch (error) {
+      console.error("Error in getSingleCategory:", error);
+      throw new ApiError(500, "Failed to fetch category products: " + error.message);
+    }
+  });
+
+  const getSecondhandSingleCategory = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    console.log("Fetching category with slug:", slug);
+    // const { condition } = req.query; 
+    const rental= false;
+    const condition = "second-hand"
     
     if (!slug) {
       throw new ApiError(400, "Category slug is required");
     }
     
-    if (!condition || !['new', 'second-hand'].includes(condition)) {
-      throw new ApiError(400, "Valid condition (new or second-hand) is required");
-    }
+    // if (!condition || !['new', 'second-hand'].includes(condition)) {
+    //   throw new ApiError(400, "Valid condition (new or second-hand) is required");
+    // }
   
     try {
       // First get the category ID from the slug
@@ -389,42 +474,60 @@ const getSingleCategory = asyncHandler(async (req, res) => {
   
       const categoryId = categoryResult.rows[0].category_id;
   
-      // Get RENTAL products from this category with the specified condition
-      const rentalProductsResult = await pool.query(
+      // Get products from this category with the specified condition
+      // Products should NOT be rental products
+      const productsResult = await pool.query(
         `SELECT 
-          p.id, 
-          p.title, 
-          p.price, 
-          p.image, 
-          p.condition,
-          p.rental_period,
-          COALESCE(AVG(r.rating), 0) as avg_rating,
-          COUNT(r.id) as review_count
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
         FROM product p
-        LEFT JOIN reviews r ON p.id = r.product_id
         WHERE p.category_id = $1 
-          AND p.condition = $2
-          AND p.rental_available = $3
-        GROUP BY p.id
-        ORDER BY p.created_at DESC`,
-        [categoryId, condition, rental]
+          AND p.rental_available = $2
+          AND P.condition = $3
+        GROUP BY p.product_id
+        LIMIT 50`,
+        [categoryId, rental, condition]
       );
+
+      const Result = productsResult.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
   
-      return res.status(200).json(
-        new ApiResponse(
-          200, 
-          {
-            category: categoryResult.rows[0],
-            products: rentalProductsResult.rows,
-            condition
-          },
-          "Rental category products fetched successfully"
-        )
-      );
+    //   return res.status(200).json(
+    //     new ApiResponse(
+    //       200, 
+    //       {
+    //         category: categoryResult.rows[0],
+    //         products: productsResult.rows,
+    //         condition
+    //       },
+    //       "Category products fetched successfully"
+    //     )
+    //   );
+
+    return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: Result
+      });
     } catch (error) {
-      console.error("Error in getSingleRentalCategory:", error);
-      throw new ApiError(500, "Failed to fetch rental category products: " + error.message);
+      console.error("Error in getSecondhandSingleCategory:", error);
+      throw new ApiError(500, "Failed to fetch category products: " + error.message);
     }
   });
 
-export { createCategory, getSingleCategory, getSingleRentalCategory, getAllCategories, updateCategory, deleteCategory }
+export { createCategory, getSingleCategory, getSingleRentalCategory, getSecondhandSingleCategory, getAllCategories, updateCategory, deleteCategory }

@@ -1,7 +1,8 @@
 import express from "express"
 import {
     returnRentalOrder,
-    getRentalDetails, 
+    getRentalDetails,
+    getRentalProduct, 
     userRentals,
     getAllRentals}
 from "../controllers/rentalController.js"
@@ -11,7 +12,11 @@ const rentalRoutes=express.Router();
 
 // rentalRoutes.post("/rentProduct/:id",isLoggedIn,createRentalOrder)
 rentalRoutes.post("/returnRental/:id",isLoggedIn,returnRentalOrder)
-rentalRoutes.get("/getRental/:id",isLoggedIn,getRentalDetails);
+rentalRoutes.get("/getRental/:id",getRentalDetails);
+rentalRoutes.get("/getRentalProduct/:id" , (req, res, next) => {
+    console.log("🏁 Rental Product Route hit! Id:", req.params.id); // Debug log
+    next();
+  },getRentalProduct);
 rentalRoutes.get("/getUserRentals",isLoggedIn,userRentals)
 rentalRoutes.get("/getAllRentals", getAllRentals);
 
