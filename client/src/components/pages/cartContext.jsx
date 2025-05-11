@@ -196,6 +196,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
   withCredentials: true,
@@ -210,8 +211,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
+ 
   // Memoized fetch function to prevent unnecessary recreations
   const fetchCartItems = useCallback(async () => {
     try {
@@ -339,7 +339,7 @@ export const CartProvider = ({ children }) => {
         )
       );
       
-      await api.put(`/cart/update/${cartId}`, { quantity });
+    await api.put(`/cart/update/${cartId}`, { quantity });
       
       return true;
     } catch (error) {

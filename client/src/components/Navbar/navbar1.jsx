@@ -329,7 +329,7 @@ export default function PrimarySearchAppBar() {
 
     const handleLogout = () => {
         logout();
-        navigate('/');
+        navigate('/sign');
         handleMenuClose();
     };
 
