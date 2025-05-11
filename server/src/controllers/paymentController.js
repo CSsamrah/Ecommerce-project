@@ -1,6 +1,7 @@
 import axios from 'axios';
 import md5 from 'md5';
-import qs from 'qs'
+import qs from 'qs';
+import pool from "../../dbConnect.js";
 
 const generateSignature = ({ merchantId, securedKey, basketId, transAmount, currencyCode }) => {
   const rawString = `${merchantId}${basketId}${securedKey}${transAmount}${currencyCode}`;
@@ -88,3 +89,53 @@ export const verifyTransaction = async (req, res) => {
     res.status(500).json({ error: 'Verification failed' });
   }
 };
+
+export const savePayment = async (req, res) => {
+  const user_id = req.user?.user_id;
+  if (!user_id) {
+    return res.status(401).json({ error: 'User Id is required to proceed' });
+  }
+
+  const {
+    order_id,
+    amount,
+    payment_method,
+    payment_status,
+    payment_date = new Date().toISOString(),
+    transaction_id,
+  } = req.body;
+
+  if (
+    !order_id ||
+    !amount || !payment_method || !payment_status ||
+    !transaction_id || !payment_date
+  ) {
+    return res.status(400).json({ error: 'Missing required payment fields' });
+  }
+
+  try {
+     const query = `
+      INSERT INTO payment
+      (order_id, user_id, amount, payment_method, payment_status, payment_date, transaction_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `
+
+    const values = [
+      order_id,
+      user_id,
+      amount,
+      payment_method,
+      payment_status,
+      new Date(payment_date),
+      transaction_id
+    ];
+
+    await pool.query(query, values);
+
+    res.status(201).json({ message: 'Payment saved successfully' });
+  } catch (err) {
+    console.error('Error saving payment:', err);
+    res.status(500).json({ error: 'Failed to save payment to database' });
+  }
+};
+

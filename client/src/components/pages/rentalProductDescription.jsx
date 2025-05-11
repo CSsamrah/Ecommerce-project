@@ -1005,7 +1005,10 @@ const RentalProductDetail = () => {
           <h1>Client Says</h1>
         </div>
 
-                <Rating addReview={addReview} />
+        {showRatingPopup && (
+  <Rating addReview={addReview} closePopup={toggleRatingPopup} />
+)}
+
 
       {reviews.length > 0 ? (
                 <div className="review_box_container">

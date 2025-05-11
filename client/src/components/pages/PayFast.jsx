@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
@@ -6,7 +7,7 @@ const PayFastForm = () => {
   
   const location = useLocation();
 
-  const { email, phone, cartId, transactionAmount, transactionDesc } = location.state || {};
+  const { email, phone, orderId, transactionAmount, transactionDesc } = location.state || {};
 
   const [token, setToken] = useState('');
   const [signature, setSignature] = useState('');
@@ -31,9 +32,9 @@ const PayFastForm = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log('Payment details received:', { email, phone, cartId, transactionAmount, transactionDesc });
+    console.log('Payment details received:', { email, phone, orderId, transactionAmount, transactionDesc });
 
-    if (!email || !phone || !cartId || !transactionAmount || !transactionDesc) {
+    if (!email || !phone || !orderId || !transactionAmount || !transactionDesc) {
       setError('Error: Payment details are missing. Please try again.');
       return;
     }
@@ -41,13 +42,14 @@ const PayFastForm = () => {
     // Ensure that payment details from state are applied to the formData state
     setFormData((prev) => ({
       ...prev,
-      BASKET_ID: cartId,
+      BASKET_ID: orderId,
       TXNAMT: transactionAmount,
       EMAIL_ADDRESS: email,
       MOBILE_NO: phone,
       TXNDESC: transactionDesc,
+      SUCCESS_URL: `http://localhost:5173/payment/success?orderId=${orderId}&amount=${transactionAmount}`, //  Add this line
     }));
-  }, [email, phone, cartId, transactionAmount, transactionDesc]);
+  }, [email, phone, orderId, transactionAmount, transactionDesc]);
 
   const getToken = async () => {
     const payload = {

@@ -132,6 +132,7 @@ table {
     min-width: 800px;
     background-color: white;
     color: #1a365d;
+    border-width:2px solid black;
 }
 
 table th, table td {
