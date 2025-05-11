@@ -263,25 +263,6 @@ const RentalProductDetail = () => {
 
   };
 
-  const authButtonStyle = {
-    flex: '1',
-    minWidth: '150px',
-    width: '400px',
-    height: '50px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'transparent',
-    color: '#d0d0d0',
-    fontSize: '16px',
-    fontWeight: '500',
-    border: '1px solid #d0d0d0',
-    borderRadius: '25px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-
-  };
-
   const handleAddToCart = () => {
     if (isInCart) {
       alert("Already in cart!");
@@ -433,14 +414,21 @@ const RentalProductDetail = () => {
                 Review Product
               </button>
               
-              <div className="PD_authentication_button">
+              {/* <div className="PD_authentication_button">
                 <button 
                   aria-label="Authenticate Product"
                   style={authButtonStyle}
                 >
-                  {/* <ShieldCheck size={20} color="#777" /> */}
+                  {/* <ShieldCheck size={20} color="#777" /> 
                   Authenticate Product
                 </button>
+              </div> */}
+
+              <div className="PD_authentication_button">
+                <ProductAuthentication 
+                productId={id} 
+                onAuthComplete={handleAuthResult} 
+                />
               </div>
               
             </div>

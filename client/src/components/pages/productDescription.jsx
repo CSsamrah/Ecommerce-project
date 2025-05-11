@@ -2,12 +2,15 @@ import React, {useEffect, useState} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { IonIcon } from '@ionic/react';
 import axios from 'axios';
-import { heartOutline, heart, cartOutline, arrowBackOutline } from 'ionicons/icons';
+import { heartOutline, 
+  heart, 
+  cartOutline, 
+  arrowBackOutline,
+  checkmarkCircle,
+  closeCircle } from 'ionicons/icons';
 import ProductAuthentication from "./productAuthentication";  // Import the product authentication component
 import "./productDescription.css"; // Add styling if needed
 import { ShieldCheck, Star, ShoppingBag } from 'lucide-react';
-
-
 
 
 // Rating Component Integrated Directly
@@ -100,6 +103,29 @@ const Rating = ({ addReview, closePopup }) => {
     );
 };
 
+const AuthenticationPopup = ({ status, onClose }) => {
+  return (
+    <div className="auth_popup_overlay">
+      <div className="auth_popup_content">
+        <div className="wrapper">
+          <button className="close_button" onClick={onClose}>×</button>
+          <h3>Product Authentication</h3>
+          <div className={`auth-status ${status.includes("valid") ? "valid" : "invalid"}`}>
+            {status}
+          </div>
+          <button 
+            className="btn-close" 
+            onClick={onClose}
+            style={{ marginTop: '20px' }}
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -118,6 +144,8 @@ const ProductDetail = () => {
   const [showRatingPopup, setShowRatingPopup] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [authStatus, setAuthStatus] = useState(null);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
 
 
   useEffect(() => {
@@ -241,25 +269,6 @@ const ProductDetail = () => {
 
   };
 
-  const authButtonStyle = {
-    flex: '1',
-    minWidth: '150px',
-    width: '400px',
-    height: '50px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'transparent',
-    color: '#d0d0d0',
-    fontSize: '16px',
-    fontWeight: '500',
-    border: '1px solid #d0d0d0',
-    borderRadius: '25px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-
-  };
-
   const handleAddToCart = () => {
     if (isInCart) {
       alert("Already in cart!");
@@ -319,6 +328,11 @@ const ProductDetail = () => {
   //     localStorage.setItem(`rating_${product.id}`, JSON.stringify(averageRating)); // Store rating
   //   }
   // }, [averageRating, product]);
+
+  const handleAuthResult = (status) => {
+    setAuthStatus(status);
+    setShowAuthPopup(true);
+  };
 
   if (loading) return (
     <div className="loading-state">
@@ -401,14 +415,21 @@ const ProductDetail = () => {
                 Review Product
               </button>
               
-              <div className="PD_authentication_button">
+              {/* <div className="PD_authentication_button">
                 <button 
                   aria-label="Authenticate Product"
                   style={authButtonStyle}
                 >
-                  {/* <ShieldCheck size={20} color="#777" /> */}
+                  {/* <ShieldCheck size={20} color="#777" />
                   Authenticate Product
                 </button>
+              </div> */}
+
+              <div className="PD_authentication_button">
+                <ProductAuthentication 
+                productId={id} 
+                onAuthComplete={handleAuthResult} 
+                />
               </div>
               
             </div>
@@ -481,7 +502,16 @@ const ProductDetail = () => {
       </div>
       )}
       </section>
+
+      {showAuthPopup && (
+    <AuthenticationPopup 
+      status={authStatus} 
+      onClose={() => setShowAuthPopup(false)} 
+    />
+  )}
     </div>
+
+    
   );
 };
 
