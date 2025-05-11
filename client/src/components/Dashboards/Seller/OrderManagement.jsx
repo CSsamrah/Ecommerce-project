@@ -218,7 +218,7 @@ const OrderManagement = () => {
                     <th>Customer</th>
                     <th>Total Amount</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th className="actions-column">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -235,19 +235,21 @@ const OrderManagement = () => {
                           </span>
                         </td>
                         <td className="action-buttons">
-                          <button className="view-button" onClick={() => handleViewDetails(order.order_id)}>
-                            View Details
-                          </button>
-                          <select
-                            value={order.status || "NULL"}
-                            onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
-                            className="status-select"
-                          >
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
+                          <div className="action-container">
+                            <button className="view-button" onClick={() => handleViewDetails(order.order_id)}>
+                              View Details
+                            </button>
+                            <select
+                              value={order.status || "NULL"}
+                              onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
+                              className="status-select"
+                            >
+                              <option value="processing">Processing</option>
+                              <option value="shipped">Shipped</option>
+                              <option value="delivered">Delivered</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </div>
                         </td>
                       </tr>
                     ))
