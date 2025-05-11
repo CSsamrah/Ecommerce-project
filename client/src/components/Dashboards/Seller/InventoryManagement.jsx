@@ -53,19 +53,33 @@ function InventoryManagement() {
         }
     }, [searchTerm, products, selectedCategory]);
 
+    // Fetch categories when component mounts
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get("http://localhost:3000/api/categories/getAllCategories");
-                console.log("Categories fetched:", response.data.data.categories);
-                setCategories(response.data.data.categories);
-            } catch (err) {
-                console.error("Failed to load categories", err);
-            }
-        };
-
         fetchCategories();
     }, []);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/api/categories/getAllCategories");
+            console.log("Categories fetched:", response.data);
+            
+            // Check if response.data.data exists and is an array
+            if (response.data && Array.isArray(response.data.data)) {
+                // Map the categories to match the expected format with category_id and category_name
+                const mappedCategories = response.data.data.map(cat => ({
+                    category_id: cat.category_id,  // Using slug as ID
+                    category_name: cat.name // Using name as display name
+                }));
+                setCategories(mappedCategories);
+            } else {
+                console.error("Categories response format unexpected:", response.data);
+                setCategories([]);
+            }
+        } catch (err) {
+            console.error("Failed to load categories", err);
+            setCategories([]);
+        }
+    };
 
     // Fetch all products from the API
     const fetchProducts = async () => {
@@ -160,134 +174,271 @@ function InventoryManagement() {
         return null;
     };
 
-    const addNewProduct = async () => {
-        const validationError = validateProductData(newProduct);
-        if (validationError) {
-            alert(validationError);
-            return;
-        }
+  const addNewProduct = async () => {
+    const validationError = validateProductData(newProduct);
+    if (validationError) {
+        alert(validationError);
+        return;
+    }
 
-        if (!newProduct.category_id) {
-            alert("Please select a valid category");
-            return;
-        }
+    if (!newProduct.category_id) {
+        alert("Please select a valid category");
+        return;
+    }
 
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
+    try {
+        // Ensure category_id is a number
+        let categoryId;
         try {
-            const formData = new FormData();
-            formData.append('name', newProduct.name);
-            formData.append('description', newProduct.description);
-            formData.append('price', newProduct.price);
-            formData.append('condition', newProduct.condition);
-            formData.append('stock_quantity', newProduct.stock_quantity);
-            formData.append('rental_available', newProduct.rental_available === "TRUE" || newProduct.rental_available === "Yes");
-            formData.append('product_features', typeof newProduct.product_features === 'string'
-                ? newProduct.product_features
-                : JSON.stringify(newProduct.product_features));
-            formData.append('category_id', parseInt(newProduct.category_id));
-
-            if (newProduct.product_image) {
-                formData.append('product_image', newProduct.product_image);
+            // First try to convert it to a number
+            categoryId = Number(newProduct.category_id);
+            
+            // Check if it's a valid number (not NaN)
+            if (isNaN(categoryId)) {
+                throw new Error("Category ID must be a valid number");
             }
-
-            console.log("Sending product data:", Object.fromEntries(formData.entries()));
-
-            const response = await axios.post('http://localhost:3000/api/products/addProduct', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                withCredentials: true
-            });
-
-            console.log("API response:", response.data);
-
-            setProducts(prev => [...prev, response.data.data]);
-            setNewProduct(null);
-            alert("Product added successfully!");
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to add product");
-            console.error("Error adding product:", err);
-        } finally {
+            setError("Category ID must be a valid number");
             setLoading(false);
-        }
-    };
-
-    const saveEdit = async () => {
-        const validationError = validateProductData(editingProduct);
-        if (validationError) {
-            alert(validationError);
             return;
         }
 
-        setLoading(true);
-        setError(null);
+        const formData = new FormData();
+        formData.append('name', newProduct.name);
+        formData.append('description', newProduct.description);
+        formData.append('price', newProduct.price);
+        formData.append('condition', newProduct.condition);
+        formData.append('stock_quantity', newProduct.stock_quantity);
+        formData.append('rental_available', newProduct.rental_available === "TRUE" || newProduct.rental_available === "Yes");
+        formData.append('product_features', typeof newProduct.product_features === 'string'
+            ? newProduct.product_features
+            : JSON.stringify(newProduct.product_features));
+            
+        // Use the validated number version of category_id
+        formData.append('category_id', categoryId);
 
-        try {
-            // Create FormData for file upload
-            const formData = new FormData();
-            formData.append('name', editingProduct.name);
-            formData.append('description', editingProduct.description);
-            formData.append('price', editingProduct.price);
-            formData.append('condition', editingProduct.condition);
-            formData.append('stock_quantity', editingProduct.stock_quantity);
-            formData.append('rental_available', editingProduct.rental_available === "Yes" || editingProduct.rental_available === true);
-            formData.append('product_features', editingProduct.product_features);
+        console.log("Category ID being sent:", categoryId, "Type:", typeof categoryId);
 
-            if (editingProduct.product_image && editingProduct.product_image instanceof File) {
-                formData.append('product_image', editingProduct.product_image);
-            }
-            console.log("Editing product details:", editingProduct); // Check if product_id is present
-
-            const response = await axios.patch(`http://localhost:3000/api/products/updateProduct/${editingProduct.id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            // Update the product in local state
-            setProducts(prev =>
-                prev.map(product =>
-                    product.product_id === editingProduct.product_id
-                        ? response.data.data
-                        : product
-                )
-            );
-            console.log("Product ID", editingProduct.product_id);
-
-            setEditingProduct(null);
-            alert("Product updated successfully!");
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to update product");
-            console.error("Error updating product:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const deleteProduct = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this product?")) {
-            return;
+        if (newProduct.product_image) {
+            formData.append('product_image', newProduct.product_image);
         }
 
-        setLoading(true);
-        setError(null);
-        console.log("Deleting product with ID:", id);
+        console.log("Sending product data:", Object.fromEntries(formData.entries()));
+
+        const response = await axios.post('http://localhost:3000/api/products/addProduct', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            withCredentials: true
+        });
+
+        console.log("API response:", response.data);
+
+        // Get the new product from the response
+        const addedProduct = response.data.data;
         
-        try {
-            await axios.delete(`http://localhost:3000/api/products/deleteProduct/${id}`);
+        // Format the product for consistent property structure
+        const formattedProduct = {
+            id: addedProduct.id || addedProduct.product_id,
+            product_id: addedProduct.product_id || addedProduct.id,
+            name: addedProduct.name || addedProduct.title,
+            title: addedProduct.title || addedProduct.name,
+            description: addedProduct.description,
+            price: addedProduct.price,
+            condition: addedProduct.condition,
+            stock_quantity: addedProduct.stock_quantity,
+            rental_available: addedProduct.rental_available,
+            features: Array.isArray(addedProduct.features) ? addedProduct.features :
+                     (typeof addedProduct.product_features === 'string' ? 
+                      JSON.parse(addedProduct.product_features || '[]') : []),
+            product_features: typeof addedProduct.product_features === 'string' ? 
+                            addedProduct.product_features : 
+                            JSON.stringify(addedProduct.features || []),
+            image: addedProduct.image,
+            category_id: addedProduct.category_id
+        };
 
-            // Remove the product from local state
-            setProducts(prev => prev.filter(p => p.product_id !== id));
-            alert("Product deleted successfully!");
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to delete product");
-            console.error("Error deleting product:", err);
-        } finally {
-            setLoading(false);
+        // Update both products and filteredProducts states
+        setProducts(prev => [...prev, formattedProduct]);
+        
+        // Only add to filtered products if it matches the current filter
+        if (selectedCategory === "all" || 
+            (selectedCategory === "rental" && formattedProduct.rental_available) ||
+            (selectedCategory === "new" && formattedProduct.condition === "new") ||
+            (selectedCategory === "secondHand" && formattedProduct.condition === "second-hand")) {
+            setFilteredProducts(prev => [...prev, formattedProduct]);
         }
-    };
+        
+        setNewProduct(null);
+        alert("Product added successfully!");
+    } catch (err) {
+        setError(err.response?.data?.message || "Failed to add product");
+        console.error("Error adding product:", err);
+    } finally {
+        setLoading(false);
+    }
+};
+const saveEdit = async () => {
+    const validationError = validateProductData(editingProduct);
+    if (validationError) {
+        alert(validationError);
+        return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('name', editingProduct.name);
+        formData.append('description', editingProduct.description);
+        formData.append('price', editingProduct.price);
+        formData.append('condition', editingProduct.condition);
+        formData.append('stock_quantity', editingProduct.stock_quantity);
+        formData.append('rental_available', editingProduct.rental_available === "Yes" || editingProduct.rental_available === true);
+        formData.append('product_features', editingProduct.product_features);
+        
+        // Make sure category_id is included and is a valid integer
+        if (editingProduct.category_id) {
+            formData.append('category_id', editingProduct.category_id);
+        }
+
+        if (editingProduct.product_image && editingProduct.product_image instanceof File) {
+            formData.append('product_image', editingProduct.product_image);
+        }
+        
+        // Determine which ID to use - product_id or id
+        const productId = editingProduct.product_id || editingProduct.id;
+        
+        if (!productId) {
+            throw new Error("Product ID is missing");
+        }
+        
+        console.log("Editing product details:", editingProduct, "Using product ID:", productId);
+
+        const response = await axios.patch(`http://localhost:3000/api/products/updateProduct/${productId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        // Get the updated product from the response
+        const updatedProduct = response.data.data;
+        
+        // Update the product in local state with consistent property naming
+        setProducts(prev => 
+            prev.map(product => {
+                if (product.product_id === productId || product.id === productId) {
+                    // Ensure the updated product has the same property structure as expected in the UI
+                    return {
+                        // Preserve the original ID fields
+                        id: product.id,
+                        product_id: product.product_id,
+                        // Use values from the API response or fallback to existing values
+                        name: updatedProduct.name || updatedProduct.title || product.name || product.title,
+                        title: updatedProduct.title || updatedProduct.name || product.title || product.name,
+                        description: updatedProduct.description || product.description,
+                        price: updatedProduct.price || product.price,
+                        condition: updatedProduct.condition || product.condition,
+                        stock_quantity: updatedProduct.stock_quantity || product.stock_quantity,
+                        rental_available: updatedProduct.rental_available || product.rental_available,
+                        // Handle features and product_features properly
+                        features: Array.isArray(updatedProduct.features) ? updatedProduct.features :
+                                 (Array.isArray(updatedProduct.product_features) ? updatedProduct.product_features :
+                                 (typeof updatedProduct.product_features === 'string' ? 
+                                    JSON.parse(updatedProduct.product_features || '[]') : 
+                                    product.features || [])),
+                        product_features: typeof updatedProduct.product_features === 'string' ? 
+                                        updatedProduct.product_features : 
+                                        JSON.stringify(updatedProduct.features || []),
+                        // Handle image property
+                        image: updatedProduct.image || product.image,
+                        category_id: updatedProduct.category_id || product.category_id
+                    };
+                }
+                return product;
+            })
+        );
+        
+        setFilteredProducts(prev => {
+            // Apply the same filtering that is currently active
+            const updated = prev.map(product => {
+                if (product.product_id === productId || product.id === productId) {
+                    // Use the same structure as above
+                    return {
+                        // Preserve the original ID fields
+                        id: product.id,
+                        product_id: product.product_id,
+                        // Use values from the API response or fallback to existing values
+                        name: updatedProduct.name || updatedProduct.title || product.name || product.title,
+                        title: updatedProduct.title || updatedProduct.name || product.title || product.name,
+                        description: updatedProduct.description || product.description,
+                        price: updatedProduct.price || product.price,
+                        condition: updatedProduct.condition || product.condition,
+                        stock_quantity: updatedProduct.stock_quantity || product.stock_quantity,
+                        rental_available: updatedProduct.rental_available || product.rental_available,
+                        // Handle features and product_features properly
+                        features: Array.isArray(updatedProduct.features) ? updatedProduct.features :
+                                 (Array.isArray(updatedProduct.product_features) ? updatedProduct.product_features :
+                                 (typeof updatedProduct.product_features === 'string' ? 
+                                    JSON.parse(updatedProduct.product_features || '[]') : 
+                                    product.features || [])),
+                        product_features: typeof updatedProduct.product_features === 'string' ? 
+                                        updatedProduct.product_features : 
+                                        JSON.stringify(updatedProduct.features || []),
+                        // Handle image property
+                        image: updatedProduct.image || product.image,
+                        category_id: updatedProduct.category_id || product.category_id
+                    };
+                }
+                return product;
+            });
+            return updated;
+        });
+        
+        setEditingProduct(null);
+        alert("Product updated successfully!");
+    } catch (err) {
+        setError(err.response?.data?.message || "Failed to update product");
+        console.error("Error updating product:", err);
+    } finally {
+        setLoading(false);
+    }
+};
+
+ const deleteProduct = async (id) => {
+    if (!id) {
+        alert("Error: Product ID is missing");
+        return;
+    }
+    
+    if (!window.confirm("Are you sure you want to delete this product?")) {
+        return;
+    }
+
+    setLoading(true);
+    setError(null);
+    console.log("Deleting product with ID:", id);
+    
+    try {
+        await axios.delete(`http://localhost:3000/api/products/deleteProduct/${id}`);
+
+        // Remove the product from both products and filteredProducts state
+        setProducts(prev => prev.filter(p => (p.product_id !== id && p.id !== id)));
+        setFilteredProducts(prev => prev.filter(p => (p.product_id !== id && p.id !== id)));
+        
+        alert("Product deleted successfully!");
+    } catch (err) {
+        setError(err.response?.data?.message || "Failed to delete product");
+        console.error("Error deleting product:", err);
+    } finally {
+        setLoading(false);
+    }
+};
 
     if (loading) {
         return <LoadingSpinner message="Loading inventory data..." />;
@@ -340,7 +491,12 @@ function InventoryManagement() {
 
                             <button
                                 className="add-product-btn"
-                                onClick={() =>
+                                onClick={() => {
+                                    // Fetch categories if they aren't loaded yet
+                                    if (categories.length === 0) {
+                                        fetchCategories();
+                                    }
+                                    
                                     setNewProduct({
                                         name: "",
                                         description: "",
@@ -350,8 +506,8 @@ function InventoryManagement() {
                                         condition: "",
                                         rental_available: "FALSE",
                                         category_id: ""
-                                    })
-                                }
+                                    });
+                                }}
                             >
                                 Add New Product
                             </button>
@@ -383,8 +539,8 @@ function InventoryManagement() {
                                         </tr>
                                     ) : (
                                         filteredProducts.map((product) => (
-                                            <tr key={product.product_id}>
-                                                <td>{product.title}</td>
+                                            <tr key={product.product_id || product.id}>
+                                                <td>{product.title || product.name}</td>
                                                 <td className="description-cell">{product.description}</td>
                                                 <td>Rs. {product.price}</td>
                                                 <td>{product.condition}</td>
@@ -400,8 +556,34 @@ function InventoryManagement() {
                                                     <img src={product.image || "https://via.placeholder.com/50"} alt="Product" className="product-thumbnail" />
                                                 </td>
                                                 <td className="action-buttons">
-                                                    <button className="edit-btn" onClick={() => setEditingProduct({ ...product })}>Edit</button>
-                                                    <button className="delete-btn" onClick={() => deleteProduct(product.id)}>Delete</button>
+                                                    <button className="edit-btn" onClick={() => {
+                                                        // Ensure categories are loaded before opening edit modal
+                                                        if (categories.length === 0) {
+                                                            fetchCategories();
+                                                        }
+                                                        
+                                                        // Make a copy of the product and ensure it has the required properties
+                                                        const productToEdit = { ...product };
+                                                        
+                                                        // Ensure product has an id property (might be product_id in some cases)
+                                                        if (!productToEdit.id && productToEdit.product_id) {
+                                                            productToEdit.id = productToEdit.product_id;
+                                                        }
+                                                        
+                                                        // Ensure name property (might be title in some cases)
+                                                        if (!productToEdit.name && productToEdit.title) {
+                                                            productToEdit.name = productToEdit.title;
+                                                        }
+                                                        
+                                                        // If features is present but product_features is not
+                                                        if (!productToEdit.product_features && Array.isArray(productToEdit.features)) {
+                                                            productToEdit.product_features = JSON.stringify(productToEdit.features);
+                                                        }
+                                                        
+                                                        console.log("Setting product to edit:", productToEdit);
+                                                        setEditingProduct(productToEdit);
+                                                    }}>Edit</button>
+                                                    <button className="delete-btn" onClick={() => deleteProduct(product.product_id || product.id)}>Delete</button>
                                                 </td>
                                             </tr>
                                         ))
@@ -476,12 +658,17 @@ function InventoryManagement() {
                                             required
                                         >
                                             <option value="">Select</option>
-                                            {categories.map(cat => (
-                                                <option key={cat.category_id} value={cat.category_id}>
-                                                    {cat.category_name}
-                                                </option>
-                                            ))}
+                                            {Array.isArray(categories) && categories.length > 0 ? (
+                                                categories.map(cat => (
+                                                    <option key={cat.category_id} value={cat.category_id}>
+                                                        {cat.category_name}
+                                                    </option>
+                                                ))
+                                            ) : (
+                                                <option value="" disabled>Loading categories...</option>
+                                            )}
                                         </select>
+                                        {categories.length === 0 && <p className="text-error">No categories loaded. Please try refreshing.</p>}
                                     </div>
 
                                     <div className="form-group">
@@ -561,5 +748,3 @@ function InventoryManagement() {
 }
 
 export default InventoryManagement;
-
-

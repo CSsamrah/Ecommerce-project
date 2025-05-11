@@ -57,6 +57,7 @@ const getAllCategories = asyncHandler(async (req, res) => {
       const categories = allCategories.rows.map(category => ({
         name: category.category_name,
         slug: category.slug,
+        category_id: category.category_id,
       }));
 
       return res.status(200).json({
