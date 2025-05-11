@@ -21,6 +21,7 @@ categoryRoutes.get("/getCategory/:slug/rental" , (req, res, next) => {
   }, getSecondhandSingleCategory); 
 categoryRoutes.get("/getAllCategories",getAllCategories);
 
+
 //ONLY admin
 categoryRoutes.post("/createCategory",isLoggedIn,createCategory);
 categoryRoutes.patch("/updateCategory/:slug",isLoggedIn,updateCategory);

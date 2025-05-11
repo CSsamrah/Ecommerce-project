@@ -42,6 +42,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const emailOptions = {
         // from: "arsalanali873@gmail.com",
         from: "arisharehan7@gmail.com",
+
         to: email,
         subject: "Welcome to ProTech Hardware!",
         text: `Welcome to Hardware Hub. Your account has been created with Email ID: ${email}`, 
@@ -489,3 +490,4 @@ const getAllSellers = asyncHandler(async (req, res) => {
 
 
 export { registerUser, loginUser, logOut,forgotPassowrd ,resetPwd,changePassword,getAccountDetails,updateAccount,deleteAccount, getAllBuyers, getAllSellers};
+

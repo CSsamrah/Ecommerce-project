@@ -37,7 +37,6 @@ import {
     registerUser,
     loginUser,
     logOut,
-
     forgotPassowrd,
     resetPwd,
     changePassword,
@@ -67,6 +66,5 @@ userRoutes.delete("/deleteAccount", isLoggedIn, deleteAccount);
 // Admin-only routes
 userRoutes.get("/buyers", isLoggedIn, isAdmin, getAllBuyers);
 userRoutes.get("/sellers", isLoggedIn, isAdmin, getAllSellers);
-
 
 export default userRoutes;

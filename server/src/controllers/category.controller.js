@@ -36,7 +36,6 @@ const createCategory = asyncHandler(async (req, res) => {
 
 })
 
-
 // const getAllCategories = asyncHandler(async (req, res) => {
 //     const allCategories = await pool.query("SELECT category_name, slug FROM category");
 
@@ -77,6 +76,7 @@ const getAllCategories = async (req, res) => {
       });
     }
   };
+
 
 const updateCategory = asyncHandler(async (req, res) => {
     if (req.user.role !== "admin") {
@@ -144,6 +144,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, {}, `Category ${slug} deleted successfully`));
 })
+
 
 // const getSingleCategory = asyncHandler(async (req, res) => {
 //     const { slug } = req.params;

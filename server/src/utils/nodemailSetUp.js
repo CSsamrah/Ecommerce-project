@@ -32,6 +32,7 @@ transporter.verify(function(error, success) {
   } else {
     console.log("SMTP server connection established");
   }
+
 });
 
 export default transporter;

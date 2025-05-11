@@ -131,6 +131,7 @@
 // export default App;
 
 
+
 import React from 'react'
 import { Box } from '@mui/material';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
@@ -152,10 +153,12 @@ import CategoryCatalog from "./components/pages/CategoryCatalog";
 // import SecondhandCategoryCatalog from "./components/pages/secondhandCategory";
 import RentalCategoryCatalog from "./components/pages/rentalCategoryCatalog";
 // import SecondhandRentalCategoryCatalog from "./components/pages/secondhandRentalCategory";
+
 import { CartProvider } from './components/pages/cartContext';
 import "./components/pages/catalog.css";
 import ProductDetail from "./components/pages/productDescription";
 import "./components/pages/productDescription.css"
+
 import RentalProductDetail from "./components/pages/rentalProductDescription";
 import "./components/pages/rentalProductDescription.css"
 import Cart from "./components/pages/cart"
@@ -183,6 +186,7 @@ import Failure from "./components/pages/cancel.jsx"
 
 
 
+
 const HomePage = () => (
   <>
     <Box>
@@ -205,6 +209,7 @@ const HomePage = () => (
 
 function App() {
   return (
+
     <Router>
       <CartProvider>
         <Box>
@@ -259,3 +264,4 @@ function App() {
 }
 
 export default App;
+

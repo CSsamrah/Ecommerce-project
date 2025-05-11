@@ -5,6 +5,7 @@ import pool from "../../dbConnect.js";
 
 const isLoggedIn=asyncHandler(async(req,_,next)=>{
     const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+
     console.log("TOKEN: ",token);
 
     if(!token){
@@ -21,12 +22,12 @@ const isLoggedIn=asyncHandler(async(req,_,next)=>{
         throw new ApiError(401,'Invalid Access Token');
     }
     req.user = findUser.rows[0];
-    
     next(); 
 })
 
 const isAdmin = asyncHandler(async (req, res, next) => {
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+
     console.log("TOKEN: ", token);
 
     if (!token) {
@@ -65,4 +66,3 @@ const authorizeSeller = (req, res, next) => {
 };
 
 export { isLoggedIn ,isAdmin,authorizeSeller}
-
