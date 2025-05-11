@@ -222,47 +222,6 @@ function InventoryManagement() {
 
         console.log("Category ID being sent:", categoryId, "Type:", typeof categoryId);
 
-<<<<<<< HEAD
-            if (editingProduct.product_image && editingProduct.product_image instanceof File) {
-                formData.append('product_image', editingProduct.product_image);
-            }
-
-            const response = await axios.patch(`http://localhost:3000/api/products/updateProduct/${editingProduct.product_id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            // Update the product in local state
-            setProducts(prev =>
-                prev.map(product =>
-                    product.product_id === editingProduct.product_id
-                        ? response.data.data
-                        : product
-                )
-            );
-
-            setEditingProduct(null);
-            alert("Product updated successfully!");
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to update product");
-            console.error("Error updating product:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const deleteProduct = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this product?")) {
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            await axios.delete(`http://localhost:3000/api/products/deleteProduct/${id}`);
-=======
         if (newProduct.product_image) {
             formData.append('product_image', newProduct.product_image);
         }
@@ -301,7 +260,6 @@ function InventoryManagement() {
             image: addedProduct.image,
             category_id: addedProduct.category_id
         };
->>>>>>> c91ab2cd9b8113d36f0cc55c08661f61968e2ee4
 
         // Update both products and filteredProducts states
         setProducts(prev => [...prev, formattedProduct]);
@@ -598,10 +556,6 @@ const saveEdit = async () => {
                                                     <img src={product.image || "https://via.placeholder.com/50"} alt="Product" className="product-thumbnail" />
                                                 </td>
                                                 <td className="action-buttons">
-<<<<<<< HEAD
-                                                    <button className="edit-btn" onClick={() => setEditingProduct({ ...product })}>Edit</button>
-                                                    <button className="delete-btn" onClick={() => deleteProduct(product.product_id)}>Delete</button>
-=======
                                                     <button className="edit-btn" onClick={() => {
                                                         // Ensure categories are loaded before opening edit modal
                                                         if (categories.length === 0) {
@@ -630,7 +584,6 @@ const saveEdit = async () => {
                                                         setEditingProduct(productToEdit);
                                                     }}>Edit</button>
                                                     <button className="delete-btn" onClick={() => deleteProduct(product.product_id || product.id)}>Delete</button>
->>>>>>> c91ab2cd9b8113d36f0cc55c08661f61968e2ee4
                                                 </td>
                                             </tr>
                                         ))
@@ -794,9 +747,4 @@ const saveEdit = async () => {
     );
 }
 
-<<<<<<< HEAD
 export default InventoryManagement;
-
-=======
-export default InventoryManagement;
->>>>>>> c91ab2cd9b8113d36f0cc55c08661f61968e2ee4
