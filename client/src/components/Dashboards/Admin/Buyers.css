@@ -6,7 +6,7 @@
     background-color: #f5f7fa;
     position: relative;
     width: 1370px;
-    background-color: #2A4E61;
+    background-color: rgb(219, 238, 243);
 
 }
 
@@ -14,7 +14,7 @@
     display: flex;
     flex: 1;
     position: relative;
-    padding-top: 60px; 
+    padding-top: 10px; 
 }
 
 .buyers-data-container {
@@ -36,9 +36,9 @@
     max-width: 1100px;
     margin: 20px auto;
     padding: 25px;
-    background: white;
+    background: rgb(219, 238, 243);
     border-radius: 10px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1); */
 }
 
 
@@ -52,7 +52,6 @@
     text-transform: uppercase;
 }
 
-/* Table controls section */
 .buyers-table-controls {
     display: flex;
     justify-content: center;

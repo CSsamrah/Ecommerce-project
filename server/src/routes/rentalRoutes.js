@@ -10,7 +10,7 @@ const rentalRoutes=express.Router();
 
 // rentalRoutes.post("/rentProduct/:id",isLoggedIn,createRentalOrder)
 rentalRoutes.post("/returnRental/:id",isLoggedIn,returnRentalOrder)
-rentalRoutes.get("/getRental/:id",getRentalDetails);
+rentalRoutes.get("/getRental/:id",isLoggedIn, getRentalDetails);
 // rentalRoutes.get("/getRentalProduct/:id", getRentalProduct);
 rentalRoutes.get("/getUserRentals",isLoggedIn,userRentals)
 // rentalRoutes.get("/getAllRentals", getAllRentals);
