@@ -90,7 +90,7 @@ export const listSecondhandProduct = async (req, res) => {
 
   export const listRentalSecondhandProduct = async (req, res) => {
     try {
-      console.log("getAllProducts function called");
+      console.log("listRentalSecondhandProduct function called");
 
       const condition = 'second-hand';
       const rental= true;
@@ -103,9 +103,17 @@ export const listSecondhandProduct = async (req, res) => {
             p.description,
             p.condition as condition,
             p.stock_quantity,
-            p.rental_available as rental
+            p.rental_available as rental,
+            r.rental_id,
+            r.rental_status,
+            r.rental_price as rental_price,
+            r.rental_duration,
+            r.return_date,
+            r.rented_by as owner_name
         FROM product p
+        LEFT JOIN rental r ON p.product_id = r.product_id
         WHERE p.condition = $1 AND p.rental_available = $2
+        AND (r.rental_status IS NULL OR r.rental_status = 'Returned')
         LIMIT 50
       `;
       
@@ -122,6 +130,12 @@ export const listSecondhandProduct = async (req, res) => {
         condition: product.condition,
         stock_quantity: product.stock_quantity,
         rental: product.rental,
+        rental_id: product.rental_id,
+        rental_status: product.rental_status,
+        rental_price: product.rental_price,
+        rental_duration: product.rental_duration,
+        return_date: product.return_date,
+        owner_name: product.owner_name,
         avg_rating: '0', 
         people_rated: '0'
       }));

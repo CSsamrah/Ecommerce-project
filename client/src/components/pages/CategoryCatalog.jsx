@@ -398,7 +398,7 @@ const addProductToCart = (product) => {
     <Navbar />
     <div className="catalog">
       <div className="catalog_container">
-        <button className='secondhand_button' onClick={() => navigate('/secondhandCatalog')}>Second hand products</button>
+        {/* <button className='secondhand_button' onClick={() => navigate('/secondhand-category/:slug')}>Second hand products</button> */}
         <div className="products">
           {categoryData.map((product) => {
             const averageRating = getProductRating(product);
@@ -411,8 +411,8 @@ const addProductToCart = (product) => {
                   </div>
                   <div className="product_price">
                     <b>Rs.{product.price}</b>
-                    {/* <p>{product.condition}</p> */}
-                    {/* <p>{product.rental?"TRUE": "False"}</p> */}
+                    <p>{product.condition}</p>
+                    <p>{product.rental?"TRUE": "False"}</p>
                   </div>
                 </div>
 

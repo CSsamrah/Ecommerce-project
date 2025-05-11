@@ -239,6 +239,7 @@ const getAllRentals = asyncHandler(async (req, res) => {
     try {
         console.log("getAllRentals function called");
 
+        const rentalavailable= true;
         const query = `
             SELECT 
                 p.product_id as id,
@@ -246,9 +247,9 @@ const getAllRentals = asyncHandler(async (req, res) => {
                 p.price as price,
                 p.product_image as image,
                 p.description,
-                p.condition,
+                p.condition as condition,
                 p.stock_quantity,
-                p.rental_available,
+                p.rental_available as rental_,
                 r.rental_id,
                 r.rental_status,
                 r.rental_price as rental_price,
@@ -256,13 +257,13 @@ const getAllRentals = asyncHandler(async (req, res) => {
                 r.return_date
             FROM product p
             LEFT JOIN rental r ON p.product_id = r.product_id
-            WHERE p.rental_available = true
-            AND (r.rental_id IS NULL OR r.rental_status = 'Returned')
+            WHERE p.rental_available = $1
+            AND (r.rental_status IS NULL OR r.rental_status = 'Returned')
             LIMIT 50
         `;
         
         console.log("Executing query:", query);
-        const result = await pool.query(query);
+        const result = await pool.query(query, [rentalavailable]);
         console.log(`Query executed successfully. Retrieved ${result.rows.length} rental products`);
 
         const rentals = result.rows.map(rental => ({
@@ -273,7 +274,7 @@ const getAllRentals = asyncHandler(async (req, res) => {
             description: rental.description,
             condition: rental.condition,
             stock_quantity: rental.stock_quantity,
-            rental_available: rental.rental_available,
+            rental_available: rental.rental_,
             rental_id: rental.rental_id,
             rental_status: rental.rental_status,
             rental_price: rental.rental_price,

@@ -55,18 +55,18 @@ const RentalCatalog = () => {
   }, []);
 
   // Add this CSS-in-JS object for the title
-  const titleStyle = {
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    lineHeight: '1.3em',
-    maxHeight: '5.5em', // 2 lines * 1.2em line height
-    padding: '15px 0 0 10px',
-    fontWeight: '500'
-    // margin: '5px 0 0 0'
-  };
+  // const titleStyle = {
+  //   display: '-webkit-box',
+  //   WebkitLineClamp: 2,
+  //   WebkitBoxOrient: 'vertical',
+  //   overflow: 'hidden',
+  //   textOverflow: 'ellipsis',
+  //   lineHeight: '1.3em',
+  //   maxHeight: '5.5em', // 2 lines * 1.2em line height
+  //   padding: '15px 0 0 10px',
+  //   fontWeight: '500'
+  //   // margin: '5px 0 0 0'
+  // };
 
 
   const addRentalToCart = (rental) => {
@@ -113,32 +113,29 @@ const RentalCatalog = () => {
         <div className="catalog_container">
         <button className='secondhand_button' onClick={() => navigate('/rentalsecondhandCatalog')}>Second hand products</button>
           <div className="products">
-            {rentals.map((rental) => {
-              const averageRating = getRentalRating(rental);
+            {rentals.map((rent) => {
+              const averageRating = getRentalRating(rent);
 
               return (
-                <div className="product_card" key={rental.id}>
+                <div className="product_card" key={rent.id}>
                   {/* Product availability badge */}
                   {/* {rental.rental_available && (
                     <div className="availability-badge">Available for Rent</div>
                   )} */}
                   <div className="product_header">
-                    <div className="product_title" style={titleStyle} title={rental.title} onClick={() => navigateToRentalDetail(rental.id)}>
-                      {rental.title}
+                    <div className="product_title" title={rent.title} onClick={() => navigateToRentalDetail(rent.id)}>
+                      {rent.title}
                     </div>
                     <div className="product_price">
-                      <b>Rs.{rental.price}</b>
-                      {rental.rental_price && (
-                        <div className="rental-price-tag">
-                          Rs.{rental.rental_price}/day
-                        </div>
-                      )}
+                      <b>Rs.{rent.price}</b>
+                      <p>{rent.condition}</p>
+                      <p>{rent.rentalavailable ?"TRUE": "False"}</p>
                     </div>
                   </div>
 
                   <div className="product_body">
-                    <div className="pro_image" onClick={() => navigateToRentalDetail(rental.id)}>
-                      <img src={rental.image} alt={rental.title} />
+                    <div className="pro_image" onClick={() => navigateToRentalDetail(rent.id)}>
+                      <img src={rent.image} alt={rent.title} />
                     </div>
                   </div>
 
@@ -150,7 +147,7 @@ const RentalCatalog = () => {
                       <p>({typeof averageRating === 'number' ? averageRating.toFixed(1) : '0.0'})</p>
                     </div>
                     <div className="add_to_cart">
-                      <button className='add_to_cart_button' onClick={() => addRentalToCart(rental)}>
+                      <button className='add_to_cart_button' onClick={() => addRentalToCart(rent)}>
                         RENT NOW
                       </button>
                     </div>

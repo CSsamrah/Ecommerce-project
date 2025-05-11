@@ -295,8 +295,8 @@ useEffect(() => {
                     </div>
                     <div className="product_price">
                       <b>Rs.{product.price}</b>
-                      {/* <p>{product.condition}</p> */}
-                      {/* <p>{product.rental?"TRUE": "False"}</p> */}
+                      <p>{product.condition}</p>
+                      <p>{product.rental ?"TRUE": "False"}</p>
                     </div>
                   </div>
 

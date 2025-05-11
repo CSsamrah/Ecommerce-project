@@ -9,7 +9,7 @@ import './catalog.css';
 import SlidingCart from './slidingCart';
 
 
-const RentalCategoryCatalog = () => {
+const SecondhandRentalCategoryCatalog = () => {
     const { addToCart } = useCart();
     const navigate = useNavigate();
     const [isSlidingCartOpen, setSlidingCartOpen] = useState(false);
@@ -118,7 +118,7 @@ const addProductToCart = (product) => {
     <Navbar />
     <div className="catalog">
       <div className="catalog_container">
-        {/* <button className='secondhand_button' onClick={() => navigate('/secondhandCatalog')}>Second hand products</button> */}
+        <button className='secondhand_button' onClick={() => navigate('/secondhandCatalog')}>Second hand products</button>
         <div className="products">
           {rentalCategoryData.map((product) => {
             const averageRating = getProductRating(product);
@@ -170,4 +170,4 @@ const addProductToCart = (product) => {
 );
 };
 
-export default RentalCategoryCatalog;
+export default SecondhandRentalCategoryCatalog;

@@ -5,24 +5,9 @@ import axios from 'axios';
 import { heartOutline, heart, cartOutline, arrowBackOutline } from 'ionicons/icons';
 import ProductAuthentication from "./productAuthentication";  // Import the product authentication component
 import "./productDescription.css"; // Add styling if needed
+import { ShieldCheck, Star, ShoppingBag } from 'lucide-react';
 
-// Import images (same as Catalog.jsx)
-import image1 from "../images/chip.png";
-import image2 from "../images/gaming.png";
-import image3 from "../images/intelcorei7.png";
-import image4 from "../images/keyboard.png";
 
-//Product Details
-const products = [
-  { id: "p1", title: "GlossyBox Skincare: Deep Cleansing Cream", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "1500", image: image1 },
-  { id: "p2", title: "Glow Recipe: Blueberry Bounce Gentle Cleanser", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "2200", image: image2 },
-  { id: "p3", title: "Anua: Heartleaf Pore Control Cleansing Oil", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "2800", image: image3 },
-  { id: "p4", title: "COSRX: Oil-Free Ultra-Moisturizing Lotion (with Birch Sap)", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "1800", image: image4 },
-  { id: "p5", title: "Summer Fridays: Cloud Dew Oil-Free Gel Cream", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "3000", image: image4 },
-  { id: "p6", title: "Summer Fridays: Rich Cushion Cream, Ultra-Plumping", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "3500", image: image3 },
-  { id: "p7", title: "Glow Recipe: Watermelon Glow Pink Juice Moisturizer", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "2800", image: image2 },
-  { id: "p8", title: "Glow Recipe: Watermelon Glow Niacinamide Dew Drops", description: "The XYZ-500 Graphics Card delivers high-performance gaming and seamless multitasking. With 8GB of GDDR6 memory and a powerful cooling system, it ensures smooth graphics rendering even under heavy workloads. Its advanced architecture supports ray tracing for realistic lighting and shadows. The dual-fan design keeps temperatures low while maintaining quiet operation.", price: "3500", image: image1 },
-];
 
 
 // Rating Component Integrated Directly
@@ -115,6 +100,7 @@ const Rating = ({ addReview, closePopup }) => {
     );
 };
 
+
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -138,63 +124,57 @@ const ProductDetail = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        try {
-          const allProductsRes = await axios.get('http://localhost:3000/api/products/getAllProducts');
-          const foundProduct = allProductsRes.data.data.find(p => p.id === parseInt(id) || p.id === id);
+        console.log("Fetching product...");
+        // Simplified request - no authentication headers
+        console.log(`Fetching product of id: ${id}`);
+          const response = await axios.get(`http://localhost:3000/api/products/getProduct/${id}`);
           
-          if (foundProduct) {
-            setProduct(foundProduct);
-          } else {
-            const token = localStorage.getItem('token');
-            if (token) {
-              const productRes = await axios.get(
-                `http://localhost:3000/api/products/getProduct/${id}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              setProduct(productRes.data.data);
-            } else {
-              throw new Error("Product not found");
+              console.log("Specific Product Response received:", response.data);
+              console.log("1Current products state:", product)
+              
+              // Check if response has data property
+              if (response.data && (response.data.data || Array.isArray(response.data))) {
+                // Handle both possible response formats
+                const productsData = Array.isArray(response.data) ? response.data : 
+                                    (response.data.data ? response.data.data : []);
+                
+                  setProduct(productsData);
+                console.log("2Current products state:", product)
+                // console.log("The products are:", products);
+              } else {
+                console.error("Unexpected response format:", response.data);
+                setError("Invalid data format received from server");
+              }
+              
+              setLoading(false);
+            } catch (err) {
+              console.error("Error fetching the product:", err);
+              setError(err.message || "Failed to fetch the product");
+              setLoading(false);
             }
-          }
-        } catch (apiErr) {
-          const cachedProducts = JSON.parse(localStorage.getItem('cachedProducts') || '[]');
-          const cachedProduct = cachedProducts.find(p => p.id === parseInt(id) || p.id === id);
-          
-          if (cachedProduct) {
-            setProduct(cachedProduct);
-          } else {
-            throw new Error("Failed to load product data");
-          }
-        }
-        
-        const storedReviews = JSON.parse(localStorage.getItem(`reviews_${id}`)) || [];
-        setReviews(storedReviews);
-        
-      } catch (err) {
-        setError("Unable to load product details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+          };
+      
+          fetchData();
+        }, [id]);
+      
+        useEffect(() => {
+                console.log("3Current products state:", product);
+              }, [product]);
+      
+  // useEffect(() => {
+  //   if (reviews.length > 0) {
+  //     const avg = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+  //     setAverageRating(avg);
+  //   }
+  // }, [reviews]);
 
-    fetchData();
-  }, [id]);
-
-  useEffect(() => {
-    if (reviews.length > 0) {
-      const avg = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
-      setAverageRating(avg);
-    }
-  }, [reviews]);
-
-  const handleWishlist = () => {
-    if (!localStorage.getItem('token')) {
-      alert("Please log in to add items to your wishlist");
-      return;
-    }
-    setIsWishlisted(!isWishlisted);
-  };
+  // const handleWishlist = () => {
+  //   if (!localStorage.getItem('token')) {
+  //     alert("Please log in to add items to your wishlist");
+  //     return;
+  //   }
+  //   setIsWishlisted(!isWishlisted);
+  // };
 
   // const handleAddToCart = () => {
   //   if (!localStorage.getItem('token')) {
@@ -216,6 +196,69 @@ const ProductDetail = () => {
   // const handleWishlist = () => {
   //   setIsWishlisted(!isWishlisted);
   // };
+
+  // Define inline styles for the buttons
+  const buyNowButtonStyle = {
+    flex: '1',
+    minWidth: '150px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#e6b8b0', // Rose gold color from Samsung example
+    color: 'white',
+    fontSize: '16px',
+    fontWeight: '500',
+    border: 'none',
+    borderRadius: '25px', // Rounded corners like in the Samsung example
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(230, 184, 176, 0.3)'
+  };
+
+  // Style for when the item is in cart
+  const inCartButtonStyle = {
+    ...buyNowButtonStyle,
+    background: '#c2c2c2' // Grey color for "Added to Cart" state
+  };
+
+  // Style for circular buttons (Authentication and Review)
+  const reviewButtonStyle = {
+    flex: '1',
+    minWidth: '150px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'transparent',
+    color: '#d0d0d0',
+    fontSize: '16px',
+    fontWeight: '500',
+    border: '1px solid #d0d0d0',
+    borderRadius: '25px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+
+  };
+
+  const authButtonStyle = {
+    flex: '1',
+    minWidth: '150px',
+    width: '400px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'transparent',
+    color: '#d0d0d0',
+    fontSize: '16px',
+    fontWeight: '500',
+    border: '1px solid #d0d0d0',
+    borderRadius: '25px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+
+  };
 
   const handleAddToCart = () => {
     if (isInCart) {
@@ -307,37 +350,67 @@ const ProductDetail = () => {
   );
 
   return (
-    <div className="product_detail_page">
-      <div className="product-detail">
-        <div className="product-container">
-          <div className="back-button" onClick={() => navigate(-1)}><IonIcon icon={arrowBackOutline} /></div>
+    <div className="PD_product_detail_page">
+      <div className="PD_product-detail">
+        <div className="PD_product-container">
+          <div className="PD_back-button" onClick={() => navigate(-1)}><IonIcon icon={arrowBackOutline} /></div>
           {/* <img src={product.image} alt={product.name} className="product-image" /> */}
           <img 
-            className="product-image"
+            className="PD_product-image"
             src={product.image || product.product_image || '/images/product-placeholder.jpg'} 
             alt={product.name}
             onError={(e) => e.target.src = '/images/product-placeholder.jpg'}
           />
-          <div className="product-info">
+          <div className="PD_product-info">
             <h2>{product.name}</h2>
-            <p className="about-product">{product.description}</p>
-
+            <p className="PD_about-product">{product.description}</p>
             {/* Display Average Rating */}
-            {/* <div className="average-rating">
+            <div className="average-rating">
               <div>{renderStars(Math.round(averageRating))} ({averageRating.toFixed(1)})</div>
-            </div> */}
+            </div>
             <div>
-              <h3 className="product-price">Rs. {product.price.toLocaleString()}</h3>
+              <h3 className="PD_product-price">Rs. {product.price.toLocaleString()}</h3>
               {product.originalPrice && (
-                <span className="original-price">Rs. {product.originalPrice.toLocaleString()}</span>
+                <span className="PD_original-price">Rs. {product.originalPrice.toLocaleString()}</span>
               )}
             </div>
-            <div className="product_detail_buttons">
-              <button className={`cart-button ${isInCart ? 'in-cart':''}`} onClick={handleAddToCart}>Add To Cart{isInCart?'Added to Cart':'Add to Cart'}</button>
-              <div className="authentication_button">
+            {/* <div className="PD_product_detail_buttons">
+              <button className={`PD_cart-button ${isInCart ? 'in-cart':''}`} onClick={handleAddToCart}>{isInCart?'Added to Cart':'Add to Cart'}</button>
+              <div className="PD_authentication_button">
                 <ProductAuthentication productId={id} />
               </div>
-              <button className="cart-button" onClick={toggleRatingPopup}>Review Product</button>
+              <button className="PD_cart-button" onClick={toggleRatingPopup}>Review Product</button>
+            </div> */}
+            
+            <div className="PD_product_detail_buttons">
+              <button 
+                className={`PD_cart-button ${isInCart ? 'in-cart':''}`} 
+                onClick={handleAddToCart}
+                style={isInCart ? inCartButtonStyle : buyNowButtonStyle}
+              >
+                {isInCart ? 'Added to Cart' : 'Buy now'}
+              </button>
+
+              <button 
+                onClick={toggleRatingPopup} 
+                aria-label="Review Product"
+                style={reviewButtonStyle}
+                className="PD_review-button"
+              >
+                {/* <Star size={20} color="#777" /> */}
+                Review Product
+              </button>
+              
+              <div className="PD_authentication_button">
+                <button 
+                  aria-label="Authenticate Product"
+                  style={authButtonStyle}
+                >
+                  {/* <ShieldCheck size={20} color="#777" /> */}
+                  Authenticate Product
+                </button>
+              </div>
+              
             </div>
           </div>
         </div>
@@ -350,7 +423,7 @@ const ProductDetail = () => {
           <h1>Client Says</h1>
         </div>
 
-        {/* Display Individual Reviews *
+        {/* Display Individual Reviews 
         <div className="review_box_container">
           {reviews.length ? (
             reviews.map((review, index) => (
@@ -371,15 +444,12 @@ const ProductDetail = () => {
             <p>No reviews yet.</p>
           )}     
         </div>
-      </div> */}
+      </div>  */}
 
       <section id="reviews" className="reviews-section">
-        <div className="section-header">
-          <h2>Customer Reviews</h2>
-          <div className="overall-rating">
-            {renderStars(averageRating)}
-            <span>{averageRating.toFixed(1)} out of 5</span>
-          </div>
+        <div className="review_heading">
+          <span>Customer Reviews</span>
+          <h1>Client Says</h1>
         </div>
 
       {/* Rating Popup */}
@@ -388,18 +458,20 @@ const ProductDetail = () => {
       )}
 
       {reviews.length > 0 ? (
-                <div className="reviews-list">
+                <div className="review_box_container">
                   {reviews.map((review, index) => (
-                    <div key={index} className="review-card">
-                      <div className="reviewer-info">
+                    <div key={index} className="review_box">
+                      <div className="box_top">
                         <div className="avatar">{review.username.charAt(0).toUpperCase()}</div>
                         <div>
                           <h4>{review.username}</h4>
                           <time>{new Date(review.date).toLocaleDateString()}</time>
                         </div>
+                        <div className="review-rating">{renderStars(review.rating)}</div>
                       </div>
-                      <div className="review-rating">{renderStars(review.rating)}</div>
+                      <div className="box_body">    
                       {review.content && <p className="review-content">"{review.content}"</p>}
+                      </div>
                     </div>
       ))}
       </div>
