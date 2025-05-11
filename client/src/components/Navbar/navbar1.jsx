@@ -424,6 +424,7 @@ import {
     Tabs,
     Tab,
 } from '@mui/material';
+
 import {
     Menu as MenuIcon,
     Search as SearchIcon,
@@ -433,11 +434,12 @@ import {
     ExpandLess,
     ExpandMore,
 } from '@mui/icons-material';
+
 import { styled, alpha, createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBookOpen, FaThLarge, FaPhoneAlt } from "react-icons/fa";
 import { useCart } from '../pages/cartContext';
-import axios from 'axios';
+import { useAuth } from '../pages/AuthProvider'; // Make sure path is correct
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -494,48 +496,45 @@ LinkTab.propTypes = {
 
 function NavTabs({shopOpen, setShopOpen}) {
     const [value, setValue] = React.useState(0);
+    const { user } = useAuth();
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
 
     const handleShopClick = () => {
         setShopOpen(!shopOpen);
-        setValue(!value); // Toggle value to potentially manage other tabs if needed
+    };
+
+    // Function to determine dashboard URL based on user role
+    const getDashboardUrl = () => {
+        if (!user) return "/sign"; // If not logged in, go to sign in
+        
+        switch (user.role?.toLowerCase()) {
+            case 'admin':
+                return "/adminAnalytics";
+            case 'seller':
+                return "/analytics"; // Using your existing seller dashboard route
+            case 'buyer':
+                return "/orderhistory"; // Using your existing buyer dashboard route
+            default:
+                return "/sign";
+        }
     };
 
     return (
         <Box sx={{ width: '100%' }}>
             <Tabs
                 value={value}
-                onChange={() => {}} // Prevent default tab change behavior
+                onChange={handleChange}
                 aria-label="nav tabs example"
                 role="navigation"
                 sx={{ display: { xs: 'none', md: 'flex' } }}
             >
                 <LinkTab label="Home" to="/" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-                <LinkTab label="Dashboard" to="/dashboard" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-                <LinkTab label="Selling" to="/catalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-                <LinkTab label="Rental" to="/rentalCatalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
-
-                {/* <Tab
-                    label="Shop"
-                    onClick={handleShopClick}
-                    sx={{ fontWeight: '800', fontFamily: 'Inter', display: 'flex', alignItems: 'center', gap: '5px' }}
-                    icon={shopOpen ? <ExpandLess /> : <ExpandMore />}
-                    iconPosition="end"
-                /> */}
+                <LinkTab label="Dashboard" to={getDashboardUrl()} sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
+                <LinkTab label="Shop" to="/catalog" sx={{ fontWeight: '800', fontFamily: 'Inter' }} />
             </Tabs>
-            {/* {shopOpen && (
-                <Box sx={{ display: { xs: 'none', md: 'flex' }, position: 'absolute', top: '64px', left: '50%', transform: 'translateX(-50%)', bgcolor: 'white', boxShadow: 1, zIndex: 10 }}>
-                    <Box sx={{ display: 'flex' }}>
-                        <List disablePadding>
-                            <ListItem button component={Link} to="/shop/selling" onClick={() => setShopOpen(false)}>
-                                <ListItemText primary="Selling" />
-                            </ListItem>
-                            <ListItem button component={Link} to="/shop/rental" onClick={() => setShopOpen(false)}>
-                                <ListItemText primary="Rental" />
-                            </ListItem>
-                        </List>
-                    </Box>
-                </Box>
-            )} */}
         </Box>
     );
 }
@@ -562,6 +561,8 @@ const theme = createTheme({
 
 export default function PrimarySearchAppBar() {
     const { cartItems } = useCart();
+    const { user, logout } = useAuth(); // Include logout function
+    const navigate = useNavigate();
     const cart_items = cartItems ? cartItems.length : 0;
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -576,107 +577,25 @@ export default function PrimarySearchAppBar() {
     const [secondHandSellingOpen, setSecondHandSellingOpen] = useState(false);
     const [newRentalOpen, setNewRentalOpen] = useState(false);
     const [secondHandRentalOpen, setSecondHandRentalOpen] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // Fetch categories on component mount
-    useEffect(() => {
-        const fetchCategories = async () => {
-          try {
-            console.log("Fetching categories...");
-            // Simplified request - no authentication headers
-            const response = await axios.get("http://localhost:3000/api/categories/getAllCategories");
-            
-            console.log("Response received:", response.data);
-            // console.log("1Current products state:", products)
-            
-            // Check if response has data property
-            if (response.data && (response.data.data || Array.isArray(response.data))) {
-              // Handle both possible response formats
-              const categoriesData = Array.isArray(response.data) ? response.data : 
-                                  (response.data.data ? response.data.data : []);
-              
-              setCategories(categoriesData);
-            //   console.log("2Current products state:", products)
-              // console.log("The products are:", products);
-            } else {
-              console.error("Unexpected response format:", response.data);
-              setError("Invalid data format received from server");
-            }
-            
-            setLoading(false);
-          } catch (err) {
-            console.error("Error fetching categories:", err);
-            setError(err.message || "Failed to fetch categories");
-            setLoading(false);
-          }
-        };
-    
-        fetchCategories();
-      }, []);
-    // useEffect(() => {
-    //     const fetchCategories = async () => {
-    //         try {
-    //             setLoading(true);
-    //             const response = await axios.get("http://localhost:3000/api/categories/getAllCategories");
-    //             console.log("Full API response:", response.data);
-    
-    //             // Directly access the categories array from response.data
-    //             const receivedCategories = response.data?.categories || [];
-    
-    //             if (receivedCategories.length > 0) {
-    //                 setCategories(receivedCategories);
-    //                 setError(null);
-    //                 console.log("Categories set:", receivedCategories);
-    //             } else {
-    //                 console.warn("Received empty categories array");
-    //                 setError("No categories found");
-    //                 setCategories([]); // Explicitly set empty array
-    //             }
-    //         } catch (error) {
-    //             console.error("API Error:", error);
-    //             setError(error.message || "Failed to fetch categories");
-    //             setCategories([]); // Clear on error
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //     fetchCategories();
-    // }, []);
-    useEffect(() => {
-        console.log("Current categories state:", categories);
-      }, [categories]);
-    // useEffect(() => {
-    //     const fetchCategories = async () => {
-    //         try {
-    //             setLoading(true);
-    //             const response = await axios.get('http://localhost:3000/api/categories/getAllCategories');
-    //             console.log("Categories response:", response.data);
-    //             if (response.data.categories) {
-    //                 setCategories(response.data.categories);
-    //                 setError(null);
-    //             } else {
-    //                 throw new Error("Unexpected response format");
-    //             }
-    //             // setCategories(response.data.categories);
-    //             // console.log("categories:", categories);
-    //             // console.log("set categories",setCategories);
-    //             // setError(null);
-    //         } catch (error) {
-    //             console.error("Error fetching categories:", error);
-    //             setError(err.message || "Failed to fetch categories");
-    //             // setLoading(false);
-    //         }finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //     fetchCategories();
-    // }, []);
-
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+    // Function to determine dashboard URL based on user role - same as in NavTabs
+    const getDashboardUrl = () => {
+        if (!user) return "/sign"; // If not logged in, go to sign in
+        
+        switch (user.role?.toLowerCase()) {
+            case 'admin':
+                return "/adminAnalytics";
+            case 'seller':
+                return "/analytics";
+            case 'buyer':
+                return "/orderhistory";
+            default:
+                return "/sign";
+        }
+    };
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -731,6 +650,12 @@ export default function PrimarySearchAppBar() {
         setSecondHandRentalOpen(!secondHandRentalOpen);
     };
 
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+        handleMenuClose();
+    };
+
     const menuId = 'primary-search-account-menu';
     const renderMenu = (
         <Menu
@@ -748,8 +673,18 @@ export default function PrimarySearchAppBar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Sign Up</MenuItem>
-            <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Log In</MenuItem>
+            {!user ? (
+                <>
+                    <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Sign Up</MenuItem>
+                    <MenuItem onClick={handleMenuClose} component={Link} to="/sign">Log In</MenuItem>
+                </>
+            ) : (
+                <>
+                    <MenuItem onClick={handleMenuClose} component={Link} to={getDashboardUrl()}>Dashboard</MenuItem>
+                    <MenuItem onClick={handleMenuClose} component={Link} to="/profile">Profile</MenuItem>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </>
+            )}
         </Menu>
     );
 
@@ -801,56 +736,145 @@ export default function PrimarySearchAppBar() {
             sx={{ '& .MuiDrawer-paper': { width: 300 } }}
         >
             <List>
-                <ListItem button component={Link} to="/">
+                <ListItem button component={Link} to="/" onClick={handleDrawerToggle}>
                     <ListItemText primary="Home" />
                 </ListItem>
-                <ListItem button component={Link} to="/dashboard">
+                <ListItem button component={Link} to={getDashboardUrl()} onClick={handleDrawerToggle}>
                     <ListItemText primary="Dashboard" />
                 </ListItem>
                 
-                {/* Selling Section */}
-                <ListItem button onClick={handleSellingMobileClick}>
-                    <ListItemText primary="Selling" />
-                    {sellingMobileOpen ? <ExpandLess /> : <ExpandMore />}
+                {/* Shop main category */}
+                <ListItem button onClick={handleShopMobileClick}>
+                    <ListItemText primary="Shop" />
+                    {shopMobileOpen ? <ExpandLess /> : <ExpandMore />}
                 </ListItem>
-                <Collapse in={sellingMobileOpen} timeout="auto" unmountOnExit>
+                <Collapse in={shopMobileOpen} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
-                        {categories && categories.map(category => (
-                            <ListItem 
-                                key={`selling-${category.slug}`}
-                                button 
-                                component={Link} 
-                                to={`/category/${category.slug}`}
-                                sx={{ pl: 4 }}
-                                onClick={handleDrawerToggle}
-                            >
-                                <ListItemText primary={category.name} />
-                            </ListItem>
-                        ))}
+                        {/* Selling category */}
+                        <ListItem button onClick={handleSellingMobileClick} sx={{ pl: 4 }}>
+                            <ListItemText primary="Selling" />
+                            {sellingMobileOpen ? <ExpandLess /> : <ExpandMore />}
+                        </ListItem>
+                        <Collapse in={sellingMobileOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                                {/* New subcategory under Selling */}
+                                <ListItem button onClick={handleNewSellingClick} sx={{ pl: 8 }}>
+                                    <ListItemText primary="New" />
+                                    {newSellingOpen ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
+                                <Collapse in={newSellingOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        <ListItem button component={Link} to="/shop/selling/new/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Computer Hardware" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/new/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Networking Components" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/new/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Peripherals and Accessories" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/new/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Storage and Backup" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/new/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Power and Electrical" />
+                                        </ListItem>
+                                    </List>
+                                </Collapse>
+                                
+                                {/* Second Hand subcategory under Selling */}
+                                <ListItem button onClick={handleSecondHandSellingClick} sx={{ pl: 8 }}>
+                                    <ListItemText primary="Second Hand" />
+                                    {secondHandSellingOpen ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
+                                <Collapse in={secondHandSellingOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Computer Hardware" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Networking Components" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Peripherals and Accessories" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Storage and Backup" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/selling/second-hand/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Power and Electrical" />
+                                        </ListItem>
+                                    </List>
+                                </Collapse>
+                            </List>
+                        </Collapse>
+                        
+                        {/* Rental category */}
+                        <ListItem button onClick={handleRentalMobileClick} sx={{ pl: 4 }}>
+                            <ListItemText primary="Rental" />
+                            {rentalMobileOpen ? <ExpandLess /> : <ExpandMore />}
+                        </ListItem>
+                        <Collapse in={rentalMobileOpen} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                                {/* New subcategory under Rental */}
+                                <ListItem button onClick={handleNewRentalClick} sx={{ pl: 8 }}>
+                                    <ListItemText primary="New" />
+                                    {newRentalOpen ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
+                                <Collapse in={newRentalOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        <ListItem button component={Link} to="/shop/rental/new/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Computer Hardware" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/new/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Networking Components" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/new/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Peripherals and Accessories" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/new/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Storage and Backup" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/new/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Power and Electrical" />
+                                        </ListItem>
+                                    </List>
+                                </Collapse>
+                                
+                                {/* Second Hand subcategory under Rental */}
+                                <ListItem button onClick={handleSecondHandRentalClick} sx={{ pl: 8 }}>
+                                    <ListItemText primary="Second Hand" />
+                                    {secondHandRentalOpen ? <ExpandLess /> : <ExpandMore />}
+                                </ListItem>
+                                <Collapse in={secondHandRentalOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category1" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Computer Hardware" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category2" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Networking Components" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category3" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Peripherals and Accessories" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category4" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Storage and Backup" />
+                                        </ListItem>
+                                        <ListItem button component={Link} to="/shop/rental/second-hand/category5" sx={{ pl: 12 }} onClick={handleDrawerToggle}>
+                                            <ListItemText primary="Power and Electrical" />
+                                        </ListItem>
+                                    </List>
+                                </Collapse>
+                            </List>
+                        </Collapse>
                     </List>
                 </Collapse>
-                
-                {/* Rental Section */}
-                <ListItem button onClick={handleRentalMobileClick}>
-                    <ListItemText primary="Rental" />
-                    {rentalMobileOpen ? <ExpandLess /> : <ExpandMore />}
-                </ListItem>
-                <Collapse in={rentalMobileOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        {categories && categories.map(category => (
-                            <ListItem 
-                                key={`rental-${category.slug}`}
-                                button 
-                                component={Link} 
-                                to={`/rental-category/${category.slug}`}
-                                sx={{ pl: 4 }}
-                                onClick={handleDrawerToggle}
-                            >
-                                <ListItemText primary={category.name} />
-                            </ListItem>
-                        ))}
-                    </List>
-                </Collapse>
+
+                {user && (
+                    <ListItem button onClick={handleLogout}>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                )}
             </List>
         </Drawer>
     );
@@ -872,33 +896,26 @@ export default function PrimarySearchAppBar() {
                             <MenuIcon />
                         </IconButton>
                         <Box sx={{ flexGrow: 1 }}>
-                            <NavTabs />
+                            <NavTabs shopOpen={shopOpen} setShopOpen={setShopOpen} />
                         </Box>
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography
                                 variant="h4"
                                 noWrap
-                                component="div"
+                                component={Link}
+                                to="/"
                                 sx={{
                                     display: 'flex',
                                     fontWeight: '600',
                                     color: 'white',
                                     flexGrow: 1,
                                     justifyContent: { xs: 'center', md: 'flex-start' },
+                                    textDecoration: 'none'
                                 }}
                             >
                                 TechWare
                             </Typography>
                         </Box>
-                        {/* <Search>
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }}
-                            />
-                        </Search> */}
                         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                             <Box onMouseLeave={() => setShopOpen(false)}>
                                 {shopOpen && (
@@ -914,7 +931,7 @@ export default function PrimarySearchAppBar() {
                                     </Box>
                                 )}
                             </Box>
-                            <Link to="/cart" style={{ textDecoration: 'none' }}>
+                            <Link to="/cart" style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <IconButton aria-label="cart">
                                     <Badge badgeContent={cart_items} color="secondary">
                                         <ShoppingCartIcon />

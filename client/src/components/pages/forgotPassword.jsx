@@ -71,7 +71,7 @@ const ForgotPassword = () => {
             setOtp(newOtp);
 
             if (value && index < 5) {
-                const nextInput = document.getElementById(`otp-input-${index + 1}`);
+                const nextInput = document.getElementById(`forgot-password-otp-input-${index + 1}`);
                 if (nextInput) nextInput.focus();
             }
         }
@@ -133,180 +133,203 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="forgot-password-container" style={{ maxWidth: '400px', margin: '2rem auto', padding: '2rem', border: '1px solid #ddd', borderRadius: '8px' }}>
-            {step === 1 ? (
-                <div className="email-step">
-                    <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Forgot Password</h2>
-                    <p style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Enter your email to receive a password reset OTP</p>
-                    
-                    {error && <div style={{ color: 'red', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-                    {success && <div style={{ color: 'green', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{success}</div>}
-                    
-                    <form onSubmit={handleEmailSubmit}>
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem' }}>Email Address</label>
-                            <input 
-                                type="email" 
-                                id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
+        <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100vh',
+            backgroundColor: 'midnightblue',
+            padding: '1rem',
+            width: "1400px" ,
+            
+        }}>
+            <div className="forgot-password-main-container" style={{ 
+                width: '100%',
+                maxWidth: '400px', 
+                padding: '2rem', 
+                border: '1px solid #ddd', 
+                borderRadius: '8px',
+                backgroundColor: 'white',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}>
+                {step === 1 ? (
+                    <div className="forgot-password-email-step">
+                        <h2 className="forgot-password-title" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Forgot Password</h2>
+                        <p className="forgot-password-instructions" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Enter your email to receive a password reset OTP</p>
                         
-                        <button 
-                            type="submit" 
-                            disabled={isLoading}
-                            style={{ 
-                                width: '100%', 
-                                padding: '0.75rem', 
-                                backgroundColor: '#2563eb', 
-                                color: 'white', 
-                                border: 'none', 
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            {isLoading ? 'Sending OTP...' : 'Send OTP'}
-                        </button>
+                        {error && <div className="forgot-password-error-message" style={{ color: 'red', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+                        {success && <div className="forgot-password-success-message" style={{ color: 'green', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{success}</div>}
                         
-                        <div style={{ textAlign: 'center' }}>
-                            Remember your password? <a href="/login" style={{ color: '#2563eb', textDecoration: 'none' }}>Login here</a>
-                        </div>
-                    </form>
-                </div>
-            ) : (
-                <div className="otp-step">
-                    <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Reset Password</h2>
-                    <p style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Enter the 6-digit OTP sent to {email}</p>
-                    
-                    {terminalOtp && (
-                        <div style={{ 
-                            backgroundColor: '#f0f0f0', 
-                            padding: '0.75rem', 
-                            marginBottom: '1rem',
-                            borderRadius: '4px',
-                            textAlign: 'center'
-                        }}>
-                            <p style={{ margin: 0 }}>Development OTP: <strong>{terminalOtp}</strong></p>
-                        </div>
-                    )}
-                    
-                    {error && <div style={{ color: 'red', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-                    {success && <div style={{ color: 'green', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{success}</div>}
-                    
-                    <form onSubmit={handlePasswordReset}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            {[0, 1, 2, 3, 4, 5].map((index) => (
-                                <input
-                                    key={index}
-                                    id={`otp-input-${index}`}
-                                    type="text"
-                                    inputMode="numeric"
-                                    maxLength={1}
-                                    value={otp[index]}
-                                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                        <form className="forgot-password-email-form" onSubmit={handleEmailSubmit}>
+                            <div className="forgot-password-email-field" style={{ marginBottom: '1.5rem' }}>
+                                <label htmlFor="forgot-password-email" style={{ display: 'block', marginBottom: '0.5rem' }}>Email Address</label>
+                                <input 
+                                    type="email" 
+                                    id="forgot-password-email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    style={{ 
-                                        width: '2.5rem', 
-                                        height: '2.5rem', 
-                                        textAlign: 'center',
-                                        fontSize: '1rem',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '4px'
-                                    }}
+                                    style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
                                 />
-                            ))}
-                        </div>
+                            </div>
+                            
+                            <button 
+                                type="submit" 
+                                className="forgot-password-send-otp-button"
+                                disabled={isLoading}
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '0.75rem', 
+                                    backgroundColor: '#2563eb', 
+                                    color: 'white', 
+                                    border: 'none', 
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem',
+                                    marginBottom: '1rem'
+                                }}
+                            >
+                                {isLoading ? 'Sending OTP...' : 'Send OTP'}
+                            </button>
+                            
+                            <div className="forgot-password-login-redirect" style={{ textAlign: 'center' }}>
+                                Remember your password? <a href="/login" style={{ color: '#2563eb', textDecoration: 'none' }}>Login here</a>
+                            </div>
+                        </form>
+                    </div>
+                ) : (
+                    <div className="forgot-password-otp-step">
+                        <h2 className="forgot-password-reset-title" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Reset Password</h2>
+                        <p className="forgot-password-otp-instructions" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Enter the 6-digit OTP sent to {email}</p>
                         
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label htmlFor="newPassword" style={{ display: 'block', marginBottom: '0.5rem' }}>New Password</label>
-                            <input
-                                type="password"
-                                id="newPassword"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label htmlFor="confirmPassword" style={{ display: 'block', marginBottom: '0.5rem' }}>Confirm Password</label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        
-                        <button 
-                            type="submit" 
-                            disabled={isLoading}
-                            style={{ 
-                                width: '100%', 
+                        {terminalOtp && (
+                            <div className="forgot-password-dev-otp" style={{ 
+                                backgroundColor: '#f0f0f0', 
                                 padding: '0.75rem', 
-                                backgroundColor: '#2563eb', 
-                                color: 'white', 
-                                border: 'none', 
+                                marginBottom: '1rem',
                                 borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            {isLoading ? 'Resetting Password...' : 'Reset Password'}
-                        </button>
+                                textAlign: 'center'
+                            }}>
+                                <p style={{ margin: 0 }}>Development OTP: <strong>{terminalOtp}</strong></p>
+                            </div>
+                        )}
                         
-                        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                            Didn't receive OTP? 
+                        {error && <div className="forgot-password-otp-error" style={{ color: 'red', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+                        {success && <div className="forgot-password-otp-success" style={{ color: 'green', padding: '0.5rem', marginBottom: '1rem', textAlign: 'center' }}>{success}</div>}
+                        
+                        <form className="forgot-password-reset-form" onSubmit={handlePasswordReset}>
+                            <div className="forgot-password-otp-inputs" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                {[0, 1, 2, 3, 4, 5].map((index) => (
+                                    <input
+                                        key={index}
+                                        id={`forgot-password-otp-input-${index}`}
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={1}
+                                        value={otp[index]}
+                                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                                        required
+                                        style={{ 
+                                            width: '2.5rem', 
+                                            height: '2.5rem', 
+                                            textAlign: 'center',
+                                            fontSize: '1rem',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '4px'
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            
+                            <div className="forgot-password-new-password-field" style={{ marginBottom: '1.5rem' }}>
+                                <label htmlFor="forgot-password-new-password" style={{ display: 'block', marginBottom: '0.5rem' }}>New Password</label>
+                                <input
+                                    type="password"
+                                    id="forgot-password-new-password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required
+                                    minLength={6}
+                                    style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
+                                />
+                            </div>
+                            
+                            <div className="forgot-password-confirm-password-field" style={{ marginBottom: '1.5rem' }}>
+                                <label htmlFor="forgot-password-confirm-password" style={{ display: 'block', marginBottom: '0.5rem' }}>Confirm Password</label>
+                                <input
+                                    type="password"
+                                    id="forgot-password-confirm-password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                    minLength={6}
+                                    style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}
+                                />
+                            </div>
+                            
                             <button 
-                                type="button" 
-                                onClick={handleEmailSubmit}
+                                type="submit" 
+                                className="forgot-password-reset-button"
+                                disabled={isLoading}
                                 style={{ 
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#2563eb',
+                                    width: '100%', 
+                                    padding: '0.75rem', 
+                                    backgroundColor: '#2563eb', 
+                                    color: 'white', 
+                                    border: 'none', 
+                                    borderRadius: '4px',
                                     cursor: 'pointer',
-                                    padding: '0 0.25rem',
-                                    fontSize: '1rem'
+                                    fontSize: '1rem',
+                                    marginBottom: '1rem'
                                 }}
                             >
-                                Resend OTP
+                                {isLoading ? 'Resetting Password...' : 'Reset Password'}
                             </button>
-                        </div>
-                        
-                        <div style={{ textAlign: 'center' }}>
-                            <button 
-                                type="button" 
-                                onClick={() => {
-                                    setStep(1);
-                                    setError('');
-                                    setSuccess('');
-                                    setOtp(['', '', '', '', '', '']);
-                                }}
-                                style={{ 
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#64748b',
-                                    cursor: 'pointer',
-                                    fontSize: '0.875rem'
-                                }}
-                            >
-                                ← Back to email entry
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+                            
+                            <div className="forgot-password-resend-otp" style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                                Didn't receive OTP? 
+                                <button 
+                                    type="button" 
+                                    className="forgot-password-resend-otp-button"
+                                    onClick={handleEmailSubmit}
+                                    style={{ 
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#2563eb',
+                                        cursor: 'pointer',
+                                        padding: '0 0.25rem',
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    Resend OTP
+                                </button>
+                            </div>
+                            
+                            <div className="forgot-password-back-to-email" style={{ textAlign: 'center' }}>
+                                <button 
+                                    type="button" 
+                                    className="forgot-password-back-button"
+                                    onClick={() => {
+                                        setStep(1);
+                                        setError('');
+                                        setSuccess('');
+                                        setOtp(['', '', '', '', '', '']);
+                                    }}
+                                    style={{ 
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#64748b',
+                                        cursor: 'pointer',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    ← Back to email entry
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -297,7 +297,7 @@ const HomeStart = () => {
 </svg>
         </div>
         <h3>Secure Payment Gateway</h3>
-        <p>PayPro integration with multiple options</p>
+        <p>PayFast integration with multiple options</p>
       </div>
 
       <div className="feature-box fade-in-top">

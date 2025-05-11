@@ -1,24 +1,30 @@
 .admin-analytics-container {
     padding: 40px;
-    width: 90%;
-    max-width: 1200px;
-    background-color: transparent;
+    padding-top: 40px; 
+    padding-left: 260px; 
+    width: 100%;
+    max-width: 1500px;
+    background-color: #2A4E61;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
     overflow: hidden;
+    margin-left: auto; 
+    margin-right: auto;
+
 }
 
 .analytics-header {
     display: flex;
     align-items: center;
     margin-bottom: 30px;
+    color: rgb(24, 161, 148);
 }
 
 .header-icon {
     margin-right: 15px;
-    color: #FF9F1C;
+    color: rgb(24, 161, 148);
     animation: sparkle 2s infinite;
 }
 
@@ -34,18 +40,20 @@
     color: #fff;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     margin: 10px 0;
-    background: linear-gradient(45deg, #FF9F1C, #FF006E);
+    background: linear-gradient(45deg, #ec907f, rgb(24, 161, 148));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .stats-summary {
+
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 30px;
     width: 100%;
     margin-bottom: 30px;
+    
 }
 
 .stat-card {
@@ -66,18 +74,18 @@
 }
 
 .stat-card svg {
-    color: #FF006E;
+    color: rgb(24, 161, 148);
     margin-right: 15px;
 }
 
 .stat-content {
-    text-align: left;
+    text-align: center;
 }
 
 .stat-card h3 {
     font-size: 14px;
     margin: 0;
-    color: #666;
+    color: rgb(24, 161, 148);
 }
 
 .stat-value {
@@ -92,6 +100,7 @@
     justify-content: center;
     margin-bottom: 20px;
     gap: 15px;
+    padding-left: 140px; 
 }
 
 .chart-toggle-btn {
@@ -113,8 +122,8 @@
 }
 
 .chart-toggle-btn.active {
-    background: #FF006E;
-    box-shadow: 0 4px 8px rgba(255, 0, 110, 0.3);
+    background: rgb(24, 161, 148);
+    box-shadow: 0 4px 8px #e59f93;
 }
 
 .chart-toggle-btn svg {
@@ -122,12 +131,14 @@
 }
 
 .chart-container {
+    padding-left: 140px; 
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 40px;
     margin-top: 20px;
     width: 100%;
+    max-width: calc(100% - 20px); 
 }
 
 .chart-card {
@@ -149,7 +160,7 @@
     left: 0;
     width: 100%;
     height: 5px;
-    background: linear-gradient(90deg, #FF9F1C, #FF006E, #3A86FF);
+    background: linear-gradient(90deg, #FF9F1C, #e59f93, rgb(24, 161, 148));
 }
 
 .chart-card h3 {
@@ -189,7 +200,7 @@
 }
 
 .fun-fact-box svg {
-    color: #FF9F1C;
+    color: rgb(24, 161, 148);
     margin-right: 15px;
     flex-shrink: 0;
 }
@@ -202,10 +213,9 @@
 
 .fun-fact-header {
     font-weight: bold;
-    color: #FF006E;
+    color: rgb(24, 161, 148);
 }
 
-/* Loading animation */
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -219,7 +229,7 @@
     height: 50px;
     border: 5px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top-color: #FF006E;
+    border-top-color: rgb(24, 161, 148);
     animation: spin 1s ease-in-out infinite;
 }
 
@@ -239,7 +249,6 @@
     50% { opacity: 0.7; }
 }
 
-/* Error message styling */
 .error-message {
     background: rgba(255, 255, 255, 0.9);
     padding: 30px;
@@ -256,7 +265,7 @@
 
 .retry-button {
     margin-top: 20px;
-    background: #FF006E;
+    background: #df8d7f;
     color: white;
     border: none;
     padding: 10px 25px;
@@ -271,7 +280,6 @@
     transform: scale(1.05);
 }
 
-/* Animation classes */
 .animated {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
@@ -292,19 +300,18 @@
     }
 }
 
-/* Confetti animation */
 .confetti {
     position: absolute;
     width: 10px;
     height: 10px;
-    background: #FF9F1C;
+    background: rgb(24, 161, 148);
     top: -10px;
     animation: confetti-fall 4s ease-in-out forwards;
     z-index: 1;
 }
 
 .confetti:nth-child(4n) {
-    background: #FF006E;
+    background: rgb(24, 161, 148);
     width: 8px;
     height: 8px;
 }
@@ -332,7 +339,7 @@
     }
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
     .stats-summary {
         flex-direction: column;
@@ -364,3 +371,53 @@
         margin-bottom: 10px;
     }
 }
+.revenue-summary {
+    margin-bottom: 25px;
+    padding-top: 30px;
+    padding-left: 120px;
+  }
+  
+  .revenue-card {
+    
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .revenue-card h3 {
+    color: rgb(24, 161, 148);
+    margin-top: 0;
+    margin-bottom: 20px;
+
+    font-size: 18px;
+  }
+  
+  .revenue-stats {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .revenue-stat {
+    flex: 1;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 100px;
+  }
+  
+  .stat-label {
+    display: block;
+    font-size: 14px;
+    color: #e59f93;
+    margin-bottom: 5px;
+  }
+  
+  .stat-amount {
+    font-size: 20px;
+    font-weight: bold;
+    color: #e59f93;
+  }

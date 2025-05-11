@@ -137,7 +137,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
 export const getCartItems = asyncHandler(async (req, res) => {
   const user_id = req.user.user_id;
   const cartItems = await pool.query(
-    `SELECT c.*, p.name, p.condition
+    `SELECT c.*, p.name, p.condition, p.product_image, p.price
        FROM cart c
        JOIN product p ON c.product_id = p.product_id
        WHERE c.user_id = $1`,
@@ -152,9 +152,9 @@ export const getCartItems = asyncHandler(async (req, res) => {
 export const getUserCartItems = asyncHandler(async (req, res) => {
   const user_id = req.user?.user_id;
 
-  if (!user_id) {
-    return res.status(401).json({ message: 'Unauthorized: User not logged in.' });
-  }
+  // if (!user_id) {
+  //   return res.status(401).json({ message: 'Unauthorized: User not logged in.' });
+  // }
 
   try {
     const result = await pool.query(
@@ -172,6 +172,32 @@ export const getUserCartItems = asyncHandler(async (req, res) => {
   }
 });
 
+
+export const clearUserCart = asyncHandler(async (req, res) => {
+  const user_id = req.user.user_id;
+
+  // Verify user has items in cart
+  const cartCheck = await pool.query(
+    `SELECT * FROM cart WHERE user_id = $1`,
+    [user_id]
+  );
+
+  if (cartCheck.rowCount === 0) {
+    return res.status(404).json({ message: 'No items found in cart.' });
+  }
+
+  // Clear all items
+  await pool.query(
+    `DELETE FROM cart WHERE user_id = $1`,
+    [user_id]
+  );
+
+  return res.status(200).json({ 
+    message: 'Cart cleared successfully.',
+    deletedItems: cartCheck.rowCount 
+  });
+});
+
 //completed and tested 
 
 
@@ -179,99 +205,122 @@ export const getUserCartItems = asyncHandler(async (req, res) => {
 // import { ApiError } from "../utils/ApiError.js";
 // import { ApiResponse } from "../utils/ApiResponse.js";
 // import { asyncHandler } from "../utils/asyncHandler.js";
+// import { v4 as uuidv4 } from 'uuid';
 
 // export const addToCart = asyncHandler(async (req, res) => {
 //   const { product_id, quantity = 1 } = req.body;
-//   const user_id = req.user.user_id;
+//   console.log('Request received at /api/cart/add');
+//   console.log('Headers:', req.headers);
+//   console.log('Cookies:', req.cookies);
+//   console.log('Body:', req.body);
+  
+//   // Session handling
+//   let session_id = req.cookies?.guest_session_id;
+//   const user_id = req.user?.user_id || null;
 
-//   // Validate input
-//   if (!product_id || !quantity || quantity < 1) {
-//     throw new ApiError(400, "Product ID and valid quantity are required");
+//   // Create new session ID for guests
+//   if (!session_id && !user_id) {
+//     session_id = uuidv4();
+//     res.cookie('guest_session_id', session_id, { 
+//       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === 'production',
+//       sameSite: 'lax'
+//     });
 //   }
 
-//   // Check if product exists
-//   const productRes = await pool.query(
-//     `SELECT product_id, user_id, price FROM product WHERE product_id = $1`,
+//   // Validate product exists
+//   const productResult = await pool.query(
+//     `SELECT product_id, price FROM product WHERE product_id = $1`,
 //     [product_id]
 //   );
   
-//   if (productRes.rows.length === 0) {
+//   if (productResult.rows.length === 0) {
 //     throw new ApiError(404, "Product not found");
 //   }
 
-//   const product = productRes.rows[0];
-  
-//   // Prevent adding own product to cart
-//   if (product.user_id === user_id) {
-//     throw new ApiError(403, "You cannot add your own product to cart");
-//   }
+//   const price = productResult.rows[0].price;
+//   const total_price = price * quantity;
 
-//   // Calculate total price
-//   const total_price = product.price * quantity;
-
-//   // Add to cart
+//   // Insert into cart
 //   const result = await pool.query(
-//     `INSERT INTO cart (user_id, product_id, quantity, total_price)
-//      VALUES ($1, $2, $3, $4)
-//      RETURNING *`,
-//     [user_id, product_id, quantity, total_price]
+//     `INSERT INTO cart (
+//       user_id, 
+//       session_id, 
+//       product_id, 
+//       quantity, 
+//       total_price
+//     ) VALUES ($1, $2, $3, $4, $5)
+//     RETURNING *`,
+//     [
+//       user_id,
+//       user_id ? null : session_id,
+//       product_id,
+//       quantity,
+//       total_price
+//     ]
 //   );
 
 //   return res.status(201).json(
-//     new ApiResponse(201, result.rows[0], "Item added to cart successfully")
+//     new ApiResponse(201, result.rows[0], "Item added to cart")
 //   );
 // });
 
 // export const deleteCartItem = asyncHandler(async (req, res) => {
 //   const { cart_id } = req.params;
-//   const user_id = req.user.user_id;
+//   const session_id = req.cookies?.guest_session_id;
+//   const user_id = req.user?.user_id;
 
-//   // Verify cart item exists and belongs to user
+//   // Verify ownership
 //   const cartItem = await pool.query(
 //     `DELETE FROM cart 
-//      WHERE cart_id = $1 AND user_id = $2
+//      WHERE cart_id = $1 
+//      AND (user_id = $2 OR (session_id = $3 AND user_id IS NULL))
 //      RETURNING *`,
-//     [cart_id, user_id]
+//     [cart_id, user_id, session_id]
 //   );
 
 //   if (cartItem.rowCount === 0) {
-//     throw new ApiError(404, "Cart item not found or not authorized");
+//     throw new ApiError(404, "Cart item not found or unauthorized");
 //   }
 
 //   return res.status(200).json(
-//     new ApiResponse(200, null, "Cart item removed successfully")
+//     new ApiResponse(200, null, "Item removed from cart")
 //   );
 // });
 
 // export const updateCartItem = asyncHandler(async (req, res) => {
 //   const { cart_id } = req.params;
 //   const { quantity } = req.body;
-//   const user_id = req.user.user_id;
+//   const session_id = req.cookies?.guest_session_id;
+//   const user_id = req.user?.user_id;
 
 //   // Validate input
 //   if (!quantity || quantity < 1) {
-//     throw new ApiError(400, "Valid quantity is required");
+//     throw new ApiError(400, "Quantity must be at least 1");
 //   }
 
-//   // Get product price
+//   // Verify ownership
 //   const cartItem = await pool.query(
 //     `SELECT c.*, p.price 
 //      FROM cart c
 //      JOIN product p ON c.product_id = p.product_id
-//      WHERE c.cart_id = $1 AND c.user_id = $2`,
-//     [cart_id, user_id]
+//      WHERE c.cart_id = $1 
+//      AND (c.user_id = $2 OR (c.session_id = $3 AND c.user_id IS NULL))`,
+//     [cart_id, user_id, session_id]
 //   );
 
-//   if (cartItem.rowCount === 0) {
-//     throw new ApiError(404, "Cart item not found or not authorized");
+//   if (cartItem.rows.length === 0) {
+//     throw new ApiError(404, "Cart item not found or unauthorized");
 //   }
 
-//   // Calculate new total
-//   const total_price = cartItem.rows[0].price * quantity;
+//   // Calculate new total price
+//   const price = cartItem.rows[0].price;
+//   const total_price = price * quantity;
 
-//   // Update cart
-//   const updatedItem = await pool.query(
-//     `UPDATE cart
+//   // Update the item
+//   const result = await pool.query(
+//     `UPDATE cart 
 //      SET quantity = $1, total_price = $2
 //      WHERE cart_id = $3
 //      RETURNING *`,
@@ -279,42 +328,143 @@ export const getUserCartItems = asyncHandler(async (req, res) => {
 //   );
 
 //   return res.status(200).json(
-//     new ApiResponse(200, updatedItem.rows[0], "Cart item updated successfully")
+//     new ApiResponse(200, result.rows[0], "Cart item updated successfully")
 //   );
 // });
+// // export const getCartItems = asyncHandler(async (req, res) => {
+// //   try {
+// //     const session_id = req.cookies?.guest_session_id;
+// //     const user_id = req.user?.user_id;
+    
+// //     console.log('getCartItems called with:');
+// //     console.log('session_id:', session_id);
+// //     console.log('user_id:', user_id);
+
+// //     let query = `
+// //       SELECT 
+// //         c.cart_id,
+// //         c.product_id,
+// //         c.quantity,
+// //         c.total_price,
+// //         p.title as product_name,
+// //         p.price as unit_price,
+// //         p.image
+// //       FROM cart c
+// //       JOIN product p ON c.product_id = p.product_id
+// //       WHERE `;
+    
+// //     const params = [];
+    
+// //     if (user_id) {
+// //       query += 'c.user_id = $1';
+// //       params.push(user_id);
+// //     } else if (session_id) {
+// //       query += 'c.session_id = $1 AND c.user_id IS NULL';
+// //       params.push(session_id);
+// //     } else {
+// //       return res.status(200).json(
+// //         new ApiResponse(200, [], "Empty cart")
+// //       );
+// //     }
+
+// //     // Add query debugging
+// //     console.log('Running query:', query);
+// //     console.log('With params:', params);
+
+// //     const result = await pool.query(query, params);
+    
+// //     console.log('Query result rows:', result.rows);
+    
+// //     return res.status(200).json(
+// //       new ApiResponse(200, result.rows, "Cart items retrieved")
+// //     );
+// //   } catch (error) {
+// //     console.error('Error in getCartItems:', error);
+// //     return res.status(500).json(
+// //       new ApiResponse(500, null, `Failed to get cart items: ${error.message}`)
+// //     );
+// //   }
+// // });
+
 
 // export const getCartItems = asyncHandler(async (req, res) => {
-//   const user_id = req.user.user_id;
+//   try {
+//     const session_id = req.cookies?.guest_session_id;
+//     const user_id = req.user?.user_id;
 
-//   const cartItems = await pool.query(
-//     `SELECT 
-//        c.cart_id, c.quantity, c.total_price,
-//        p.product_id, p.name, p.price, p.image
-//      FROM cart c
-//      JOIN product p ON c.product_id = p.product_id
-//      WHERE c.user_id = $1`,
-//     [user_id]
-//   );
+//     // Debugging logs
+//     console.log('Fetching cart for:', { user_id, session_id });
 
-//   return res.status(200).json(
-//     new ApiResponse(200, cartItems.rows, "Cart items retrieved successfully")
-//   );
+//     let query = `
+//       SELECT 
+//         c.cart_id,
+//         c.product_id,
+//         c.quantity,
+//         c.total_price,
+//         p.name as product_name,
+//         p.price as unit_price,
+//         p.product_image as image_url
+//       FROM cart c
+//       JOIN product p ON c.product_id = p.product_id
+//       WHERE `;
+    
+//     const params = [];
+    
+//     if (user_id) {
+//       query += 'c.user_id = $1';
+//       params.push(user_id);
+//     } else if (session_id) {
+//       query += 'c.session_id = $1 AND c.user_id IS NULL';
+//       params.push(session_id);
+//     } else {
+//       console.log('No user or session - returning empty cart');
+//       return res.status(200).json(
+//         new ApiResponse(200, [], "Empty cart")
+//       );
+//     }
+
+//     console.log('Executing query:', query);
+//     console.log('With parameters:', params);
+
+//     const result = await pool.query(query, params);
+//     console.log('Query successful, rows returned:', result.rows.length);
+
+//     return res.status(200).json(
+//       new ApiResponse(200, result.rows, "Cart items retrieved")
+//     );
+//   } catch (error) {
+//     console.error('Database error in getCartItems:', {
+//       message: error.message,
+//       stack: error.stack,
+//       query: error.query,
+//       parameters: error.parameters
+//     });
+//     throw new ApiError(500, "Failed to get cart items: " + error.message);
+//   }
 // });
 
-// export const getUserCartItems = asyncHandler(async (req, res) => {
+// export const mergeGuestCart = asyncHandler(async (req, res) => {
+//   const session_id = req.cookies?.guest_session_id;
 //   const user_id = req.user.user_id;
 
-//   const cartItems = await pool.query(
-//     `SELECT 
-//        c.cart_id, c.quantity, c.total_price,
-//        p.product_id, p.name, p.price, p.image
-//      FROM cart c
-//      JOIN product p ON c.product_id = p.product_id
-//      WHERE c.user_id = $1`,
-//     [user_id]
+//   if (!session_id) {
+//     return res.status(200).json(
+//       new ApiResponse(200, null, "No guest cart to merge")
+//     );
+//   }
+
+//   // Transfer guest cart items to user
+//   await pool.query(
+//     `UPDATE cart 
+//      SET user_id = $1, session_id = NULL 
+//      WHERE session_id = $2 AND user_id IS NULL`,
+//     [user_id, session_id]
 //   );
 
+//   // Clear guest session cookie
+//   res.clearCookie('guest_session_id');
+
 //   return res.status(200).json(
-//     new ApiResponse(200, { cartItems: cartItems.rows }, "Cart items retrieved successfully")
+//     new ApiResponse(200, null, "Guest cart merged successfully")
 //   );
 // });

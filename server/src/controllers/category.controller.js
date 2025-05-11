@@ -51,9 +51,8 @@ const createCategory = asyncHandler(async (req, res) => {
 
 // });
 
-const getAllCategories = async (req, res) => {
-    try {
-        const allCategories = await pool.query("SELECT category_name, slug FROM category");
+const getAllCategories = asyncHandler(async (req, res) => {
+    const allCategories = await pool.query("SELECT * FROM category");
 
       const categories = allCategories.rows.map(category => ({
         name: category.category_name,
