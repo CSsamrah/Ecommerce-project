@@ -284,7 +284,7 @@ const AdminAnalytics = () => {
           <DollarSign size={24} />
           <div className="stat-content">
             <h3>Monthly Revenue</h3>
-            <p className="stat-value">${monthlyRevenue}</p>
+            <p className="stat-value">Rs. {monthlyRevenue}</p>
           </div>
         </div>
         
@@ -292,7 +292,7 @@ const AdminAnalytics = () => {
           <Calendar size={24} />
           <div className="stat-content">
             <h3>Daily Revenue</h3>
-            <p className="stat-value">${dailyRevenue}</p>
+            <p className="stat-value">Rs. {dailyRevenue}</p>
           </div>
         </div>
       </div>
@@ -338,15 +338,15 @@ const AdminAnalytics = () => {
           <div className="revenue-stats">
             <div className="revenue-stat">
               <span className="stat-label">Daily</span>
-              <span className="stat-amount">${dailyRevenue}</span>
+              <span className="stat-amount">Rs. {dailyRevenue}</span>
             </div>
             <div className="revenue-stat">
               <span className="stat-label">Weekly</span>
-              <span className="stat-amount">${weeklyRevenue}</span>
+              <span className="stat-amount">Rs. {weeklyRevenue}</span>
             </div>
             <div className="revenue-stat">
               <span className="stat-label">Monthly</span>
-              <span className="stat-amount">${monthlyRevenue}</span>
+              <span className="stat-amount">Rs. {monthlyRevenue}</span>
             </div>
           </div>
         </div>
