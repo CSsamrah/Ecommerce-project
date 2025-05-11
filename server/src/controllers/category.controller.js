@@ -51,6 +51,7 @@ const createCategory = asyncHandler(async (req, res) => {
 // });
 
 const getAllCategories = asyncHandler(async (req, res) => {
+  try{
     const allCategories = await pool.query("SELECT * FROM category");
 
       const categories = allCategories.rows.map(category => ({
@@ -74,7 +75,7 @@ const getAllCategories = asyncHandler(async (req, res) => {
         data: null
       });
     }
-  };
+  });
 
 
 const updateCategory = asyncHandler(async (req, res) => {

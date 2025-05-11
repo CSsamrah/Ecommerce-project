@@ -257,22 +257,71 @@ const returnRentalOrder = asyncHandler(async (req, res) => {
     try {
         await client.query('BEGIN');
 
-    const updatedRental = await pool.query(updateQuery, [rental_id]);
+        const rentalQuery = `
+            SELECT 
+                r.rental_id, 
+                r.product_id,
+                r.rental_status, 
+                r.rented_by,
+                p.name AS product_name,
+                u.name AS user_name
+            FROM rental r
+            JOIN product p ON r.product_id = p.product_id
+            JOIN "Users" u ON r.rented_by = u.user_id
+            WHERE r.rental_id = $1
+            FOR UPDATE;`; // FOR UPDATE locks the row
 
-    await pool.query(`UPDATE product SET rental_available=TRUE WHERE product_id=$1`,[rentalProductID])
+        const rentalResult = await client.query(rentalQuery, [rental_id]);
 
-    return res.status(200).json(new ApiResponse(200, {
-            rental_id: updatedRental.rows[0].rental_id,
-            rental_status: updatedRental.rows[0].rental_status,
-            returned_at: updatedRental.rows[0].returned_at,
-            rented_by: rental.name,
-        }, "Product returned successfully"));
+        if (rentalResult.rows.length === 0) {
+            throw new ApiError(404, "Rental order not found");
+        }
 
-    } catch (err) {
-        console.error("Error updating rental record:", err);
-        throw new ApiError(409, "Database error occured")
+        const rental = rentalResult.rows[0];
+
+        if (rental.rental_status === "Returned") {
+            throw new ApiError(400, "Product already returned");
+        }
+
+        if (userID !== rental.rented_by) {
+            throw new ApiError(403, "Unauthorized to return this product");
+        }
+
+        // Update rental status
+        const updateRentalQuery = `
+            UPDATE rental 
+            SET rental_status = 'Returned', 
+                returned_at = NOW()
+            WHERE rental_id = $1 
+            RETURNING *;`;
+
+        const updatedRental = await client.query(updateRentalQuery, [rental_id]);
+
+        // Update product availability
+        await client.query(`
+            UPDATE product SET rental_available = TRUE WHERE product_id = $1`,
+            [rental.product_id]
+        );
+
+        await client.query('COMMIT');
+
+        return res.status(200).json(
+            new ApiResponse(200, {
+                rental_id: updatedRental.rows[0].rental_id,
+                product_name: rental.product_name,
+                returned_at: updatedRental.rows[0].returned_at,
+                rented_by: rental.user_name
+            }, "Product returned successfully")
+        );
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error("Return rental error:", error);
+        throw new ApiError(error.statusCode || 500, error.message || "Failed to process return");
+    } finally {
+        client.release();
     }
-})
+});
 
 const getRentalDetails=asyncHandler(async(req,res)=>{
     const {id:rental_id}=req.params;
@@ -318,51 +367,51 @@ const getRentalDetails=asyncHandler(async(req,res)=>{
 
 })
 
-const getRentalProduct = asyncHandler(async (req, res) => {
-    const { id: rental_id } = req.params;
+// const getRentalProduct = asyncHandler(async (req, res) => {
+//     const { id: rental_id } = req.params;
 
-    if (!rental_id) {
-        throw new ApiError(400, "Product ID should be provided to search for a product");
-    }
-    const findRental = await pool.query(
-        `SELECT 
-        r.rental_id,
-        p.name, 
-        p.description, 
-        p.price, 
-        r.rental_price,
-        p.condition,
-        p.product_features, 
-        p.product_image, 
-        r.rental_duration,
-        r.return_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' as return_date
-        FROM rental r
-            JOIN product p ON r.product_id = p.product_id
-            WHERE r.rental_id = $1
-            LIMIT 50`,
-        [rental_id]
+//     if (!rental_id) {
+//         throw new ApiError(400, "Product ID should be provided to search for a product");
+//     }
+//     const findRental = await pool.query(
+//         `SELECT 
+//         r.rental_id,
+//         p.name, 
+//         p.description, 
+//         p.price, 
+//         r.rental_price,
+//         p.condition,
+//         p.product_features, 
+//         p.product_image, 
+//         r.rental_duration,
+//         r.return_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' as return_date
+//         FROM rental r
+//             JOIN product p ON r.product_id = p.product_id
+//             WHERE r.rental_id = $1
+//             LIMIT 50`,
+//         [rental_id]
 
-    )
+//     )
 
-    if (findRental.rows.length == 0) {
-        throw new ApiError(404, "Product not found")
-    }
+//     if (findRental.rows.length == 0) {
+//         throw new ApiError(404, "Product not found")
+//     }
 
-    const rental = findRental.rows.map(rental => ({
-            rental_id: rental.rental_id,
-            title: rental.name,
-            price: rental.price,
-            image: rental.product_image,
-            description: rental.description,
-            rental_price: rental.rental_price,
-            rental_duration: rental.rental_duration,
-            return_date: rental.return_date,
-            avg_rating: '0', 
-            people_rated: '0'
-        }));
+//     const rental = findRental.rows.map(rental => ({
+//             rental_id: rental.rental_id,
+//             title: rental.name,
+//             price: rental.price,
+//             image: rental.product_image,
+//             description: rental.description,
+//             rental_price: rental.rental_price,
+//             rental_duration: rental.rental_duration,
+//             return_date: rental.return_date,
+//             avg_rating: '0', 
+//             people_rated: '0'
+//         }));
 
-    return res.status(200).json(new ApiResponse(200, rental, "Product retrieved successfully"))
-})
+//     return res.status(200).json(new ApiResponse(200, rental, "Product retrieved successfully"))
+// })
 
 const userRentals=asyncHandler(async(req,res)=>{
     const userID=req.user?.user_id;
@@ -402,72 +451,64 @@ const userRentals=asyncHandler(async(req,res)=>{
     ))
 })
 
-const getAllRentals = asyncHandler(async (req, res) => {
-    try {
-        console.log("getAllRentals function called");
+// const getAllRentals = asyncHandler(async (req, res) => {
+//     try {
+//         console.log("getAllRentals function called");
 
-        const rentalavailable= true;
-        const query = `
-            SELECT 
-                p.product_id as id,
-                p.name as title,
-                p.price as price,
-                p.product_image as image,
-                p.description,
-                p.condition as condition,
-                p.stock_quantity,
-                p.rental_available as rental_,
-                r.rental_id,
-                r.rental_status,
-                r.rental_price as rental_price,
-                r.rental_duration,
-                r.return_date
-            FROM product p
-            LEFT JOIN rental r ON p.product_id = r.product_id
-            WHERE p.rental_available = $1
-            AND (r.rental_status IS NULL OR r.rental_status = 'Returned')
-            LIMIT 50
-        `;
+//         const rentalavailable= true;
+//         const query = `
+//             SELECT 
+//                 p.product_id as id,
+//                 p.name as title,
+//                 p.price as price,
+//                 p.product_image as image,
+//                 p.description,
+//                 p.condition as condition,
+//                 p.stock_quantity,
+//                 p.rental_available as rental_,
+//                 r.rental_id,
+//                 r.rental_status,
+//                 r.rental_price as rental_price,
+//                 r.rental_duration,
+//                 r.return_date
+//             FROM product p
+//             LEFT JOIN rental r ON p.product_id = r.product_id
+//             WHERE p.rental_available = $1
+//             AND (r.rental_status IS NULL OR r.rental_status = 'Returned')
+//             LIMIT 50
+//         `;
         
-        console.log("Executing query:", query);
-        const result = await pool.query(query, [rentalavailable]);
-        console.log(`Query executed successfully. Retrieved ${result.rows.length} rental products`);
+//         console.log("Executing query:", query);
+//         const result = await pool.query(query, [rentalavailable]);
+//         console.log(`Query executed successfully. Retrieved ${result.rows.length} rental products`);
 
-        const rentals = result.rows.map(rental => ({
-            id: rental.id,
-            title: rental.title,
-            price: rental.price,
-            image: rental.image,
-            description: rental.description,
-            condition: rental.condition,
-            stock_quantity: rental.stock_quantity,
-            rental_available: rental.rental_,
-            rental_id: rental.rental_id,
-            rental_status: rental.rental_status,
-            rental_price: rental.rental_price,
-            rental_duration: rental.rental_duration,
-            return_date: rental.return_date,
-            owner_name: rental.owner_name,
-            avg_rating: '0', 
-            people_rated: '0'
-        }));
+//         const rentals = result.rows.map(rental => ({
+//             id: rental.id,
+//             title: rental.title,
+//             price: rental.price,
+//             image: rental.image,
+//             description: rental.description,
+//             condition: rental.condition,
+//             stock_quantity: rental.stock_quantity,
+//             rental_available: rental.rental_,
+//             rental_id: rental.rental_id,
+//             rental_status: rental.rental_status,
+//             rental_price: rental.rental_price,
+//             rental_duration: rental.rental_duration,
+//             return_date: rental.return_date,
+//             owner_name: rental.owner_name,
+//             avg_rating: '0', 
+//             people_rated: '0'
+//         }));
 
-        return res.status(200).json(
-            new ApiResponse(200, {
-                rental_id: updatedRental.rows[0].rental_id,
-                product_name: rental.product_name,
-                returned_at: updatedRental.rows[0].returned_at,
-                rented_by: rental.user_name
-            }, "Product returned successfully")
-        );
+//         return res.status(200).json(
+//             new ApiResponse(200, rentals, "Rental products fetched successfully")
+//         );
+//     } catch (error) {
+//         console.error("Error in getAllRentals:", error);
+//         throw new ApiError(500, "Failed to fetch rental products: " + error.message);
+//     }
+// });
 
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.error("Return rental error:", error);
-        throw new ApiError(error.statusCode || 500, error.message || "Failed to process return");
-    } finally {
-        client.release();
-    }
-});
 
-export { returnRentalOrder ,getRentalDetails, getRentalProduct, userRentals, getAllRentals}
+export { returnRentalOrder ,getRentalDetails, userRentals}

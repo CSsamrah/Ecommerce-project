@@ -437,6 +437,7 @@ const getProducts = asyncHandler(async (req, res) => {
 const getAllProducts = asyncHandler(async (req, res) => {
     // Still check for authentication, but don't restrict products by user
     const userID = req.user?.user_id;
+
     if (!userID) {
         throw new ApiError(400, "User ID is required for authentication");
     }
@@ -455,7 +456,6 @@ const getAllProducts = asyncHandler(async (req, res) => {
             p.product_image as image,
             p.rental_available
         FROM product p
-        WHERE p.rental_available = $1
         LIMIT 50
     `;
 
@@ -480,4 +480,162 @@ const getAllProducts = asyncHandler(async (req, res) => {
     }
 );
 
-export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts, getProducts }
+const getAllSellings = async (req, res) => {
+    try {
+      console.log("getAllProducts function called");
+
+      const rental= false;
+      const query = `
+        SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.description,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
+        FROM product p
+        WHERE p.rental_available = $1
+        LIMIT 50
+      `;
+      
+      console.log("Executing query:", query);
+      const result = await pool.query(query, [rental]);
+      console.log(`Query executed successfully. Retrieved ${result.rows.length} products`);
+
+      const products = result.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: products
+      });
+    } catch (error) {
+      console.error("Error in getAllProducts:", error);
+
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: "Failed to fetch products: " + error.message,
+        data: null
+      });
+    }
+  };
+
+
+  const getAllRentalProducts = async (req, res) => {
+    try {
+      console.log("getAllProducts function called");
+
+      const rental= true;
+      const query = `
+        SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.description,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
+        FROM product p
+        WHERE p.rental_available = $1
+        LIMIT 50
+      `;
+      
+      console.log("Executing query:", query);
+      const result = await pool.query(query, [rental]);
+      console.log(`Query executed successfully. Retrieved ${result.rows.length} products`);
+
+      const products = result.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: products
+      });
+    } catch (error) {
+      console.error("Error in getAllProducts:", error);
+
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: "Failed to fetch products: " + error.message,
+        data: null
+      });
+    }
+  };
+
+  const getRentalProduct = asyncHandler(async (req, res) => {
+    const { id: rental_id } = req.params;
+
+    if (!rental_id) {
+        throw new ApiError(400, "Product ID should be provided to search for a product");
+    }
+    const findRental = await pool.query(
+        `SELECT 
+        r.rental_id,
+        p.name, 
+        p.description, 
+        p.price, 
+        r.rental_price,
+        p.condition,
+        p.product_features, 
+        p.product_image, 
+        r.rental_duration,
+        r.return_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' as return_date
+        FROM product p
+            JOIN product p ON r.product_id = p.product_id
+            WHERE r.rental_id = $1
+            LIMIT 50`,
+        [rental_id]
+
+    )
+
+    if (findRental.rows.length == 0) {
+        throw new ApiError(404, "Product not found")
+    }
+
+    const rental = findRental.rows.map(rental => ({
+            rental_id: rental.rental_id,
+            title: rental.name,
+            price: rental.price,
+            image: rental.product_image,
+            description: rental.description,
+            rental_price: rental.rental_price,
+            rental_duration: rental.rental_duration,
+            return_date: rental.return_date,
+            avg_rating: '0', 
+            people_rated: '0'
+        }));
+
+    return res.status(200).json(new ApiResponse(200, rental, "Product retrieved successfully"))
+})
+
+
+export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts, getAllSellings, getAllRentalProducts, getProducts, getRentalProduct }

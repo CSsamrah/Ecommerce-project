@@ -93,7 +93,7 @@ function App() {
               <Route path="/category/:slug" element={<CategoryCatalog />} />
               <Route path="/rental-category/:slug" element={<RentalCategoryCatalog />} />
                 <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-                <Route path="/product/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+                <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/rental-product/:id" element={<RentalProductDetail />} />
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/checkout' element={<ProtectedRoute><Checkout /></ProtectedRoute>} />

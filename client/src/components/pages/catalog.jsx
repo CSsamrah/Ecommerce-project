@@ -197,7 +197,7 @@ const Catalog = () => {
     const fetchProducts = async () => {
       try {
         console.log("Fetching products...");
-        const response = await api.get("/products/getAllProducts");
+        const response = await api.get("/products/getAllSellings");
         
         console.log("Products Catalog Response received:", response.data);
         // console.log("1Current products state:", products)

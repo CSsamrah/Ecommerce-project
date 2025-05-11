@@ -826,3 +826,63 @@
         opacity: 1;
     }
 }
+
+
+
+/* Rental Duration Styles */
+.rental-duration-container {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rental-label {
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+}
+
+.rental-select-wrapper {
+  position: relative;
+  width: 150px;
+}
+
+.rental-select {
+  width: 100%;
+  padding: 12px 15px;
+  padding-right: 35px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-size: 14px;
+  appearance: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rental-select:hover {
+  border-color: #b1857d;
+}
+
+.rental-select:focus {
+  outline: none;
+  border-color: #b1857d;
+  box-shadow: 0 0 0 2px rgba(177, 133, 125, 0.2);
+}
+
+.rental-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(270deg);
+  pointer-events: none;
+  color: #b1857d;
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.rental-select:focus + .rental-select-arrow {
+  transform: translateY(-50%) rotate(90deg);
+}

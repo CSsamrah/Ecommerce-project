@@ -20,7 +20,7 @@ const RentalCatalog = () => {
     const fetchRentals = async () => {
       try {
         console.log("Fetching rental products...");
-        const response = await axios.get("http://localhost:3000/api/rental/getAllRentals");
+        const response = await axios.get("http://localhost:3000/api/products/getAllRentalProducts");
         
         console.log("Rental response received:", response.data);
         
@@ -148,7 +148,7 @@ const RentalCatalog = () => {
                       <p>({typeof averageRating === 'number' ? averageRating.toFixed(1) : '0.0'})</p>
                     </div>
                     <div className="add_to_cart">
-                      <button className='add_to_cart_button' onClick={() => addRentalToCart(rent)}>
+                      <button className='add_to_cart_button' onClick={() => navigateToRentalDetail(rent.id)}>
                         RENT NOW
                       </button>
                     </div>

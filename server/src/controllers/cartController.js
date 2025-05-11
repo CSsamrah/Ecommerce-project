@@ -24,7 +24,7 @@ export const addToCart = asyncHandler(async (req, res) => {
   let rental_price = null;
 
   if (is_rental) {
-    if (!product.rental_available) {
+    if (product.rental_available) {
       throw new ApiError(403, "Rental not available for this product");
     }
     if (rental_days < 1 || rental_days > 30) {
