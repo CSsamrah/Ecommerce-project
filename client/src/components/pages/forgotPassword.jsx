@@ -138,9 +138,9 @@ const ForgotPassword = () => {
             justifyContent: 'center',
             alignItems: 'center',
             minHeight: '100vh',
-            backgroundColor: 'midnightblue',
+            backgroundColor: '#52667E',
             padding: '1rem',
-            width: "1400px" ,
+            width: "1350px" ,
             
         }}>
             <div className="forgot-password-main-container" style={{ 
@@ -295,7 +295,7 @@ const ForgotPassword = () => {
                                     style={{ 
                                         background: 'none',
                                         border: 'none',
-                                        color: '#2563eb',
+                                        color: '#52667E',
                                         cursor: 'pointer',
                                         padding: '0 0.25rem',
                                         fontSize: '1rem'
@@ -318,7 +318,7 @@ const ForgotPassword = () => {
                                     style={{ 
                                         background: 'none',
                                         border: 'none',
-                                        color: '#64748b',
+                                        color: '#52667E',
                                         cursor: 'pointer',
                                         fontSize: '0.875rem'
                                     }}

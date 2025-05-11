@@ -73,6 +73,7 @@ import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import BuyerDashboard from "./BuyerDashboard";
 import "./RentalAgreement.css";
 import axios from "axios";
+import Navbar from '../../Navbar/navbar1'
 
 const RentalAgreement = () => {
   const [selectedRental, setSelectedRental] = useState(null);
@@ -99,17 +100,18 @@ const RentalAgreement = () => {
         }
 
         const formattedRentals = response.data.rentals.map(rental => ({
-          id: rental.rental_id,
-          item: rental.productName,
+          id: rental.id,
+          item: rental.product.name,
           rentedOn: new Date(rental.rented_at).toLocaleDateString(),
           dueDate: rental.return_date 
             ? new Date(rental.return_date).toLocaleDateString() 
             : "N/A",
-          returned: rental.rental_status === "Returned",
-          status: rental.rental_status,
-          productId: rental.product_id,
-          rentalDuration: rental.rental_duration,
-          rentalPrice: rental.rental_price
+          returned: rental.status === "Returned",
+          status: rental.status,
+          productId: rental.product.id,
+          rentalDuration: rental.duration,
+          rentalPrice: rental.price,
+          productImage: rental.product.image
         }));
 
         setRentals(formattedRentals);
@@ -127,7 +129,7 @@ const RentalAgreement = () => {
   const handleReturnItem = async (rentalId) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/rental/returnRental/${rentalId}`,
+        `${API_BASE_URL}/rental/returnRental/${rentalId}`,
         {},
         { withCredentials: true }
       );
@@ -162,23 +164,23 @@ const RentalAgreement = () => {
   const viewRentalDetails = async (rentalId) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/api/rental/getRental/${rentalId}`,
+        `${API_BASE_URL}/rental/getRental/${rentalId}`,
         { withCredentials: true }
       );
       
-      const rental = response.data.rental;
+      const rental = response.data.data.rental;
       setSelectedRental({
-        id: rental.rental_id,
-        item: rental.product_name,
+        id: rental.id,
+        item: rental.product.name,
         rentedOn: new Date(rental.rented_at).toLocaleDateString(),
         dueDate: rental.return_date 
           ? new Date(rental.return_date).toLocaleDateString() 
           : "N/A",
-        returned: rental.rental_status === "Returned",
-        status: rental.rental_status,
-        productId: rental.product_id,
-        rentalDuration: rental.rental_duration,
-        rentalPrice: rental.rental_price
+        returned: rental.status === "Returned",
+        status: rental.status,
+        productId: rental.product.id,
+        rentalDuration: rental.duration,
+        rentalPrice: rental.price
       });
     } catch (err) {
       console.error("Error fetching rental details:", err);
@@ -186,81 +188,103 @@ const RentalAgreement = () => {
     }
   };
 
+  // Cute loading component
+  const LoadingAnimation = () => (
+    <div className="loading-container">
+      <div className="loading-box">
+        <div className="loading-circle"></div>
+        <div className="loading-circle"></div>
+        <div className="loading-circle"></div>
+      </div>
+      <p>Loading your rentals...</p>
+    </div>
+  );
+
   return (
-    <div className="rental-container">
-      <BuyerDashboard />
-      <div className="rental-items">
-        <h2>Your Rentals</h2>
-        
-        {loading ? (
-          <p>Loading your rentals...</p>
-        ) : error ? (
-          <p className="error-message">{error}</p>
-        ) : rentals.length === 0 ? (
-          <p>You don't have any active rentals.</p>
-        ) : (
-          <div className="rental-list">
-            {rentals.map((rental) => (
-              <div
-                key={rental.id}
-                className={`rental-card ${selectedRental?.id === rental.id ? "selected" : ""}`}
-                onClick={() => viewRentalDetails(rental.id)}
-              >
-                <div className="rental-header">
-                  <h3>{rental.item}</h3>
-                  {rental.returned ? (
-                    <FaCheckCircle className="status-icon returned" />
-                  ) : (
-                    <FaTimesCircle className="status-icon pending" />
+    <div className="rental-page-container">
+      <Navbar />
+      <div className="sidebar-wrapper">
+        <BuyerDashboard />
+      </div>
+      <div className="rental-content">
+        <div className="rental-items">
+          <h2>Your Rentals</h2>
+          
+          {loading ? (
+            <LoadingAnimation />
+          ) : error ? (
+            <p className="error-message">{error}</p>
+          ) : rentals.length === 0 ? (
+            <p>You don't have any active rentals.</p>
+          ) : (
+            <div className="rental-list">
+              {rentals.map((rental) => (
+                <div
+                  key={rental.id}
+                  className={`rental-card ${selectedRental?.id === rental.id ? "selected" : ""}`}
+                  onClick={() => viewRentalDetails(rental.id)}
+                >
+                  <div className="rental-header">
+                    <h3>{rental.item}</h3>
+                    {rental.returned ? (
+                      <FaCheckCircle className="status-icon returned" />
+                    ) : (
+                      <FaTimesCircle className="status-icon pending" />
+                    )}
+                  </div>
+                  {rental.productImage && (
+                    <div className="rental-image">
+                      <img src={rental.productImage} alt={rental.item} />
+                    </div>
+                  )}
+                  <p><strong>Rented On:</strong> {rental.rentedOn}</p>
+                  {!rental.returned && rental.dueDate && (
+                    <p><strong>Due Date:</strong> {rental.dueDate}</p>
+                  )}
+                  <span className={`status-badge ${rental.returned ? "returned" : "pending"}`}>
+                    {rental.returned ? "Returned" : rental.status}
+                  </span>
+                  {!rental.returned && (
+                    <button 
+                      className="return-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm("Are you sure you want to mark this item as returned?")) {
+                          handleReturnItem(rental.id);
+                        }
+                      }}
+                    >
+                      Mark as Returned
+                    </button>
                   )}
                 </div>
-                <p><strong>Rented On:</strong> {rental.rentedOn}</p>
-                {!rental.returned && rental.dueDate && (
-                  <p><strong>Due Date:</strong> {rental.dueDate}</p>
-                )}
-                <span className={`status-badge ${rental.returned ? "returned" : "pending"}`}>
-                  {rental.returned ? "Returned" : rental.status}
-                </span>
-                {!rental.returned && (
-                  <button 
-                    className="return-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm("Are you sure you want to mark this item as returned?")) {
-                        handleReturnItem(rental.id);
-                      }
-                    }}
-                  >
-                    Mark as Returned
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      <div className="rental-details">
-        <h2>Rental Policy</h2>
-        <p>Late returns charges set by seller. Damages will be assessed, and charges may apply.</p>
-        
-        {selectedRental && (
-          <div className="rental-info">
-            <h3>Rental Details</h3>
-            <p><strong>Item:</strong> {selectedRental.item}</p>
-            <p><strong>Rented On:</strong> {selectedRental.rentedOn}</p>
-            {selectedRental.dueDate && !selectedRental.returned && (
-              <p><strong>Due Date:</strong> {selectedRental.dueDate}</p>
-            )}
-            <p><strong>Status:</strong> 
-              <span className={`status-text ${selectedRental.returned ? "returned" : "pending"}`}>
-                {selectedRental.returned ? "Returned" : selectedRental.status}
-              </span>
-            </p>
-            <p><strong>Duration:</strong> {selectedRental.rentalDuration} days</p>
-            <p><strong>Total Price:</strong> ${selectedRental.rentalPrice?.toFixed(2) || "N/A"}</p>
-          </div>
-        )}
+        <div className="rental-details">
+          <h2>Rental Policy</h2>
+          <p>Late returns charges set by seller. Damages will be assessed, and charges may apply.</p>
+          
+          {selectedRental && (
+            <div className="rental-info">
+              <h3>Rental Details</h3>
+              <p><strong>Item:</strong> {selectedRental.item}</p>
+              <p><strong>Rented On:</strong> {selectedRental.rentedOn}</p>
+              {selectedRental.dueDate && !selectedRental.returned && (
+                <p><strong>Due Date:</strong> {selectedRental.dueDate}</p>
+              )}
+              <p><strong>Status:</strong> 
+                <span className={`status-text ${selectedRental.returned ? "returned" : "pending"}`}>
+                  {selectedRental.returned ? "Returned" : selectedRental.status}
+                </span>
+              </p>
+              <p><strong>Duration:</strong> {selectedRental.rentalDuration} days</p>
+              <p><strong>Total Price:</strong> ${selectedRental.rentalPrice?.toFixed(2) || "N/A"}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
