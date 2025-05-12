@@ -1,262 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import { useParams, useSearchParams } from 'react-router-dom';
-// import axios from 'axios';
-// import Navbar from '../Navbar/navbar1';
-
-// const CategoryCatalog = ({ isRental = false }) => {
-//     const { slug } = useParams();
-//     const [searchParams] = useSearchParams();
-//     const [products, setProducts] = useState([]);
-//     const [category, setCategory] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState(null);
-
-//     useEffect(() => {
-//         const fetchCategoryProducts = async () => {
-//             try {
-//                 setLoading(true);
-//                 const condition = searchParams.get('condition');
-                
-//                 // Determine the correct API endpoint based on isRental prop
-//                 const baseUrl = isRental ? '/api/rental-category' : '/api/category';
-//                 const url = `${baseUrl}/${slug}${condition ? `?condition=${condition}` : ''}`;
-//                 const response = await axios.get(
-//                     `http://localhost:3000/api/categories/<span class="math-inline">\{slug\}?condition\=</span>{condition}` // Your backend endpoint
-//                   );
-                
-//                 // const response = await axios.get(url);
-//                 console.log(response.data);
-//                 setCategory(response.data.category);
-//                 setProducts(response.data.products);
-//                 setLoading(false);
-//             } catch (err) {
-//                 setError(err.message || "Failed to fetch products");
-//                 setLoading(false);
-//             }
-//         };
-
-//         fetchCategoryProducts();
-//     }, [slug, searchParams, isRental]);
-
-//     if (loading) return <div>Loading...</div>;
-//     if (error) return <div>Error: {error}</div>;
-//     if (!category) return <div>Category not found</div>;
-
-//     return (
-//         <div>
-//             <h1>{category.category_name} {isRental ? 'Rental' : ''} Products</h1>
-//             {searchParams.get('condition') && (
-//                 <h2>Condition: {searchParams.get('condition')}</h2>
-//             )}
-//             <div className="products-grid">
-//                 {products.map(product => (
-//                     <div key={product.product_id} className="product-card">
-//                         <img src={product.product_image} alt={product.name} />
-//                         <h3>{product.name}</h3>
-//                         <p>Rs. {product.price}</p>
-//                         <p>Condition: {product.condition}</p>
-//                         {isRental && (
-//                             <p>Rental Available: {product.rental_available ? 'Yes' : 'No'}</p>
-//                         )}
-//                     </div>
-//                 ))}
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default CategoryCatalog;
-
-// import React, { useEffect, useState } from 'react';
-// import { useParams, useLocation, useNavigate } from 'react-router-dom';
-// import { useCart } from './cartContext';
-// import './catalog.css'; // Reuse the same CSS
-// import SlidingCart from './slidingCart';
-// import Navbar from '../Navbar/navbar1';
-// import axios from 'axios';
-
-// const CategoryCatalog = () => {
-//   const { addToCart } = useCart();
-//   const navigate = useNavigate();
-//   const { slug } = useParams();
-//   const location = useLocation();
-//   const searchParams = new URLSearchParams(location.search);
-//   const condition = searchParams.get('condition') || 'new';
-  
-//   const [isSlidingCartOpen, setSlidingCartOpen] = useState(false);
-//   const [products, setProducts] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [categoryName, setCategoryName] = useState('');
-//   const [isRental, setIsRental] = useState(false);
-
-//   // Determine if we're in rental mode based on URL path
-//   useEffect(() => {
-//     setIsRental(location.pathname.includes('rental-category'));
-//   }, [location.pathname]);
-
-//   // Fetch category products from database
-//   useEffect(() => {
-//     const fetchCategoryProducts = async () => {
-//       try {
-//         setLoading(true);
-//         console.log(`Fetching ${isRental ? 'rental' : ''} products for category: ${slug}, condition: ${condition}`);
-        
-//         // Determine which API endpoint to use based on rental mode
-//         const endpoint = isRental 
-//           ? `http://localhost:3000/api/categories/${slug}/rental?condition=${condition}`
-//           : `http://localhost:3000/api/categories/${slug}?condition=${condition}`;
-        
-//         const response = await axios.get(endpoint);
-        
-//         console.log("Response received:", response.data);
-        
-//         if (response.data && response.data.data) {
-//           const data = response.data.data;
-//           setProducts(data.products || []);
-//           setCategoryName(data.category?.category_name || slug);
-//         } else {
-//           console.error("Unexpected response format:", response.data);
-//           setError("Invalid data format received from server");
-//         }
-        
-//         setLoading(false);
-//       } catch (err) {
-//         console.error(`Error fetching ${isRental ? 'rental' : ''} category products:`, err);
-//         setError(err.message || "Failed to fetch products");
-//         setLoading(false);
-//       }
-//     };
-
-//     if (slug && condition) {
-//       fetchCategoryProducts();
-//     }
-//   }, [slug, condition, isRental]);
-
-//   // Store products in localStorage for product detail page
-//   useEffect(() => {
-//     if (products.length > 0) {
-//       localStorage.setItem('cachedProducts', JSON.stringify(products));
-//     }
-//   }, [products]);
-
-//   const addProductToCart = (product) => {
-//     addToCart(product);
-//     setSlidingCartOpen(true);
-//   };
-
-//   const navigateToProductDetail = (productId) => {
-//     navigate(`/product/${productId}`);
-//   };
-
-//   const renderStars = (rating) => {
-//     const numericRating = typeof rating === 'string' ? parseFloat(rating) : rating || 0;
-//     return [...Array(5)].map((_, i) => (
-//       <span key={i} style={{ color: i < numericRating ? "#FFD700" : "#ccc", fontSize: "23px" }}>★</span>
-//     ));
-//   };
-
-//   const getProductRating = (product) => {
-//     // First try to get rating from local storage
-//     const storedRating = localStorage.getItem(`rating_${product.id}`);
-//     if (storedRating) return JSON.parse(storedRating);
-    
-//     // Otherwise use the rating from the API response
-//     return product.avg_rating ? parseFloat(product.avg_rating) : 0;
-//   };
-
-//   // Loading, error, and empty states
-//   if (loading) return <div className="loading">Loading products...</div>;
-//   if (error) return <div className="error">Error: {error}</div>;
-//   if (!products || products.length === 0) return (
-//     <main>
-//       <Navbar />
-//       <div className="catalog">
-//         <div className="catalog_container">
-//           <h2 className="category-title">
-//             {categoryName} - {condition === 'new' ? 'New' : 'Second Hand'} 
-//             {isRental ? ' Rental' : ''} Products
-//           </h2>
-//           <div className="no-products">No products available in this category</div>
-//         </div>
-//       </div>
-//     </main>
-//   );
-
-//   return (
-//     <main>
-//       <Navbar />
-//       <div className="catalog">
-//         <div className="catalog_container">
-//           <h2 className="category-title">
-//             {categoryName} - {condition === 'new' ? 'New' : 'Second Hand'} 
-//             {isRental ? ' Rental' : ''} Products
-//           </h2>
-          
-//           {/* Toggle button for second hand / new products */}
-//           <button 
-//             className='secondhand_button' 
-//             onClick={() => {
-//               const newCondition = condition === 'new' ? 'second-hand' : 'new';
-//               navigate(`${location.pathname}?condition=${newCondition}`);
-//             }}
-//           >
-//             Switch to {condition === 'new' ? 'Second Hand' : 'New'} Products
-//           </button>
-          
-//           <div className="products">
-//             {products.map((product) => {
-//               const averageRating = getProductRating(product);
-              
-//               return (
-//                 <div className="product_card" key={product.id}>
-//                   <div className="product_header">
-//                     <div className="product_title" onClick={() => navigateToProductDetail(product.id)}>
-//                       <p>{product.title}</p>
-//                     </div>
-//                     <div className="product_price">
-//                       <b>Rs.{product.price}</b>
-//                       {isRental && <p>/{product.rental_period || 'day'}</p>}
-//                     </div>
-//                   </div>
-                  
-//                   <div className="product_body">
-//                     <div className="pro_image" onClick={() => navigateToProductDetail(product.id)}>
-//                       <img src={product.image} alt={product.title} />
-//                     </div>
-//                   </div>
-                  
-//                   <div className="button">
-//                     <div className="show_rating">
-//                       <div className="catalog_review_stars">
-//                         {renderStars(averageRating)}
-//                       </div>
-//                       <p>({typeof averageRating === 'number' ? averageRating.toFixed(1) : '0.0'})</p>
-//                     </div>
-//                     <div className="add_to_cart">
-//                       <button className='add_to_cart_button' onClick={() => addProductToCart(product)}>
-//                         {isRental ? 'RENT NOW' : 'BUY NOW'}
-//                       </button>
-//                     </div>
-//                   </div>
-//                 </div>
-//               );
-//             })}
-//           </div>
-//         </div>
-//       </div>
-      
-//       <SlidingCart
-//         isOpen={isSlidingCartOpen}
-//         onClose={() => setSlidingCartOpen(false)}
-//         onViewFullCart={() => navigate('/cart')}
-//       />
-//     </main>
-//   );
-// };
-
-// export default CategoryCatalog;
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Box, Typography, Grid, Card, CardMedia, CardContent, Rating, CircularProgress, Alert } from '@mui/material';
@@ -393,6 +134,34 @@ const addProductToCart = (product) => {
   if (loading) return <div className="loading">Loading products...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
+
+  if (!loading && !error && categoryData.length === 0) {
+    return (
+      <main>
+        <Navbar />
+        <div className="catalog">
+          <div className="catalog_container">
+            <div className="no-products-message">
+              {/* <img src="/empty-state.svg" alt="No products" className="empty-state-img" /> */}
+              <Typography variant="h5" className="empty-state-title">
+                There are currently no selling products in this category.
+              </Typography>
+              {/* <Typography variant="body1" className="empty-state-text">
+                There are currently no selling products in this category.
+              </Typography> */}
+              <button 
+                className="browse-categories-btn"
+                onClick={() => navigate('/catalog')}
+              >
+                Browse Other Selling Products
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main>
     <Navbar />
@@ -411,8 +180,8 @@ const addProductToCart = (product) => {
                   </div>
                   <div className="product_price">
                     <b>Rs.{product.price}</b>
-                    <p>{product.condition}</p>
-                    <p>{product.rental?"TRUE": "False"}</p>
+                    {/* <p>{product.condition}</p>
+                    <p>{product.rental?"TRUE": "False"}</p> */}
                   </div>
                 </div>
 
@@ -451,3 +220,169 @@ const addProductToCart = (product) => {
 };
 
 export default CategoryCatalog;
+
+// import React, { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { useCart } from './cartContext';
+// import './catalog.css';
+// import SlidingCart from './slidingCart';
+// import Navbar from '../Navbar/navbar1';
+// import axios from 'axios';
+
+// // Create consistent axios instance
+// const api = axios.create({
+//   baseURL: 'http://localhost:3000/api',
+//   withCredentials: true
+// });
+
+// const Catalog = () => {
+//   const { addToCart, error: cartError, loading: cartLoading } = useCart();
+//   const navigate = useNavigate();
+//   const [isSlidingCartOpen, setSlidingCartOpen] = useState(false);
+//   const [products, setProducts] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [addingToCart, setAddingToCart] = useState(null); // Track which product is being added
+
+//   // Fetch products from database
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       try {
+//         console.log("Fetching products...");
+//         const response = await api.get("/products/getAllProducts");
+        
+//         console.log("Response received:", response.data);
+        
+//         // Check if response has data property
+//         if (response.data && (response.data.data || Array.isArray(response.data))) {
+//           // Handle both possible response formats
+//           const productsData = Array.isArray(response.data) ? response.data : 
+//                               (response.data.data ? response.data.data : []);
+          
+//           setProducts(productsData);
+          
+//           // Store products in localStorage for later use in product detail page
+//           localStorage.setItem('cachedProducts', JSON.stringify(productsData));
+//         } else {
+//           console.error("Unexpected response format:", response.data);
+//           setError("Invalid data format received from server");
+//         }
+        
+//         setLoading(false);
+//       } catch (err) {
+//         console.error("Error fetching products:", err);
+//         setError(err.message || "Failed to fetch products");
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProducts();
+//   }, []);
+
+//   const addProductToCart = async (product) => {
+//     console.log("Adding product to cart:", product);
+//     const productId = product.id || product.product_id;
+    
+//     try {
+//       setAddingToCart(productId); // Set the product being added
+//       const success = await addToCart(product);
+      
+//       if (success) {
+//         setSlidingCartOpen(true);
+//       } else {
+//         // Show a more user-friendly message
+//         alert(cartError || "Failed to add product to cart. Please try again.");
+//       }
+//     } catch (err) {
+//       console.error("Error in addProductToCart:", err);
+//       alert("An unexpected error occurred. Please try again.");
+//     } finally {
+//       setAddingToCart(null); // Clear the adding state
+//     }
+//   };
+
+//   const navigateToProductDetail = (productId) => {
+//     navigate(`/product/${productId}`);
+//   };
+
+//   const renderStars = (rating) => {
+//     const numericRating = typeof rating === 'string' ? parseFloat(rating) : rating || 0;
+//     return [...Array(5)].map((_, i) => (
+//       <span key={i} style={{ color: i < numericRating ? "#FFD700" : "#ccc", fontSize: "23px" }}>★</span>
+//     ));
+//   };
+
+//   const getProductRating = (product) => {
+//     // First try to get rating from local storage
+//     const storedRating = localStorage.getItem(`rating_${product.id || product.product_id}`);
+//     if (storedRating) return JSON.parse(storedRating);
+    
+//     // Otherwise use the rating from the API response
+//     return product.avg_rating ? parseFloat(product.avg_rating) : 0;
+//   };
+
+//   if (loading) return <div className="loading">Loading products...</div>;
+//   if (error) return <div className="error">Error: {error}</div>;
+//   if (!products || products.length === 0) return <div className="no-products">No products available</div>;
+
+//   return (
+//     <main>
+//       <Navbar />
+//       <div className="catalog">
+//         <div className="catalog_container">
+//           <div className="products">
+//             {products.map((product) => {
+//               const averageRating = getProductRating(product);
+//               const productId = product.id || product.product_id;
+//               const isAddingThisProduct = addingToCart === productId;
+
+//               return (
+//                 <div className="product_card" key={productId}>
+//                   <div className="product_header">
+//                     <div className="product_title" onClick={() => navigateToProductDetail(productId)}>
+//                       <p>{product.title || product.name}</p>
+//                     </div>
+//                     <div className="product_price">
+//                       <b>Rs.{product.price}</b>
+//                     </div>
+//                   </div>
+
+//                   <div className="product_body">
+//                     <div className="pro_image" onClick={() => navigateToProductDetail(productId)}>
+//                       <img src={product.image} alt={product.title || product.name} />
+//                     </div>
+//                   </div>
+
+//                   <div className="button">
+//                     <div className="show_rating">
+//                       <div className="catalog_review_stars">
+//                         {renderStars(averageRating)}
+//                       </div>
+//                       <p>({typeof averageRating === 'number' ? averageRating.toFixed(1) : '0.0'})</p>
+//                     </div>
+//                     <div className="add_to_cart">
+//                       <button 
+//                         className='add_to_cart_button' 
+//                         onClick={() => addProductToCart(product)}
+//                         disabled={isAddingThisProduct || cartLoading}
+//                       >
+//                         {isAddingThisProduct ? 'ADDING...' : 'BUY NOW'}
+//                       </button>
+//                     </div>
+//                   </div>
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         </div>
+//       </div>
+//       <SlidingCart
+//         isOpen={isSlidingCartOpen}
+//         onClose={() => setSlidingCartOpen(false)}
+//         onViewFullCart={() => navigate('/cart')}
+//       />
+//     </main>
+//   );
+// };
+
+// export default Catalog;
