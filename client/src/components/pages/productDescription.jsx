@@ -409,7 +409,7 @@ const AuthenticationPopup = ({ status, onClose }) => {
       <div className="auth_popup_content">
         <div className="wrapper">
           <button className="close_button" onClick={onClose}>×</button>
-          <h3>Product Authentication</h3>
+          <h3 className="prod-auth-header">Product Authentication</h3>
           <div className={`auth-status ${status.includes("valid") ? "valid" : "invalid"}`}>
             {status}
           </div>

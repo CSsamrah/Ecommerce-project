@@ -772,10 +772,12 @@
     color: #D32F2F;
     font-weight: 500;
 }
-
+/* .prod-auth-header {
+  margin-top: 20px;
+} */
 .btn-close {
     padding: 12px 24px;
-    background-color: #b1857d;
+    background-color: rgb(24, 161, 148);
     color: white;
     border: none;
     border-radius: 8px;
@@ -797,8 +799,8 @@
 
 .close_button {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 5px;
+    right: 10px;
     font-size: 24px;
     color: #888;
     cursor: pointer;
