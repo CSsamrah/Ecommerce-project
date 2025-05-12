@@ -110,6 +110,7 @@ const Catalog = () => {
       <Navbar />
       <div className="catalog">
         <div className="catalog_container">
+          <button onClick={() => navigate('/secondhandCatalog')}>Secondhand Products</button>
           <div className="products">
             {products.map((product) => {
               const averageRating = getProductRating(product);
