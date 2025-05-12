@@ -20,7 +20,7 @@ const SecondhandCatalog = () => {
       try {
         console.log("Fetching products...");
         // Simplified request - no authentication headers
-        const response = await axios.get("http://localhost:3000/api/secondHand/listSecondHand");
+        const response = await axios.get("http://localhost:3000/api/products/listSecondHand");
         
         console.log("Response received:", response.data);
         
@@ -52,23 +52,23 @@ const SecondhandCatalog = () => {
   //       }, [products]);
 
   // Add this to your product listing page where you get all products
-useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/api/secondHand/listSecondHand');
-      const products = response.data.data;
+// useEffect(() => {
+//   const fetchProducts = async () => {
+//     try {
+//       const response = await axios.get('http://localhost:3000/api/products/listSecondHand');
+//       const products = response.data.data;
       
-      // Store products in localStorage for later use in product detail page
-      localStorage.setItem('cachedProducts', JSON.stringify(products));
+//       // Store products in localStorage for later use in product detail page
+//       localStorage.setItem('cachedProducts', JSON.stringify(products));
       
-      setProducts(products); // Your existing state update
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
+//       setProducts(products); // Your existing state update
+//     } catch (error) {
+//       console.error('Error fetching products:', error);
+//     }
+//   };
   
-  fetchProducts();
-}, []);
+//   fetchProducts();
+// }, []);
 
   const addProductToCart = (product) => {
     addToCart(product);

@@ -279,6 +279,7 @@ const RentalCatalog = () => {
       <Navbar />
       <div className="catalog">
         <div className="catalog_container">
+          <button onClick={() => navigate('/rentalsecondhandCatalog')}>Secondhand Products</button>
           <div className="products">
             {products.map((product) => {
               const averageRating = getProductRating(product);

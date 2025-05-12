@@ -637,5 +637,118 @@ const getAllSellings = async (req, res) => {
     return res.status(200).json(new ApiResponse(200, rental, "Product retrieved successfully"))
 })
 
+const listSecondhandProduct = async (req, res) => {
+    try {
+      console.log("getAllProducts function called");
 
-export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts, getAllSellings, getAllRentalProducts, getProducts, getRentalProduct }
+      const condition = 'second-hand';
+      const rental= false;
+      const query = `
+        SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.description,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
+        FROM product p
+        WHERE p.condition = $1 AND p.rental_available = $2
+        LIMIT 50
+      `;
+      
+      console.log("Executing query:", query);
+      const result = await pool.query(query, [condition, rental]);
+      console.log(`Query executed successfully. Retrieved ${result.rows.length} products`);
+
+      const products = result.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: products
+      });
+    } catch (error) {
+      console.error("Error in getAllProducts:", error);
+
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: "Failed to fetch products: " + error.message,
+        data: null
+      });
+    }
+  };
+
+
+const listRentalSecondhandProduct = async (req, res) => {
+    try {
+      console.log("getAllRentalSecondhandProducts function called");
+
+      const condition = 'second-hand';
+      const rental= true;
+      const query = `
+        SELECT 
+            p.product_id as id,
+            p.name as title,
+            p.price,
+            p.product_image as image,
+            p.description,
+            p.condition as condition,
+            p.stock_quantity,
+            p.rental_available as rental
+        FROM product p
+        WHERE p.condition = $1 AND p.rental_available = $2
+        LIMIT 50
+      `;
+      
+      console.log("Executing query:", query);
+      const result = await pool.query(query, [condition, rental]);
+      console.log(`Query executed successfully. Retrieved ${result.rows.length} products`);
+
+      const products = result.rows.map(product => ({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        condition: product.condition,
+        stock_quantity: product.stock_quantity,
+        rental: product.rental,
+        avg_rating: '0', 
+        people_rated: '0'
+      }));
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: products
+      });
+    } catch (error) {
+      console.error("Error in getAllProducts:", error);
+
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: "Failed to fetch products: " + error.message,
+        data: null
+      });
+    }
+  };
+
+
+export { addProduct, getOneProduct, updateProduct, deleteProduct, getAllProducts, getAllSellings, getAllRentalProducts, getProducts, getRentalProduct, listSecondhandProduct, listRentalSecondhandProduct}

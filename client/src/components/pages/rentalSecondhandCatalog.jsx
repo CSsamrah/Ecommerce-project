@@ -20,7 +20,7 @@ const RentalSecondhandCatalog = () => {
       try {
         console.log("Fetching products...");
         // Simplified request - no authentication headers
-        const response = await axios.get("http://localhost:3000/api/secondHand/listRentalSecondHand");
+        const response = await axios.get("http://localhost:3000/api/products/listRentalSecondHand");
         
         console.log("Response received:", response.data);
         
@@ -55,7 +55,7 @@ const RentalSecondhandCatalog = () => {
 useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/secondHand/listRentalSecondHand');
+      const response = await axios.get('http://localhost:3000/api/products/listRentalSecondHand');
       const products = response.data.data;
       
       // Store products in localStorage for later use in product detail page
