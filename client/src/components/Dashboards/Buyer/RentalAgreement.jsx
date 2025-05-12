@@ -217,7 +217,7 @@ const RentalAgreement = () => {
                 </span>
               </p>
               <p><strong>Duration:</strong> {selectedRental.rentalDuration} days</p>
-              <p><strong>Total Price:</strong> ${selectedRental.rentalPrice?.toFixed(2) || "N/A"}</p>
+              <p><strong>Total Price:</strong> Rs. {selectedRental.rentalPrice || "N/A"}</p>
             </div>
           )}
         </div>
