@@ -313,8 +313,9 @@ const RentalCatalog = () => {
                     <div className="add_to_cart">
                       <button 
                         className='add_to_cart_button' 
-                        onClick={() => addProductToCart(product)}
-                        disabled={isAddingThisProduct || cartLoading}
+                        // onClick={() => addProductToCart(product)}
+                        // disabled={isAddingThisProduct || cartLoading}
+                        onClick={() => navigateToProductDetail(productId)}
                       >
                         {isAddingThisProduct ? 'ADDING...' : 'RENT NOW'}
                       </button>
