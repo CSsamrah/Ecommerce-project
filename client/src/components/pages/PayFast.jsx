@@ -151,7 +151,7 @@ const PayFastForm = () => {
               fontWeight: 'bold',
             }}
           >
-            Submit Payment
+            Make Payment
           </button>
         </div>
       </form>
