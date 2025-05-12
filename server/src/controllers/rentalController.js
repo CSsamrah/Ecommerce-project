@@ -286,6 +286,9 @@ const returnRentalOrder = asyncHandler(async (req, res) => {
         if (userID !== rental.rented_by) {
             throw new ApiError(403, "Unauthorized to return this product");
         }
+        if(rental.returned_at===null){
+            throw new ApiError(403, "You have cannot change its status to returned"); 
+        }
 
         // Update rental status
         const updateRentalQuery = `
@@ -356,7 +359,7 @@ const getRentalDetails = asyncHandler(async (req, res) => {
         if (result.rows.length === 0) {
             throw new ApiError(404, "Rental record not found");
         }
-
+        console.log("Rental record found:", result.rows);
         const rental = result.rows[0];
 
         if (userID !== rental.user_id) {

@@ -208,7 +208,8 @@ const AnalyticsDashboard = () => {
         borderColor: "#1C2E4A",
         backgroundColor: "rgba(24, 68, 140, 0.2)",
         fill: true,
-        tension: 0.3
+        tension: 0.3,
+        
       },
       {
         label: "Rental Revenue",
@@ -254,7 +255,8 @@ const AnalyticsDashboard = () => {
       {
         label: "Total Revenue",
         data: topProducts.top_selling_products.slice(0, 5).map(p => p.total_revenue),
-        backgroundColor: "#e6b8b0"
+        backgroundColor: "#e6b8b0",
+        
       }
     ]
   };
@@ -390,6 +392,7 @@ const AnalyticsDashboard = () => {
                   plugins: {
                     legend: {
                       position: 'top',
+                      align: 'center'
                     },
                     tooltip: {
                       callbacks: {
@@ -432,9 +435,18 @@ const AnalyticsDashboard = () => {
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
+                  layout: {
+                    padding: {
+                      left: 0,
+                      right: 0,
+                      top: 10,
+                      bottom: 10
+                    }},
                   plugins: {
                     legend: {
                       position: 'bottom',
+                      align: 'center',
+                      
                     },
                     tooltip: {
                       callbacks: {

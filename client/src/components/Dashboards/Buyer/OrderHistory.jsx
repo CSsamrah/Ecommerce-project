@@ -671,7 +671,7 @@ const OrderHistory = () => {
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="oh-total-cell">${order.total_amount}</td>
+                                    <td className="oh-total-cell">Rs. {order.total_amount}</td>
                                     <td className="oh-actions-cell">
                                         {order.status && order.status.toLowerCase() === "processing" && (
                                             <button
