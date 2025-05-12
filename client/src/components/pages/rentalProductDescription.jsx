@@ -510,6 +510,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { IonIcon } from '@ionic/react';
+import { useCart } from './cartContext';
 import axios from 'axios';
 import { heartOutline, 
   heart, 
@@ -667,26 +668,47 @@ const RentalProductDetail = () => {
         console.log("Fetching product...");
         // Simplified request - no authentication headers
         console.log(`Fetching product of id: ${id}`);
-          const response = await axios.get(`http://localhost:3000/api/products/getProduct/${id}`);
+          const response = await axios.get(`http://localhost:3000/api/products/getRentalProduct/${id}`);
           
               console.log("Specific Product Response received:", response.data);
               console.log("1Current products state:", product)
               
               // Check if response has data property
-              if (response.data && (response.data.data || Array.isArray(response.data))) {
-                // Handle both possible response formats
-                const productsData = Array.isArray(response.data) ? response.data : 
-                                    (response.data.data ? response.data.data : []);
+              // if (response.data && (response.data.data || Array.isArray(response.data))) {
                 
-                  setProduct(productsData);
+
+              //   const productData = Array.isArray(response.data) ? response.data[0] : 
+              //      (response.data.data ? response.data.data : null);
+              //   setProduct(productData);
+
+              if (!response.data || !response.data.data || !response.data.data[0]) {
+        throw new Error("Invalid product data format");
+      }
+
+      const apiProduct = response.data.data[0];
+
+      // Transform API data to match component expectations
+      const formattedProduct = {
+        id: apiProduct.product_id,
+        name: apiProduct.title, // Map title to name
+        description: apiProduct.description,
+        price: parseFloat(apiProduct.price), // Convert string to number
+        product_image: apiProduct.image, // Map image to product_image
+        avg_rating: parseFloat(apiProduct.swg_rating || 0),
+        people_rated: parseInt(apiProduct.people_rated || 0)
+      };
+
+      setProduct(formattedProduct);
+      setLoading(false);
+
                 console.log("2Current products state:", product)
                 // console.log("The products are:", products);
-              } else {
-                console.error("Unexpected response format:", response.data);
-                setError("Invalid data format received from server");
-              }
+              // } else {
+              //   console.error("Unexpected response format:", response.data);
+              //   setError("Invalid data format received from server");
+              // }
               
-              setLoading(false);
+              // setLoading(false);
             } catch (err) {
               console.error("Error fetching the product:", err);
               setError(err.message || "Failed to fetch the product");
@@ -917,7 +939,7 @@ const RentalProductDetail = () => {
               <div>{renderStars(Math.round(averageRating))} ({averageRating.toFixed(1)})</div>
             </div>
             <div>
-              <h3 className="PD_product-price">Rs. {product.price.toLocaleString()}</h3>
+              <h3 className="PD_product-price">Rs. {product.price}</h3>
               {product.originalPrice && (
                 <span className="PD_original-price">Rs. {product.originalPrice.toLocaleString()}</span>
               )}
@@ -968,15 +990,6 @@ const RentalProductDetail = () => {
                 Review Product
               </button>
               
-              {/* <div className="PD_authentication_button">
-                <button 
-                  aria-label="Authenticate Product"
-                  style={authButtonStyle}
-                >
-                  {/* <ShieldCheck size={20} color="#777" />
-                  Authenticate Product
-                </button>
-              </div> */}
 
               {/* <div className="PD_authentication_button">
                 <ProductAuthentication 
@@ -990,16 +1003,6 @@ const RentalProductDetail = () => {
         </div>
       </div>
 
-                    {/* {product.seller_name && (
-                        <div className="seller-info">
-                            <span>Sold by: {product.seller_name}</span>
-                        </div>
-                    )}
-
-                    <div className="product-description">
-                        <h3>Description</h3>
-                        <p>{product.description || "No description available"}</p>
-                    </div> */}
 
         {/* Display Individual Reviews 
         <div className="review_box_container">

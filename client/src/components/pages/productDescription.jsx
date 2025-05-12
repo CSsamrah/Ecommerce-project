@@ -793,7 +793,7 @@ const ProductDetail = () => {
 
                 {/* <Rating addReview={addReview} /> */}
                 {showRatingPopup && (
-  <Rating addReview={addReview} closePopup={toggleRatingPopup} />
+  <Rating addReview={addReview} closePopup={toggleRatingPopup}/>
 )}
 
       {reviews.length > 0 ? (

@@ -592,28 +592,24 @@ const getAllSellings = async (req, res) => {
   };
 
   const getRentalProduct = asyncHandler(async (req, res) => {
-    const { id: rental_id } = req.params;
+    const { id: product_id } = req.params;
 
-    if (!rental_id) {
+    if (!product_id) {
         throw new ApiError(400, "Product ID should be provided to search for a product");
     }
     const findRental = await pool.query(
         `SELECT 
-        r.rental_id,
+        p.product_id,
         p.name, 
         p.description, 
         p.price, 
-        r.rental_price,
         p.condition,
         p.product_features, 
-        p.product_image, 
-        r.rental_duration,
-        r.return_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Karachi' as return_date
+        p.product_image 
         FROM product p
-            JOIN product p ON r.product_id = p.product_id
-            WHERE r.rental_id = $1
+            WHERE p.product_id = $1
             LIMIT 50`,
-        [rental_id]
+        [product_id]
 
     )
 
@@ -622,14 +618,11 @@ const getAllSellings = async (req, res) => {
     }
 
     const rental = findRental.rows.map(rental => ({
-            rental_id: rental.rental_id,
+            product_id: rental.product_id,
             title: rental.name,
             price: rental.price,
             image: rental.product_image,
             description: rental.description,
-            rental_price: rental.rental_price,
-            rental_duration: rental.rental_duration,
-            return_date: rental.return_date,
             avg_rating: '0', 
             people_rated: '0'
         }));

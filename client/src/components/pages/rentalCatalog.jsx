@@ -251,7 +251,7 @@ const RentalCatalog = () => {
   };
 
   const navigateToProductDetail = (productId) => {
-    navigate(`/product/${productId}`);
+    navigate(`/rental-product/${productId}`);
   };
 
   const renderStars = (rating) => {
