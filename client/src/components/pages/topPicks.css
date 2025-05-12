@@ -193,7 +193,7 @@ body {
   
   .product-description {
     font-size: 1.1rem;
-    color: rgba(0, 0, 0, 0.8);
+    color: lightgreen;
     margin-bottom: 20px;
     line-height: 1.6;
     font-weight: 500;
