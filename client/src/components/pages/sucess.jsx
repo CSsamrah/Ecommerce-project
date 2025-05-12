@@ -71,7 +71,7 @@ const Success = () => {
         color: "#2e8b57",
         marginBottom: "10px"
       }}>
-        🎉 Payment Successful!
+        🎉 Payment Successful! :<span style={{fontFamily:"monospace"}}> Order ID={order_id} </span>
       </h2>
       <p style={{
         fontSize: "1.2rem",

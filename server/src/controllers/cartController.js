@@ -23,21 +23,22 @@ export const addToCart = asyncHandler(async (req, res) => {
   let total_price;
   let rental_price = null;
 
-  if (!is_rental) {
-    if (product.rental_available) {
-      throw new ApiError(403, "Rental not available for this product");
-    }
-    if (rental_days < 1 || rental_days > 30) {
-      throw new ApiError(400, "Rental days must be between 1 and 30");
-    }
+  if (is_rental) {
+    if (!product.rental_available) {
+    throw new ApiError(403, "Rental not available for this product");
+  }
 
-    if (rental_days <= 10) rental_price = product.price * 0.2;
-    else if (rental_days <= 20) rental_price = product.price * 0.25;
-    else rental_price = product.price * 0.3;
+  if (rental_days < 1 || rental_days > 30) {
+    throw new ApiError(400, "Rental days must be between 1 and 30");
+  }
 
-    total_price = rental_price * quantity;
+  if (rental_days <= 10) rental_price = product.price * 0.2;
+  else if (rental_days <= 20) rental_price = product.price * 0.25;
+  else rental_price = product.price * 0.3;
+
+  total_price = rental_price * quantity;
   } else {
-    total_price = product.price * quantity;
+  total_price = product.price * quantity;
   }
 
   await pool.query(
