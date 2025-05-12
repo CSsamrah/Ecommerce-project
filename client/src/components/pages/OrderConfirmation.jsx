@@ -6,7 +6,7 @@
 // function OrderConfirmation() {
 //   const location = useLocation();
 //   const navigate = useNavigate();
-  
+
 //   // Safely destructure with defaults
 //   const { 
 //     formData = {},
@@ -144,6 +144,8 @@ import { useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../Navbar/navbar1';
 import './OrderConfirmation.css';
+import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from 'react-router-dom';
 
 function OrderConfirmation() {
   const location = useLocation();
@@ -153,6 +155,11 @@ function OrderConfirmation() {
   const [error, setError] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const payment_method = "Cash on Delivery";
+  const payment_status = "pending";
+  const payment_date = new Date().toISOString();
+  const transaction_id = uuidv4(); // Generate a unique transaction ID
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if PWA installation is available
@@ -190,6 +197,41 @@ function OrderConfirmation() {
     return orderDetails.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
   };
 
+  useEffect(() => {
+
+    const savePaymentToDB = async () => {
+      try {
+        const amount = calculateTotal();
+        const payload = {
+          order_id: orderId,
+          amount,
+          transaction_id,
+          payment_method,
+          payment_status,
+          payment_date,
+        };
+
+        const res = await axios.post(
+          "http://localhost:3000/api/payfast/savePayment",
+          payload,
+          { withCredentials: true }
+        );
+        console.log("Payment saved:", res.data.message);
+
+      } catch (err) {
+        console.error("Failed to save payment:", err.response?.data || err.message);
+      }
+    };
+
+    savePaymentToDB();
+
+    const timer = setTimeout(() => {
+      navigate("/");
+    }, 6000);
+
+    return () => clearTimeout(timer);
+  }, [orderDetails, navigate, orderId, transaction_id, payment_method, payment_status, payment_date]);
+
   const handleAddToHome = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -199,6 +241,7 @@ function OrderConfirmation() {
       }
     }
   };
+
 
   if (loading) {
     return (
@@ -232,7 +275,7 @@ function OrderConfirmation() {
           <h1>Order Confirmation</h1>
           <div className="order_confirmation_icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="#4CAF50">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </div>
         </div>
@@ -267,6 +310,7 @@ function OrderConfirmation() {
           </div>
         )}
 
+
         <div className="order_confirmation_shipping_info">
           <h3>Shipping Information</h3>
           <p>Your order will be shipped within 2-3 business days.</p>
@@ -275,12 +319,12 @@ function OrderConfirmation() {
 
         <div className="order_confirmation_actions">
           {showInstallPrompt && (
-            <button 
+            <button
               onClick={handleAddToHome}
               className="order_confirmation_add_to_home_button"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
               </svg>
               Add to Home Screen
             </button>

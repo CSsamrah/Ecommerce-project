@@ -14,7 +14,7 @@ const PayFastForm = () => {
   const [formData, setFormData] = useState({
     CURRENCY_CODE: 'PKR',
     MERCHANT_ID: '102',
-    MERCHANT_NAME: 'PC Parts Picker',
+    MERCHANT_NAME: 'TechWare',
     BASKET_ID: '',
     TXNAMT: '',
     ORDER_DATE: new Date().toISOString(),
